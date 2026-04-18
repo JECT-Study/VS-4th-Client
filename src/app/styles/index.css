@@ -1,0 +1,120 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  --vt-duration: 220ms;
+  --vt-ease: cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+@layer base {
+  html,
+  body,
+  #root {
+    height: 100%;
+  }
+
+  body {
+    overscroll-behavior-y: contain;
+    -webkit-tap-highlight-color: transparent;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    font-family: "Pretendard", sans-serif;
+  }
+}
+
+
+/* View Transition only */
+::view-transition-old(root),
+::view-transition-new(root) {
+  animation-duration: var(--vt-duration);
+  animation-timing-function: var(--vt-ease);
+  animation-fill-mode: both;
+}
+
+@supports selector(html:active-view-transition-type(x)) {
+  html:active-view-transition-type(forward) ::view-transition-old(root) {
+    animation-name: app-page-out-forward;
+  }
+
+  html:active-view-transition-type(forward) ::view-transition-new(root) {
+    animation-name: app-page-in-forward;
+  }
+
+  html:active-view-transition-type(back) ::view-transition-old(root) {
+    animation-name: app-page-out-back;
+  }
+
+  html:active-view-transition-type(back) ::view-transition-new(root) {
+    animation-name: app-page-in-back;
+  }
+}
+
+::view-transition-group(*) {
+  animation-duration: var(--vt-duration);
+  animation-timing-function: var(--vt-ease);
+}
+
+@keyframes app-page-out-forward {
+  from {
+    opacity: 1;
+    transform: translateX(0);
+  }
+  to {
+    opacity: 0.94;
+    transform: translateX(-14px);
+  }
+}
+
+@keyframes app-page-in-forward {
+  from {
+    opacity: 0;
+    transform: translateX(18px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+@keyframes app-page-out-back {
+  from {
+    opacity: 1;
+    transform: translateX(0);
+  }
+  to {
+    opacity: 0.94;
+    transform: translateX(14px);
+  }
+}
+
+@keyframes app-page-in-back {
+  from {
+    opacity: 0;
+    transform: translateX(-18px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+
+@keyframes shimmer {
+  from {
+    background-position: 200% 0;
+  }
+  to {
+    background-position: -200% 0;
+  }
+}
+
+/* HorizontalScroll: 스크롤바 숨김 + iOS 모멘텀 스크롤 */
+.hs-scroll {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+  -webkit-overflow-scrolling: touch;
+}
+.hs-scroll::-webkit-scrollbar {
+  display: none;
+}
