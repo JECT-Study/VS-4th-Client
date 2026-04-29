@@ -7,12 +7,12 @@ export interface RouterContext {
 
 export const Route = createRootRouteWithContext<RouterContext>()({
   component: RootComponent,
-  notFoundComponent: () => null,
+  notFoundComponent: () => <div className="p-4">페이지를 찾을 수 없습니다.</div>,
 });
 
 function RootComponent() {
   return (
-    <div className="min-h-dvh max-w-md mx-auto">
+    <div className="max-w-md mx-auto min-h-dvh">
       <Outlet />
     </div>
   );
