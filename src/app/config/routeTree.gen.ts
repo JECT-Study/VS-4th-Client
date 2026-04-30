@@ -10,11 +10,17 @@
 
 import { Route as rootRouteImport } from './../../pages/routes/__root'
 import { Route as LoginRouteImport } from './../../pages/routes/login'
+import { Route as HomeRouteImport } from './../../pages/routes/home'
 import { Route as IndexRouteImport } from './../../pages/routes/index'
 
 const LoginRoute = LoginRouteImport.update({
   id: '/login',
   path: '/login',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const HomeRoute = HomeRouteImport.update({
+  id: '/home',
+  path: '/home',
   getParentRoute: () => rootRouteImport,
 } as any)
 const IndexRoute = IndexRouteImport.update({
@@ -25,27 +31,31 @@ const IndexRoute = IndexRouteImport.update({
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
+  '/home': typeof HomeRoute
   '/login': typeof LoginRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
+  '/home': typeof HomeRoute
   '/login': typeof LoginRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
+  '/home': typeof HomeRoute
   '/login': typeof LoginRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/' | '/login'
+  fullPaths: '/' | '/home' | '/login'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/login'
-  id: '__root__' | '/' | '/login'
+  to: '/' | '/home' | '/login'
+  id: '__root__' | '/' | '/home' | '/login'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
+  HomeRoute: typeof HomeRoute
   LoginRoute: typeof LoginRoute
 }
 
@@ -56,6 +66,13 @@ declare module '@tanstack/react-router' {
       path: '/login'
       fullPath: '/login'
       preLoaderRoute: typeof LoginRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/home': {
+      id: '/home'
+      path: '/home'
+      fullPath: '/home'
+      preLoaderRoute: typeof HomeRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/': {
@@ -70,6 +87,7 @@ declare module '@tanstack/react-router' {
 
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
+  HomeRoute: HomeRoute,
   LoginRoute: LoginRoute,
 }
 export const routeTree = rootRouteImport
