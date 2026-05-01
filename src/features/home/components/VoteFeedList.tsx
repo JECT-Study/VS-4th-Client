@@ -8,7 +8,7 @@ interface VoteFeedListProps {
 
 export function VoteFeedList({ votes, onClickVote }: VoteFeedListProps) {
   if (votes.length === 0) {
-    return <div className="py-10 text-sm text-center text-neutral-400">표시할 투표가 없습니다.</div>;
+    return <div className="py-10 text-center text-label-m text-grey-purple">표시할 투표가 없습니다.</div>;
   }
 
   return (

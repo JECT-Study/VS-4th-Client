@@ -7,7 +7,7 @@ interface BottomTabBarProps {
 
 export function BottomTabBar({ activeTab = "home", onClickTab }: BottomTabBarProps) {
   return (
-    <nav className="fixed bottom-0 z-20 grid w-full h-16 max-w-md grid-cols-4 pb-1 -translate-x-1/2 bg-white border-t left-1/2 border-neutral-100">
+    <nav className="fixed bottom-0 z-20 grid w-full h-16 max-w-md grid-cols-4 pb-1 -translate-x-1/2 bg-white border-t left-1/2 border-grey-stroke">
       {bottomTabs.map((tab) => {
         const isActive = tab.key === activeTab;
 
@@ -16,11 +16,11 @@ export function BottomTabBar({ activeTab = "home", onClickTab }: BottomTabBarPro
             key={tab.key}
             type="button"
             onClick={() => onClickTab?.(tab.path)}
-            className={`flex flex-col items-center justify-center gap-1 text-[11px] ${
-              isActive ? "font-bold text-neutral-950" : "font-medium text-neutral-500"
+            className={`flex flex-col items-center justify-center gap-1 text-label-s ${
+              isActive ? "text-grey-black" : "text-grey-light"
             }`}
           >
-            <span className="text-lg leading-none">{tab.icon}</span>
+            <span className="leading-none text-title-m">{tab.icon}</span>
             <span>{tab.label}</span>
           </button>
         );

@@ -12,7 +12,7 @@ export function TodayRecommendationSlider({ votes, onClickVote }: TodayRecommend
 
   return (
     <section className="px-5 pt-2">
-      <h2 className="mb-3 text-lg font-bold text-neutral-950">오늘의 추천</h2>
+      <h2 className="mb-3 text-title-m text-grey-black">오늘의 추천</h2>
 
       <div className="flex gap-3 pb-2 overflow-x-auto scrollbar-hide">
         {votes.map((vote) => (
@@ -22,7 +22,7 @@ export function TodayRecommendationSlider({ votes, onClickVote }: TodayRecommend
             onClick={() => onClickVote?.(vote.id)}
             className="w-[178px] shrink-0 text-left"
           >
-            <div className="mb-2 aspect-[1.35/1] overflow-hidden rounded-xl bg-neutral-100">
+            <div className="mb-2 aspect-[1.35/1] overflow-hidden rounded-xl bg-grey-divider">
               <img
                 src={vote.thumbnailUrl}
                 alt={vote.title}
@@ -32,9 +32,12 @@ export function TodayRecommendationSlider({ votes, onClickVote }: TodayRecommend
                 }}
               />
             </div>
-            <p className="text-sm font-bold line-clamp-1 text-neutral-950">{vote.title}</p>
-            <p className="mt-1 text-xs line-clamp-1 text-neutral-500">{vote.description}</p>
-            <p className="mt-1 text-xs text-neutral-500">◷ {vote.remainingTime}</p>
+
+            <p className="line-clamp-1 text-label-l text-grey-black">{vote.title}</p>
+
+            <p className="mt-1 line-clamp-1 text-label-m text-grey-light">{vote.description}</p>
+
+            <p className="mt-1 text-label-s text-grey-light">◷ {vote.remainingTime}</p>
           </button>
         ))}
       </div>

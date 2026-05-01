@@ -36,10 +36,11 @@ export function HomePage() {
       <HomeHeader hasUnreadNotification onClickNotification={handleClickNotification} />
 
       <TodayRecommendationSlider votes={todayRecommendations} onClickVote={handleClickVote} />
+
       <HotTopicTop3 votes={hotTopicVotes} onClickVote={handleClickVote} />
 
       <section className="px-5 pt-8">
-        <h2 className="mb-3 text-lg font-bold text-neutral-950">모든 투표</h2>
+        <h2 className="mb-3 text-title-m text-grey-black">모든 투표</h2>
 
         <VoteFilterBar
           sortType={sortType}
@@ -52,6 +53,7 @@ export function HomePage() {
       </section>
 
       <ScrollToTopButton isVisible={isVisible} onClick={scrollToTop} />
+
       <BottomTabBar activeTab="home" onClickTab={handleClickTab} />
     </main>
   );
