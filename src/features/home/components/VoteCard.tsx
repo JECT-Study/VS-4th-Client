@@ -11,16 +11,18 @@ export function VoteCard({ vote, onClick }: VoteCardProps) {
       <div className="flex-1 min-w-0">
         <div className="flex items-center gap-2 mb-1">
           {vote.status === "ended" && (
-            <span className="rounded bg-neutral-800 px-1.5 py-0.5 text-[10px] font-semibold text-white">투표 종료</span>
+            <span className="rounded bg-grey-dark px-1.5 py-0.5 text-[10px] font-semibold text-white">투표 종료</span>
           )}
-          <p className="text-sm font-bold line-clamp-1 text-neutral-950">{vote.title}</p>
+
+          <p className="line-clamp-1 text-label-l text-grey-black">{vote.title}</p>
         </div>
 
-        <p className="text-xs leading-5 line-clamp-2 text-neutral-500">{vote.description}</p>
-        <p className="mt-2 text-xs text-neutral-400">◷ {vote.remainingTime}</p>
+        <p className="line-clamp-2 text-label-m text-grey-light">{vote.description}</p>
+
+        <p className="mt-2 text-label-s text-grey-purple">◷ {vote.remainingTime}</p>
       </div>
 
-      <div className="w-16 h-16 overflow-hidden rounded-lg shrink-0 bg-neutral-100">
+      <div className="w-16 h-16 overflow-hidden rounded-lg shrink-0 bg-grey-divider">
         <img
           src={vote.thumbnailUrl}
           alt={vote.title}

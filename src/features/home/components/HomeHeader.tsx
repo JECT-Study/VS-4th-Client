@@ -18,7 +18,7 @@ export function HomeHeader({ hasUnreadNotification = false, onClickNotification 
       >
         <img src="/assets/icons/bell.svg" alt="알림" className="w-6 h-6" />
 
-        {hasUnreadNotification && <span className="absolute right-1.5 top-1.5 h-2 w-2 rounded-full bg-red-500" />}
+        {hasUnreadNotification && <span className="absolute right-1.5 top-1.5 h-2 w-2 rounded-full bg-error" />}
       </button>
     </header>
   );
