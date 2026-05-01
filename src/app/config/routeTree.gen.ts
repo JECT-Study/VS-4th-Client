@@ -12,6 +12,7 @@ import { Route as rootRouteImport } from './../../pages/routes/__root'
 import { Route as LoginRouteImport } from './../../pages/routes/login'
 import { Route as HomeRouteImport } from './../../pages/routes/home'
 import { Route as IndexRouteImport } from './../../pages/routes/index'
+import { Route as VotesVoteIdRouteImport } from './../../pages/routes/votes.$voteId'
 
 const LoginRoute = LoginRouteImport.update({
   id: '/login',
@@ -28,35 +29,44 @@ const IndexRoute = IndexRouteImport.update({
   path: '/',
   getParentRoute: () => rootRouteImport,
 } as any)
+const VotesVoteIdRoute = VotesVoteIdRouteImport.update({
+  id: '/votes/$voteId',
+  path: '/votes/$voteId',
+  getParentRoute: () => rootRouteImport,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/home': typeof HomeRoute
   '/login': typeof LoginRoute
+  '/votes/$voteId': typeof VotesVoteIdRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/home': typeof HomeRoute
   '/login': typeof LoginRoute
+  '/votes/$voteId': typeof VotesVoteIdRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
   '/home': typeof HomeRoute
   '/login': typeof LoginRoute
+  '/votes/$voteId': typeof VotesVoteIdRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/' | '/home' | '/login'
+  fullPaths: '/' | '/home' | '/login' | '/votes/$voteId'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/home' | '/login'
-  id: '__root__' | '/' | '/home' | '/login'
+  to: '/' | '/home' | '/login' | '/votes/$voteId'
+  id: '__root__' | '/' | '/home' | '/login' | '/votes/$voteId'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   HomeRoute: typeof HomeRoute
   LoginRoute: typeof LoginRoute
+  VotesVoteIdRoute: typeof VotesVoteIdRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -82,6 +92,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof IndexRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/votes/$voteId': {
+      id: '/votes/$voteId'
+      path: '/votes/$voteId'
+      fullPath: '/votes/$voteId'
+      preLoaderRoute: typeof VotesVoteIdRouteImport
+      parentRoute: typeof rootRouteImport
+    }
   }
 }
 
@@ -89,6 +106,7 @@ const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   HomeRoute: HomeRoute,
   LoginRoute: LoginRoute,
+  VotesVoteIdRoute: VotesVoteIdRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
