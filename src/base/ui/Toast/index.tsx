@@ -34,7 +34,7 @@ const Toast = ({ ...props }: ToastProps) => {
   return (
     <Toaster
       position="top-center"
-      duration={30000000}
+      duration={2000}
       gap={8}
       offset={16}
       className="flex flex-col items-center"
