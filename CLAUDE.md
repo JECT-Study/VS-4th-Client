@@ -46,6 +46,12 @@ TanStack Router with file-based routing. Route files live in `src/pages/routes/`
 
 `src/main.tsx` → `src/app/App.tsx` wraps the app in: `Sentry.ErrorBoundary` → `HelmetProvider` → `QueryClientProvider` → `RouterProvider`. `PushNotificationBridge` and `Toast` (Sonner) are injected globally inside the router.
 
+## Docs
+
+- [FSD Architecture Guide](src/docs/architecture/fsd.md)
+- [Auth API](src/docs/api-spec/auth.md)
+- [Vote API](src/docs/api-spec/vote.md)
+
 ## Key conventions
 
 - **Package manager**: `pnpm` only
