@@ -39,11 +39,14 @@ export function useVoteDetail(voteId: string) {
   const { data: user, isLoading: isUserLoading } = useQuery(userQueryOptions());
   const isGuest = user === null;
 
-  const { data: result, isLoading: isVoteResultLoading } = useQuery({ ...voteResultQueryOptions(voteId), enabled: isEnded });
+  const { data: result, isLoading: isVoteResultLoading } = useQuery({
+    ...voteResultQueryOptions(voteId),
+    enabled: isEnded,
+  });
 
   const isInitialLoading = isVoteDetailLoading || isUserLoading || (isEnded && isVoteResultLoading);
 
-  const voteUserType: VoteUserType = isGuest ? "guest" : result?.myVote.voted ? "member-voted" : "member-not-voted";
+  const voteUserType: VoteUserType = isGuest ? "guest" : data?.myVote.voted ? "member-voted" : "member-not-voted";
 
   const participateMutation = useMutation({
     mutationFn: (optionId: number) => participateVote(voteId, optionId),
