@@ -1,5 +1,9 @@
+import { showToast } from "@base/ui/Toast";
 import { userQueryOptions } from "@features/auth/api/userQuery";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { isAxiosError } from "axios";
+import { useState } from "react";
+import { type FreeVotesResponse, freeVotesQueryKey, freeVotesQueryOptions } from "../api/freeVotesQuery";
 import { voteDetailQueryOptions } from "../api/voteDetailQuery";
 import { reactEmoji } from "../api/voteEmoji";
 import { cancelVote, participateVote } from "../api/voteParticipate";
@@ -44,6 +48,13 @@ export function useVoteDetail(voteId: string) {
     enabled: isEnded,
   });
 
+  const { data: freeVotesData } = useQuery({
+    ...freeVotesQueryOptions(),
+    enabled: user === null,
+  });
+
+  const [isFreeVoteLimitModalOpen, setIsFreeVoteLimitModalOpen] = useState(false);
+
   const isInitialLoading = isVoteDetailLoading || isUserLoading || (isEnded && isVoteResultLoading);
 
   const voteUserType: VoteUserType = isGuest ? "guest" : data?.myVote.voted ? "member-voted" : "member-not-voted";
@@ -69,9 +80,18 @@ export function useVoteDetail(voteId: string) {
             }
           : old,
       );
+      if (isGuest && response.remainingFreeVotes !== null) {
+        showToast.info(`남은 무료 투표 ${response.remainingFreeVotes}회`);
+        queryClient.setQueryData<FreeVotesResponse>(freeVotesQueryKey, (old) =>
+          old ? { ...old, remainingFreeVotes: response.remainingFreeVotes! } : old,
+        );
+      }
     },
     onError: (_err, _optionId, context) => {
       if (context?.previous) queryClient.setQueryData(queryKey, context.previous);
+      if (isAxiosError(_err) && _err.response?.data?.code === "VOTE_FREE_LIMIT_EXCEEDED") {
+        setIsFreeVoteLimitModalOpen(true);
+      }
     },
   });
 
@@ -121,6 +141,13 @@ export function useVoteDetail(voteId: string) {
 
   const handleOptionClick = (optionId: number) => {
     if (data?.myVote.voted) return;
+    if (isGuest) {
+      if (freeVotesData === undefined) return;
+      if (freeVotesData.remainingFreeVotes === 0) {
+        setIsFreeVoteLimitModalOpen(true);
+        return;
+      }
+    }
     participateMutation.mutate(optionId);
   };
 
@@ -211,5 +238,7 @@ export function useVoteDetail(voteId: string) {
     cancelMutation,
     emojiMutation,
     participateMutation,
+    isFreeVoteLimitModalOpen,
+    setIsFreeVoteLimitModalOpen,
   };
 }

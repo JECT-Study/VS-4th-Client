@@ -7,8 +7,8 @@ export const mockVoteDetail: VoteDetail = {
   content:
     "저는 혼자 밥 먹는 게 편한데 회사에서 막내라 혼자 밥 먹겠다고 하기 눈치보여요ㅠㅠ 혼밥하고 싶다고 말씀드려도 될까요?",
   thumbnailUrl: "https://picsum.photos/400/250",
-  status: "ENDED",
-  endAt: "2026-04-14T23:59:00+09:00",
+  status: "ONGOING",
+  endAt: "2026-06-30T23:59:00+09:00",
   participantCount: 31,
   options: [
     { optionId: 10, label: "혼밥이 편하다", voteCount: null, ratio: null },
