@@ -42,10 +42,10 @@ function AgeBarGroup({ group, animated, duration }: AgeBarGroupProps) {
     <div>
       <div className="flex items-center justify-between mb-2">
         <div className="flex items-center gap-2">
-          <span className={`${isPrimary ? "text-primary text-body-m" : "text-grey-dark text-label-m"}`}>{label}</span>
+          <span className={`${isMyGroup ? "text-primary text-body-m" : "text-grey-dark text-label-m"}`}>{label}</span>
           {isMyGroup && <span className="bg-primary text-white text-label-s px-[6px] py-1 rounded-full">내 그룹</span>}
         </div>
-        <span className={`${isPrimary ? "text-primary text-body-m" : "text-grey-dark text-label-m"}`}>
+        <span className={`${isMyGroup ? "text-primary text-body-m" : "text-grey-dark text-label-m"}`}>
           {percentage}%
         </span>
       </div>
