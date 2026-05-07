@@ -156,8 +156,32 @@ export const allVotes: VoteItem[] = Array.from({ length: 36 }, (_, index) => {
 });
 
 export const bottomTabs: BottomTabItem[] = [
-  { key: "home", label: "홈", icon: "⌂", path: "/" },
-  { key: "vote", label: "VOTE", icon: "☑", path: "/vote" },
-  { key: "chat", label: "채팅", icon: "☵", path: "/chat" },
-  { key: "my", label: "마이", icon: "♙", path: "/my" },
+  {
+    key: "home",
+    label: "홈",
+    path: "/",
+    icon: "/assets/icons/home.svg",
+    activeIcon: "/assets/icons/home-active.svg",
+  },
+  {
+    key: "vote",
+    label: "VOTE",
+    path: "/vote",
+    icon: "/assets/icons/vote.svg",
+    activeIcon: "/assets/icons/vote-active.svg",
+  },
+  {
+    key: "chat",
+    label: "채팅",
+    path: "/chat",
+    icon: "/assets/icons/chat.svg",
+    activeIcon: "/assets/icons/chat-active.svg",
+  },
+  {
+    key: "my",
+    label: "마이",
+    path: "/my",
+    icon: "/assets/icons/my.svg",
+    activeIcon: "/assets/icons/my-active.svg",
+  },
 ];
