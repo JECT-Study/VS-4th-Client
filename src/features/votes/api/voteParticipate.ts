@@ -15,7 +15,7 @@ export const participateVote = async (voteId: string, optionId: number): Promise
     selectedOptionId: optionId,
     options: mockOptions,
     participantCount: 32,
-    remainingFreeVotes: null,
+    remainingFreeVotes: 3,
   });
   // return apiClient
   //   .post<ParticipateResponse>(`/api/votes/${voteId}/participate`, { optionId })
