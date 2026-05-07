@@ -1,4 +1,4 @@
-import { bottomTabs } from "../data/mockHomeData";
+import { bottomTabs } from "@/features/home/data/mockHomeData";
 
 interface BottomTabBarProps {
   activeTab?: "home" | "vote" | "chat" | "my";

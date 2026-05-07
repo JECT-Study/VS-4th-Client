@@ -11,8 +11,11 @@
 import { Route as rootRouteImport } from './../../pages/routes/__root'
 import { Route as LoginRouteImport } from './../../pages/routes/login'
 import { Route as HomeRouteImport } from './../../pages/routes/home'
+import { Route as ChatRouteImport } from './../../pages/routes/chat'
 import { Route as IndexRouteImport } from './../../pages/routes/index'
+import { Route as ChatIndexRouteImport } from './../../pages/routes/chat.index'
 import { Route as VotesVoteIdRouteImport } from './../../pages/routes/votes.$voteId'
+import { Route as ChatChatRoomIdRouteImport } from './../../pages/routes/chat.$chatRoomId'
 
 const LoginRoute = LoginRouteImport.update({
   id: '/login',
@@ -24,46 +27,91 @@ const HomeRoute = HomeRouteImport.update({
   path: '/home',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ChatRoute = ChatRouteImport.update({
+  id: '/chat',
+  path: '/chat',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const IndexRoute = IndexRouteImport.update({
   id: '/',
   path: '/',
   getParentRoute: () => rootRouteImport,
+} as any)
+const ChatIndexRoute = ChatIndexRouteImport.update({
+  id: '/',
+  path: '/',
+  getParentRoute: () => ChatRoute,
 } as any)
 const VotesVoteIdRoute = VotesVoteIdRouteImport.update({
   id: '/votes/$voteId',
   path: '/votes/$voteId',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ChatChatRoomIdRoute = ChatChatRoomIdRouteImport.update({
+  id: '/$chatRoomId',
+  path: '/$chatRoomId',
+  getParentRoute: () => ChatRoute,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
+  '/chat': typeof ChatRouteWithChildren
   '/home': typeof HomeRoute
   '/login': typeof LoginRoute
+  '/chat/$chatRoomId': typeof ChatChatRoomIdRoute
   '/votes/$voteId': typeof VotesVoteIdRoute
+  '/chat/': typeof ChatIndexRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/home': typeof HomeRoute
   '/login': typeof LoginRoute
+  '/chat/$chatRoomId': typeof ChatChatRoomIdRoute
   '/votes/$voteId': typeof VotesVoteIdRoute
+  '/chat': typeof ChatIndexRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
+  '/chat': typeof ChatRouteWithChildren
   '/home': typeof HomeRoute
   '/login': typeof LoginRoute
+  '/chat/$chatRoomId': typeof ChatChatRoomIdRoute
   '/votes/$voteId': typeof VotesVoteIdRoute
+  '/chat/': typeof ChatIndexRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/' | '/home' | '/login' | '/votes/$voteId'
+  fullPaths:
+    | '/'
+    | '/chat'
+    | '/home'
+    | '/login'
+    | '/chat/$chatRoomId'
+    | '/votes/$voteId'
+    | '/chat/'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/home' | '/login' | '/votes/$voteId'
-  id: '__root__' | '/' | '/home' | '/login' | '/votes/$voteId'
+  to:
+    | '/'
+    | '/home'
+    | '/login'
+    | '/chat/$chatRoomId'
+    | '/votes/$voteId'
+    | '/chat'
+  id:
+    | '__root__'
+    | '/'
+    | '/chat'
+    | '/home'
+    | '/login'
+    | '/chat/$chatRoomId'
+    | '/votes/$voteId'
+    | '/chat/'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
+  ChatRoute: typeof ChatRouteWithChildren
   HomeRoute: typeof HomeRoute
   LoginRoute: typeof LoginRoute
   VotesVoteIdRoute: typeof VotesVoteIdRoute
@@ -85,12 +133,26 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof HomeRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/chat': {
+      id: '/chat'
+      path: '/chat'
+      fullPath: '/chat'
+      preLoaderRoute: typeof ChatRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/': {
       id: '/'
       path: '/'
       fullPath: '/'
       preLoaderRoute: typeof IndexRouteImport
       parentRoute: typeof rootRouteImport
+    }
+    '/chat/': {
+      id: '/chat/'
+      path: '/'
+      fullPath: '/chat/'
+      preLoaderRoute: typeof ChatIndexRouteImport
+      parentRoute: typeof ChatRoute
     }
     '/votes/$voteId': {
       id: '/votes/$voteId'
@@ -99,11 +161,31 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof VotesVoteIdRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/chat/$chatRoomId': {
+      id: '/chat/$chatRoomId'
+      path: '/$chatRoomId'
+      fullPath: '/chat/$chatRoomId'
+      preLoaderRoute: typeof ChatChatRoomIdRouteImport
+      parentRoute: typeof ChatRoute
+    }
   }
 }
 
+interface ChatRouteChildren {
+  ChatChatRoomIdRoute: typeof ChatChatRoomIdRoute
+  ChatIndexRoute: typeof ChatIndexRoute
+}
+
+const ChatRouteChildren: ChatRouteChildren = {
+  ChatChatRoomIdRoute: ChatChatRoomIdRoute,
+  ChatIndexRoute: ChatIndexRoute,
+}
+
+const ChatRouteWithChildren = ChatRoute._addFileChildren(ChatRouteChildren)
+
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
+  ChatRoute: ChatRouteWithChildren,
   HomeRoute: HomeRoute,
   LoginRoute: LoginRoute,
   VotesVoteIdRoute: VotesVoteIdRoute,
