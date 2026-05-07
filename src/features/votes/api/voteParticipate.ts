@@ -1,3 +1,4 @@
+import { apiClient } from "@base/api/client";
 // MOCK_START — 제거 시 이 줄부터 MOCK_END까지와 VoteOption import를 삭제
 import type { VoteOption } from "../model/types";
 // MOCK_END
@@ -22,7 +23,7 @@ export const participateVote = async (voteId: string, optionId: number): Promise
   // MOCK_END
 };
 
-export const cancelVote = async (_voteId: string): Promise<void> => {
+export const cancelVote = async (voteId: string): Promise<void> => {
   // MOCK_START — 제거 시 이 줄부터 MOCK_END까지 삭제 후 아래 실제 호출 주석 해제
   return Promise.resolve();
   // return apiClient.delete(`/api/votes/${voteId}/participate`).then(() => undefined);

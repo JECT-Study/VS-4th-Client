@@ -1,3 +1,4 @@
+import { apiClient } from "@base/api/client";
 import { queryOptions } from "@tanstack/react-query";
 import type { VoteResult } from "../model/resultTypes";
 // MOCK_START — 제거 시 이 줄부터 MOCK_END까지와 mockVoteResult import를 삭제
