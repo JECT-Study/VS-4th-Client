@@ -18,7 +18,7 @@
   "nickname": "{{ String : 서비스 닉네임 }}",
   "birthDate": "{{ LocalDate : 생년월일, yyyy형식 }}",
   "gender": "{{ String : 성별, MALE 또는 FEMALE }}",
-  "imageColor": "{{ !String : 이미지 색상}}",
+  "imageColor": "{{ !String : 이미지 색상: GREEN, RED, BLUE, YELLOW}}",
   "userStatus": "{{ String : 사용자 가입 여부}}"
 }
 ```
@@ -67,7 +67,7 @@
   "birthDate": "{{ LocalDate! : 생년월일, yyyy-MM-dd 형식 }}",
   "gender": "{{ String! : 성별, MALE 또는 FEMALE }}",
   "nickname": "{{ String! : 서비스에서 사용할 닉네임 }}",
-  "imageColor": "{{ String! : 사용자가 선택한 이미지 색상}}"
+  "imageColor": "{{ String! : 사용자가 선택한 이미지 색상: GREEN(기본), RED, BLUE, YELLOW}}"
 }
 ```
 
@@ -80,7 +80,7 @@
 ```json
 {
 	"nickname" : "{{!String 사용자가 설정한 닉네임}}",
-	"imageColor" : " {{!String 사용자가 선택한 이미지 색상}}"
+	"imageColor" : " {{!String 사용자가 선택한 이미지 색상: GREEN(기본), RED, BLUE, YELLOW}}"
 }
 ```
 
@@ -244,7 +244,7 @@
 ```json
 {
 	"nickname" : {{!String : 닉네임}},
-	"imageColor" : {{!String : 이미지 색}}
+	"imageColor" : {{!String : 이미지 색: GREEN(기본), RED, BLUE, YELLOW}}
 }
 ```
 
