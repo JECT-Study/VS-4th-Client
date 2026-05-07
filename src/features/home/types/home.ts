@@ -16,6 +16,7 @@ export interface VoteItem {
 export interface BottomTabItem {
   key: "home" | "vote" | "chat" | "my";
   label: string;
-  icon: string;
   path: string;
+  icon: string;
+  activeIcon: string;
 }
