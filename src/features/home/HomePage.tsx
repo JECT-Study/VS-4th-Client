@@ -1,5 +1,5 @@
-import { useNavigate } from "@tanstack/react-router";
 import { BottomTabBar } from "@/features/common/ui/BottomTabBar";
+import { useNavigate } from "@tanstack/react-router";
 import { HomeHeader } from "./components/HomeHeader";
 import { HotTopicTop3 } from "./components/HotTopicTop3";
 import { ScrollToTopButton } from "./components/ScrollToTopButton";
