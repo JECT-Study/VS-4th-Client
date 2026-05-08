@@ -44,9 +44,9 @@ export function Checkbox({ checked, onChange, label, indeterminate = false, clas
             <path
               d="M0.75 3.65L5.35 8.15L12.75 0.75"
               stroke="white"
-              stroke-width="1.5"
-              stroke-linecap="round"
-              stroke-linejoin="round"
+              strokeWidth="1.5"
+              strokeLinecap="round"
+              strokeLinejoin="round"
             />
           </svg>
         )}
