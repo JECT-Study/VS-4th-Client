@@ -20,8 +20,6 @@ export interface GenderBirthState {
 export interface ProfileState {
   imageColor: ImageColor;
   nickname: string;
-  defaultNickname: string;
-  defaultImageColor: ImageColor;
   nicknameError: string | null;
   isCheckingNickname: boolean;
 }
