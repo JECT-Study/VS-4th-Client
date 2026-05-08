@@ -1,4 +1,9 @@
+import { useState } from "react";
+import SharePageModal from "./SharePageModal";
+
 export function VoteHeader({ isEnded }: { isEnded: boolean }) {
+  const [isOpen, setIsOpen] = useState(false);
+
   return (
     <header className="px-5 py-4 flex items-center justify-between">
       <div className="flex items-center gap-2">
@@ -9,10 +14,12 @@ export function VoteHeader({ isEnded }: { isEnded: boolean }) {
       </div>
 
       {!isEnded && (
-        <button type="button">
+        <button type="button" onClick={() => setIsOpen(true)}>
           <img src="/assets/icons/share.svg" alt="공유하기" />
         </button>
       )}
+
+      <SharePageModal isOpen={isOpen} onClose={() => setIsOpen(false)} />
     </header>
   );
 }

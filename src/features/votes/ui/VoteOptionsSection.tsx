@@ -7,6 +7,7 @@ interface VoteOptionsSectionProps {
   myVote: { voted: boolean; selectedOptionId: number | null } | undefined;
   participantCount: number | undefined;
   endAt: string | undefined;
+  isEnded: boolean;
   onOptionClick: (optionId: number) => void;
   onCancel: () => void;
   isCancelPending: boolean;
@@ -18,6 +19,7 @@ export function VoteOptionsSection({
   myVote,
   participantCount,
   endAt,
+  isEnded,
   onOptionClick,
   onCancel,
   isCancelPending,
@@ -33,9 +35,9 @@ export function VoteOptionsSection({
       <div className="mt-2 flex flex-col gap-2 items-end">
         <button
           type="button"
-          className={`text-label-s text-grey-light ${myVote?.voted ? "" : "invisible"}`}
+          className={`text-label-s text-grey-light ${myVote?.voted && !isEnded ? "" : "invisible"}`}
           onClick={onCancel}
-          disabled={isCancelPending || !myVote?.voted}
+          disabled={isCancelPending || !myVote?.voted || isEnded}
         >
           다시 투표하기
         </button>

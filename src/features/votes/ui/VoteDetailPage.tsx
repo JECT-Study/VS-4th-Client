@@ -1,6 +1,8 @@
 import { Spinner } from "@base/ui/Spinner";
 import { useVoteDetail } from "../model/useVoteDetail";
+import FreeVoteLimitModal from "./FreeVoteLimitModal";
 import { VoteContent } from "./VoteContent";
+import VoteFooter from "./VoteFooter";
 import { VoteHeader } from "./VoteHeader";
 import { VoteInsightSection } from "./VoteInsightSection";
 import { VoteOptionsSection } from "./VoteOptionsSection";
@@ -21,6 +23,8 @@ export function VoteDetailPage({ voteId }: { voteId: string }) {
     cancelMutation,
     emojiMutation,
     participateMutation,
+    isFreeVoteLimitModalOpen,
+    setIsFreeVoteLimitModalOpen,
   } = useVoteDetail(voteId);
 
   if (isInitialLoading) {
@@ -48,6 +52,7 @@ export function VoteDetailPage({ voteId }: { voteId: string }) {
             myVote={data?.myVote}
             participantCount={data?.participantCount}
             endAt={data?.endAt}
+            isEnded={isEnded}
             onOptionClick={handleOptionClick}
             onCancel={() => cancelMutation.mutate()}
             isCancelPending={cancelMutation.isPending}
@@ -58,6 +63,7 @@ export function VoteDetailPage({ voteId }: { voteId: string }) {
             commentCount={data?.commentCount}
             onEmojiClick={(type) => emojiMutation.mutate(type)}
             isEmojiPending={emojiMutation.isPending}
+            voteUserType={voteUserType}
           />
         </div>
 
@@ -73,25 +79,9 @@ export function VoteDetailPage({ voteId }: { voteId: string }) {
         )}
       </main>
 
-      {isEnded && (
-        <footer
-          className="fixed bottom-0 left-1/2 -translate-x-1/2 w-full max-w-md px-5 pt-[6px] flex gap-2 bg-white"
-          style={{
-            paddingBottom: "calc(env(safe-area-inset-bottom, 0px) + 6px)",
-            boxShadow: "0px -1px 4px 0px rgba(0, 0, 0, 0.05)",
-          }}
-        >
-          <button type="button" className="flex-[1.5] py-4 text-center text-body-m text-white bg-primary rounded-lg">
-            채팅 바로가기
-          </button>
-          <button
-            type="button"
-            className="flex-1 py-4 text-center text-body-m text-grey-light border border-grey-stroke rounded-lg"
-          >
-            공유하기
-          </button>
-        </footer>
-      )}
+      {isEnded && voteUserType !== "guest" && <VoteFooter />}
+
+      <FreeVoteLimitModal isOpen={isFreeVoteLimitModalOpen} onClose={() => setIsFreeVoteLimitModalOpen(false)} />
     </div>
   );
 }

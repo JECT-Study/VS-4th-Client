@@ -1,4 +1,4 @@
-import { bottomTabs } from "../data/mockHomeData";
+import { bottomTabs } from "@/features/home/data/mockHomeData";
 
 interface BottomTabBarProps {
   activeTab?: "home" | "vote" | "chat" | "my";
@@ -10,6 +10,7 @@ export function BottomTabBar({ activeTab = "home", onClickTab }: BottomTabBarPro
     <nav className="fixed bottom-0 z-20 grid w-full h-16 max-w-md grid-cols-4 pb-1 -translate-x-1/2 bg-white border-t left-1/2 border-grey-stroke">
       {bottomTabs.map((tab) => {
         const isActive = tab.key === activeTab;
+        const iconSrc = isActive ? tab.activeIcon : tab.icon;
 
         return (
           <button
@@ -20,7 +21,7 @@ export function BottomTabBar({ activeTab = "home", onClickTab }: BottomTabBarPro
               isActive ? "text-grey-black" : "text-grey-light"
             }`}
           >
-            <span className="leading-none text-title-m">{tab.icon}</span>
+            <img src={iconSrc} alt={`${tab.label} 아이콘`} className="w-6 h-6" />
             <span>{tab.label}</span>
           </button>
         );

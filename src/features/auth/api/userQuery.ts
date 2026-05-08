@@ -11,6 +11,7 @@ const mockUser: User = {
   imageColor: "GREEN",
   userStatus: "ACTIVE",
 };
+
 // MOCK_END
 
 export const userQueryOptions = () =>
