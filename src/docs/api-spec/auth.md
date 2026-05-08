@@ -64,7 +64,7 @@
 
 ```json
 {
-  "birthDate": "{{ LocalDate! : 생년월일, yyyy-MM-dd 형식 }}",
+  "birthDate": "{{ LocalDate! : 출생년도, yyyy 형식 }}",
   "gender": "{{ String! : 성별, MALE 또는 FEMALE }}",
   "nickname": "{{ String! : 서비스에서 사용할 닉네임 }}",
   "imageColor": "{{ String! : 사용자가 선택한 이미지 색상: GREEN(기본), RED, BLUE, YELLOW}}"
