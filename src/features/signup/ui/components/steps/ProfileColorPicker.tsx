@@ -14,7 +14,6 @@ type ProfileColorPickerProps = {
 const ProfileColorPicker = ({ isOpen, onClose, selectedColor, onSelect }: ProfileColorPickerProps) => {
   const [newColor, setNewColor] = useState(selectedColor);
 
-  // #2: Reset picker state to saved color each time the sheet opens
   useEffect(() => {
     if (isOpen) setNewColor(selectedColor);
   }, [isOpen, selectedColor]);
