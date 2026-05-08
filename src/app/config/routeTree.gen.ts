@@ -9,6 +9,7 @@
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
 import { Route as rootRouteImport } from './../../pages/routes/__root'
+import { Route as SignupRouteImport } from './../../pages/routes/signup'
 import { Route as LoginRouteImport } from './../../pages/routes/login'
 import { Route as HomeRouteImport } from './../../pages/routes/home'
 import { Route as ChatRouteImport } from './../../pages/routes/chat'
@@ -17,6 +18,11 @@ import { Route as ChatIndexRouteImport } from './../../pages/routes/chat.index'
 import { Route as VotesVoteIdRouteImport } from './../../pages/routes/votes.$voteId'
 import { Route as ChatChatRoomIdRouteImport } from './../../pages/routes/chat.$chatRoomId'
 
+const SignupRoute = SignupRouteImport.update({
+  id: '/signup',
+  path: '/signup',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const LoginRoute = LoginRouteImport.update({
   id: '/login',
   path: '/login',
@@ -58,6 +64,7 @@ export interface FileRoutesByFullPath {
   '/chat': typeof ChatRouteWithChildren
   '/home': typeof HomeRoute
   '/login': typeof LoginRoute
+  '/signup': typeof SignupRoute
   '/chat/$chatRoomId': typeof ChatChatRoomIdRoute
   '/votes/$voteId': typeof VotesVoteIdRoute
   '/chat/': typeof ChatIndexRoute
@@ -66,6 +73,7 @@ export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/home': typeof HomeRoute
   '/login': typeof LoginRoute
+  '/signup': typeof SignupRoute
   '/chat/$chatRoomId': typeof ChatChatRoomIdRoute
   '/votes/$voteId': typeof VotesVoteIdRoute
   '/chat': typeof ChatIndexRoute
@@ -76,6 +84,7 @@ export interface FileRoutesById {
   '/chat': typeof ChatRouteWithChildren
   '/home': typeof HomeRoute
   '/login': typeof LoginRoute
+  '/signup': typeof SignupRoute
   '/chat/$chatRoomId': typeof ChatChatRoomIdRoute
   '/votes/$voteId': typeof VotesVoteIdRoute
   '/chat/': typeof ChatIndexRoute
@@ -87,6 +96,7 @@ export interface FileRouteTypes {
     | '/chat'
     | '/home'
     | '/login'
+    | '/signup'
     | '/chat/$chatRoomId'
     | '/votes/$voteId'
     | '/chat/'
@@ -95,6 +105,7 @@ export interface FileRouteTypes {
     | '/'
     | '/home'
     | '/login'
+    | '/signup'
     | '/chat/$chatRoomId'
     | '/votes/$voteId'
     | '/chat'
@@ -104,6 +115,7 @@ export interface FileRouteTypes {
     | '/chat'
     | '/home'
     | '/login'
+    | '/signup'
     | '/chat/$chatRoomId'
     | '/votes/$voteId'
     | '/chat/'
@@ -114,11 +126,19 @@ export interface RootRouteChildren {
   ChatRoute: typeof ChatRouteWithChildren
   HomeRoute: typeof HomeRoute
   LoginRoute: typeof LoginRoute
+  SignupRoute: typeof SignupRoute
   VotesVoteIdRoute: typeof VotesVoteIdRoute
 }
 
 declare module '@tanstack/react-router' {
   interface FileRoutesByPath {
+    '/signup': {
+      id: '/signup'
+      path: '/signup'
+      fullPath: '/signup'
+      preLoaderRoute: typeof SignupRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/login': {
       id: '/login'
       path: '/login'
@@ -188,6 +208,7 @@ const rootRouteChildren: RootRouteChildren = {
   ChatRoute: ChatRouteWithChildren,
   HomeRoute: HomeRoute,
   LoginRoute: LoginRoute,
+  SignupRoute: SignupRoute,
   VotesVoteIdRoute: VotesVoteIdRoute,
 }
 export const routeTree = rootRouteImport

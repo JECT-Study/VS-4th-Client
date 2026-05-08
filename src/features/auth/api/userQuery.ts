@@ -8,7 +8,7 @@ const mockUser: User = {
   nickname: "테스트유저",
   birthDate: "1998-03-15",
   gender: "FEMALE",
-  imageColor: "#9A9AF6",
+  imageColor: "GREEN",
   userStatus: "ACTIVE",
 };
 
