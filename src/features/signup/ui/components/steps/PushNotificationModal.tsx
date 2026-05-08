@@ -5,7 +5,7 @@ type PushNotificationModalProps = {
   onClose: () => void;
 };
 
-const PushNotificationModal = ({ isOpen, onClose }: PushNotificationModalProps) => {
+export function PushNotificationModal({ isOpen, onClose }: PushNotificationModalProps) {
   return (
     <Modal isOpen={isOpen} onClose={onClose}>
       <div className="py-4 px-5 flex justify-end">
@@ -29,6 +29,6 @@ const PushNotificationModal = ({ isOpen, onClose }: PushNotificationModalProps) 
       </div>
     </Modal>
   );
-};
+}
 
 export default PushNotificationModal;

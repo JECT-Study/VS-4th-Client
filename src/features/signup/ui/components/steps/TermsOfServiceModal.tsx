@@ -5,7 +5,7 @@ type TermsOfServiceModalProps = {
   onClose: () => void;
 };
 
-const TermsOfServiceModal = ({ isOpen, onClose }: TermsOfServiceModalProps) => {
+export function TermsOfServiceModal({ isOpen, onClose }: TermsOfServiceModalProps) {
   return (
     <Modal isOpen={isOpen} onClose={onClose}>
       <div className="py-4 px-5 flex justify-end">
@@ -30,6 +30,6 @@ const TermsOfServiceModal = ({ isOpen, onClose }: TermsOfServiceModalProps) => {
       </div>
     </Modal>
   );
-};
+}
 
 export default TermsOfServiceModal;

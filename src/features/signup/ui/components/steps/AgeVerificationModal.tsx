@@ -5,7 +5,7 @@ type AgeVerificationModalProps = {
   onClose: () => void;
 };
 
-const AgeVerificationModal = ({ isOpen, onClose }: AgeVerificationModalProps) => {
+export function AgeVerificationModal({ isOpen, onClose }: AgeVerificationModalProps) {
   return (
     <Modal isOpen={isOpen} onClose={onClose}>
       <div className="py-4 px-5 flex justify-end">
@@ -28,6 +28,6 @@ const AgeVerificationModal = ({ isOpen, onClose }: AgeVerificationModalProps) =>
       </div>
     </Modal>
   );
-};
+}
 
 export default AgeVerificationModal;

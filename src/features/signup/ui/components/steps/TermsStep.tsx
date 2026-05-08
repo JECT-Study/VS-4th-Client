@@ -1,10 +1,10 @@
 import { Checkbox } from "@base/ui/Checkbox";
 import { useState } from "react";
 import type { TermsState } from "../../../model/types";
-import AgeVerificationModal from "./AgeVerificationModal";
-import PrivacyPolicyModal from "./PrivacyPolicyModal";
-import PushNotificationModal from "./PushNotificationModal";
-import TermsOfServiceModal from "./TermsOfServiceModal";
+import { AgeVerificationModal } from "./AgeVerificationModal";
+import { PrivacyPolicyModal } from "./PrivacyPolicyModal";
+import { PushNotificationModal } from "./PushNotificationModal";
+import { TermsOfServiceModal } from "./TermsOfServiceModal";
 
 const TERMS_ITEMS: { key: keyof TermsState; label: string; required: boolean }[] = [
   { key: "age", label: "만 19세 이상이에요", required: true },
