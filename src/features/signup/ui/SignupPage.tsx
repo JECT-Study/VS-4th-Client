@@ -11,7 +11,12 @@ export function SignupPage() {
 
   return (
     <main className="flex flex-col min-h-dvh bg-white text-grey-dark">
-      <SignupHeader currentStep={funnel.currentStep} onBack={funnel.goBack} onSkip={funnel.skipProfile} />
+      <SignupHeader
+        currentStep={funnel.currentStep}
+        onBack={funnel.goBack}
+        onSkip={funnel.skipProfile}
+        isSavePending={funnel.isSavePending}
+      />
 
       <div className="flex-1 py-4 px-5">
         {funnel.currentStep === 1 && (

@@ -1,5 +1,7 @@
 export type SignupStep = 1 | 2 | 3 | 4;
 
+export type ImageColor = "GREEN" | "RED" | "BLUE" | "YELLOW";
+
 export interface TermsState {
   age: boolean;
   privacy: boolean;
@@ -16,10 +18,10 @@ export interface GenderBirthState {
 }
 
 export interface ProfileState {
-  imageColor: string;
+  imageColor: ImageColor;
   nickname: string;
   defaultNickname: string;
-  defaultImageColor: string;
+  defaultImageColor: ImageColor;
   nicknameError: string | null;
   isCheckingNickname: boolean;
 }

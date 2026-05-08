@@ -1,6 +1,7 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useNavigate } from "@tanstack/react-router";
 import { useEffect, useRef, useState } from "react";
+import { toast } from "sonner";
 import { checkNickname, extractNicknameCheckError } from "../api/nicknameCheck";
 import { saveProfile } from "../api/saveProfile";
 import { signupDefaultsQueryOptions } from "../api/signupDefaultsQuery";
@@ -11,7 +12,7 @@ import {
   validateBirthYear,
   validateNickname,
 } from "./signupValidation";
-import type { Gender, GenderBirthState, ProfileState, SignupStep, TermsState } from "./types";
+import type { Gender, GenderBirthState, ImageColor, ProfileState, SignupStep, TermsState } from "./types";
 
 const INITIAL_TERMS: TermsState = { age: false, privacy: false, tos: false, push: false };
 
@@ -36,15 +37,19 @@ export function useSignupFunnel() {
   const [termsState, setTermsState] = useState<TermsState>(INITIAL_TERMS);
   const [genderBirthState, setGenderBirthState] = useState<GenderBirthState>(INITIAL_GENDER_BIRTH);
   const [profileState, setProfileState] = useState<ProfileState>({
-    imageColor: "",
+    imageColor: "GREEN",
     nickname: "",
     defaultNickname: "",
-    defaultImageColor: "",
+    defaultImageColor: "GREEN",
     nicknameError: null,
     isCheckingNickname: false,
   });
 
-  const { data: signupDefaults, isLoading: isDefaultsLoading } = useQuery({
+  const {
+    data: signupDefaults,
+    isLoading: isDefaultsLoading,
+    isError: isDefaultsError,
+  } = useQuery({
     ...signupDefaultsQueryOptions(),
     enabled: currentStep >= 2,
   });
@@ -69,20 +74,34 @@ export function useSignupFunnel() {
     }
   }, [signupDefaults]);
 
+  useEffect(() => {
+    if (isDefaultsError && pendingStep3Ref.current) {
+      pendingStep3Ref.current = false;
+      toast.error("기본 정보를 불러오지 못했어요. 다시 시도해 주세요.");
+    }
+  }, [isDefaultsError]);
+
   const checkNicknameMutation = useMutation({
     mutationFn: checkNickname,
     onMutate: () => {
       setProfileState((prev) => ({ ...prev, isCheckingNickname: true, nicknameError: null }));
     },
-    onSuccess: () => {
-      setProfileState((prev) => ({ ...prev, isCheckingNickname: false }));
+
+    onSuccess: (_data, variables) => {
+      setProfileState((prev) => {
+        if (prev.nickname !== variables) return prev;
+        return { ...prev, isCheckingNickname: false };
+      });
     },
-    onError: (error: unknown) => {
-      setProfileState((prev) => ({
-        ...prev,
-        isCheckingNickname: false,
-        nicknameError: extractNicknameCheckError(error),
-      }));
+    onError: (error: unknown, variables) => {
+      setProfileState((prev) => {
+        if (prev.nickname !== variables) return prev;
+        return {
+          ...prev,
+          isCheckingNickname: false,
+          nicknameError: extractNicknameCheckError(error),
+        };
+      });
     },
   });
 
@@ -91,6 +110,10 @@ export function useSignupFunnel() {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["user", "me"] });
       setCurrentStep(4);
+    },
+
+    onError: () => {
+      toast.error("저장에 실패했어요. 다시 시도해 주세요.");
     },
   });
 
@@ -124,7 +147,7 @@ export function useSignupFunnel() {
 
   // ── Profile (Step 3) ───────────────────────────────────────────────────────
 
-  const setImageColor = (color: string) => {
+  const setImageColor = (color: ImageColor) => {
     setProfileState((prev) => ({ ...prev, imageColor: color }));
   };
 

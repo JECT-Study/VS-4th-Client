@@ -4,9 +4,10 @@ interface SignupHeaderProps {
   currentStep: SignupStep;
   onBack: () => void;
   onSkip: () => void;
+  isSavePending: boolean;
 }
 
-export function SignupHeader({ currentStep, onBack, onSkip }: SignupHeaderProps) {
+export function SignupHeader({ currentStep, onBack, onSkip, isSavePending }: SignupHeaderProps) {
   return (
     <header className="flex items-center justify-between py-[6px] pl-1 pr-5">
       <div className="flex items-center gap-[2px]">
@@ -18,7 +19,7 @@ export function SignupHeader({ currentStep, onBack, onSkip }: SignupHeaderProps)
       </div>
 
       {currentStep === 3 && (
-        <button type="button" onClick={onSkip} className="text-body-m text-grey-light">
+        <button type="button" onClick={onSkip} disabled={isSavePending} className="text-body-m text-grey-light">
           나중에 할게요
         </button>
       )}

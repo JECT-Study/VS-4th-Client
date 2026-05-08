@@ -1,15 +1,16 @@
 import { apiClient } from "@base/api/client";
+import type { ImageColor } from "../model/types";
 
 export interface SaveProfilePayload {
   birthDate: string;
   gender: "MALE" | "FEMALE";
   nickname: string;
-  imageColor: string;
+  imageColor: ImageColor;
 }
 
 export interface SaveProfileResponse {
   nickname: string;
-  imageColor: string;
+  imageColor: ImageColor;
 }
 
 /* MOCK_START */
