@@ -115,7 +115,7 @@ export interface FileRouteTypes {
     | '/chat'
     | '/home'
     | '/login'
-    |'/signup'
+    | '/signup'
     | '/chat/$chatRoomId'
     | '/votes/$voteId'
     | '/chat/'
