@@ -1,35 +1,18 @@
 import { Spinner } from "@base/ui/Spinner";
+import { useState } from "react";
+import { PROFILE_COLOR } from "../../../config/profileColors";
+import type { ImageColor } from "../../../model/types";
 import type { ProfileState } from "../../../model/types";
 import { NicknameInput } from "../../components/NicknameInput";
 import ProfileColorPicker from "./ProfileColorPicker";
-import { useState } from "react";
 
 interface ProfileStepProps {
   profileState: ProfileState;
   isDefaultsLoading: boolean;
-  setImageColor: (color: string) => void;
+  setImageColor: (color: ImageColor) => void;
   setNickname: (value: string) => void;
   handleNicknameBlur: () => void;
 }
-
-export const PROFILE_COLOR = [
-  {
-    color: "GREEN",
-    image: "/assets/images/profile/profile-green.png",
-  },
-  {
-    color: "RED",
-    image: "/assets/images/profile/profile-pink.png",
-  },
-  {
-    color: "BLUE",
-    image: "/assets/images/profile/profile-blue.png",
-  },
-  {
-    color: "YELLOW",
-    image: "/assets/images/profile/profile-yellow.png",
-  },
-];
 
 export function ProfileStep({
   profileState,
@@ -61,7 +44,9 @@ export function ProfileStep({
           <div className="relative">
             <button type="button" onClick={() => setIsPickerOpen(true)}>
               <img
-                src={PROFILE_COLOR.find(({ color }) => profileState.imageColor === color)!.image}
+                src={
+                  PROFILE_COLOR.find(({ color }) => profileState.imageColor === color)?.image ?? PROFILE_COLOR[0]!.image
+                }
                 alt="프로필 이미지 변경"
                 className="w-16 h-16"
               />

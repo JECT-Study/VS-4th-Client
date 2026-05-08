@@ -1,17 +1,23 @@
 import { BottomSheet } from "@base/ui/BottomSheet";
 import { Button } from "@base/ui/Button";
-import { useState } from "react";
-import { PROFILE_COLOR } from "./ProfileStep";
+import { useEffect, useState } from "react";
+import { PROFILE_COLOR } from "../../../config/profileColors";
+import type { ImageColor } from "../../../model/types";
 
 type ProfileColorPickerProps = {
   isOpen: boolean;
   onClose: () => void;
-  selectedColor: string;
-  onSelect: (color: string) => void;
+  selectedColor: ImageColor;
+  onSelect: (color: ImageColor) => void;
 };
 
 const ProfileColorPicker = ({ isOpen, onClose, selectedColor, onSelect }: ProfileColorPickerProps) => {
   const [newColor, setNewColor] = useState(selectedColor);
+
+  // #2: Reset picker state to saved color each time the sheet opens
+  useEffect(() => {
+    if (isOpen) setNewColor(selectedColor);
+  }, [isOpen, selectedColor]);
 
   return (
     <BottomSheet isOpen={isOpen} onClose={onClose}>
