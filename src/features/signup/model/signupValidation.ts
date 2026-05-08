@@ -1,4 +1,4 @@
-import type { GenderBirthState, ProfileState, TermsState } from "./types";
+import type { GenderBirthState, ImageColor, ProfileState, TermsState } from "./types";
 
 const MIN_AGE = 19;
 const MIN_BIRTH_YEAR = 1900;
@@ -32,11 +32,8 @@ export function canProceedStep2(state: GenderBirthState): boolean {
   return state.gender !== null && state.birthYearError === null && state.birthYear.length === 4;
 }
 
-export function canProceedStep3(state: ProfileState): boolean {
-  return (
-    (state.nickname !== state.defaultNickname || state.imageColor !== state.defaultImageColor) &&
-    state.nicknameError === null &&
-    state.nickname.length >= 2 &&
-    !state.isCheckingNickname
-  );
+export function canProceedStep3(state: ProfileState, defaultNickname: string, defaultImageColor: ImageColor): boolean {
+  const isNicknameValid = state.nickname.length >= 2 && state.nicknameError === null;
+  const hasUserEdit = state.nickname !== defaultNickname || state.imageColor !== defaultImageColor;
+  return isNicknameValid && hasUserEdit && !state.isCheckingNickname;
 }
