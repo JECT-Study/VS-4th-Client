@@ -9,11 +9,17 @@
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
 import { Route as rootRouteImport } from './../../pages/routes/__root'
+import { Route as SignupRouteImport } from './../../pages/routes/signup'
 import { Route as LoginRouteImport } from './../../pages/routes/login'
 import { Route as HomeRouteImport } from './../../pages/routes/home'
 import { Route as IndexRouteImport } from './../../pages/routes/index'
 import { Route as VotesVoteIdRouteImport } from './../../pages/routes/votes.$voteId'
 
+const SignupRoute = SignupRouteImport.update({
+  id: '/signup',
+  path: '/signup',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const LoginRoute = LoginRouteImport.update({
   id: '/login',
   path: '/login',
@@ -39,12 +45,14 @@ export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/home': typeof HomeRoute
   '/login': typeof LoginRoute
+  '/signup': typeof SignupRoute
   '/votes/$voteId': typeof VotesVoteIdRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/home': typeof HomeRoute
   '/login': typeof LoginRoute
+  '/signup': typeof SignupRoute
   '/votes/$voteId': typeof VotesVoteIdRoute
 }
 export interface FileRoutesById {
@@ -52,25 +60,34 @@ export interface FileRoutesById {
   '/': typeof IndexRoute
   '/home': typeof HomeRoute
   '/login': typeof LoginRoute
+  '/signup': typeof SignupRoute
   '/votes/$voteId': typeof VotesVoteIdRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/' | '/home' | '/login' | '/votes/$voteId'
+  fullPaths: '/' | '/home' | '/login' | '/signup' | '/votes/$voteId'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/home' | '/login' | '/votes/$voteId'
-  id: '__root__' | '/' | '/home' | '/login' | '/votes/$voteId'
+  to: '/' | '/home' | '/login' | '/signup' | '/votes/$voteId'
+  id: '__root__' | '/' | '/home' | '/login' | '/signup' | '/votes/$voteId'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   HomeRoute: typeof HomeRoute
   LoginRoute: typeof LoginRoute
+  SignupRoute: typeof SignupRoute
   VotesVoteIdRoute: typeof VotesVoteIdRoute
 }
 
 declare module '@tanstack/react-router' {
   interface FileRoutesByPath {
+    '/signup': {
+      id: '/signup'
+      path: '/signup'
+      fullPath: '/signup'
+      preLoaderRoute: typeof SignupRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/login': {
       id: '/login'
       path: '/login'
@@ -106,6 +123,7 @@ const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   HomeRoute: HomeRoute,
   LoginRoute: LoginRoute,
+  SignupRoute: SignupRoute,
   VotesVoteIdRoute: VotesVoteIdRoute,
 }
 export const routeTree = rootRouteImport
