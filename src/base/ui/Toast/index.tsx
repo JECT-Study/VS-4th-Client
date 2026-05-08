@@ -1,4 +1,3 @@
-import type { ReactNode } from "react";
 import { Toaster, toast } from "sonner";
 
 type ToastProps = React.ComponentProps<typeof Toaster>;
@@ -18,7 +17,7 @@ const CustomToast = ({ type, message }: { type: ToastType; message: string }) =>
   return (
     <div className="flex items-center gap-3 py-[10px] px-5 bg-[#6C777F] rounded-2xl w-full">
       {icon && <img src={icon} alt="" className="shrink-0" />}
-      <span className="text-body-s text-white">{message}</span>
+      <span className="text-white text-body-s">{message}</span>
     </div>
   );
 };
