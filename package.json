@@ -24,6 +24,7 @@
     "@tanstack/react-router": "^1.168.3",
     "autoprefixer": "^10.4.27",
     "axios": "^1.13.6",
+    "classnames": "^2.5.1",
     "clsx": "^2.1.1",
     "dayjs": "^1.11.20",
     "postcss": "^8.5.8",
