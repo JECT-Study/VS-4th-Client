@@ -1,10 +1,9 @@
 import { Spinner } from "@base/ui/Spinner";
 import { useState } from "react";
 import { PROFILE_COLOR } from "../../../config/profileColors";
-import type { ImageColor } from "../../../model/types";
-import type { ProfileState } from "../../../model/types";
+import type { ImageColor, ProfileState } from "../../../model/types";
 import { NicknameInput } from "../../components/NicknameInput";
-import ProfileColorPicker from "./ProfileColorPicker";
+import { ProfileColorPicker } from "./ProfileColorPicker";
 
 interface ProfileStepProps {
   profileState: ProfileState;
@@ -41,24 +40,20 @@ export function ProfileStep({
 
       <div className="flex flex-col gap-3">
         <div className="flex flex-col items-center gap-3">
-          <div className="relative">
-            <button type="button" onClick={() => setIsPickerOpen(true)}>
-              <img
-                src={
-                  PROFILE_COLOR.find(({ color }) => profileState.imageColor === color)?.image ?? PROFILE_COLOR[0]!.image
-                }
-                alt="프로필 이미지 변경"
-                className="w-16 h-16"
-              />
-            </button>
-            <button
-              type="button"
-              onClick={() => setIsPickerOpen(true)}
+          <button
+            type="button"
+            onClick={() => setIsPickerOpen(true)}
+            aria-label="프로필 이미지 변경"
+            className="relative"
+          >
+            <img src={PROFILE_COLOR[profileState.imageColor]} alt="" className="w-16 h-16" />
+            <span
               className="absolute bottom-1 -right-1 w-6 h-6 bg-white rounded-full flex items-center justify-center shadow-md"
+              aria-hidden="true"
             >
-              <img src="/assets/icons/edit.svg" alt="프로필 이미지 변경" />
-            </button>
-          </div>
+              <img src="/assets/icons/edit.svg" alt="" />
+            </span>
+          </button>
         </div>
 
         <NicknameInput

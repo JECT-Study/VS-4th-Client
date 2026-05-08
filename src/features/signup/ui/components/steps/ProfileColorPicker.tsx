@@ -11,7 +11,7 @@ type ProfileColorPickerProps = {
   onSelect: (color: ImageColor) => void;
 };
 
-const ProfileColorPicker = ({ isOpen, onClose, selectedColor, onSelect }: ProfileColorPickerProps) => {
+export function ProfileColorPicker({ isOpen, onClose, selectedColor, onSelect }: ProfileColorPickerProps) {
   const [newColor, setNewColor] = useState(selectedColor);
 
   useEffect(() => {
@@ -23,7 +23,7 @@ const ProfileColorPicker = ({ isOpen, onClose, selectedColor, onSelect }: Profil
       <div>
         <p className="text-title-m text-center">프로필 이미지 변경</p>
         <div className="mt-8 flex items-center gap-8 justify-center py-3">
-          {PROFILE_COLOR.map(({ color, image }) => (
+          {(Object.entries(PROFILE_COLOR) as [ImageColor, string][]).map(([color, image]) => (
             <button type="button" key={color} onClick={() => setNewColor(color)} className="relative">
               <img src={image} alt={`${color.toLowerCase()} 선택`} className="w-12 h-12" />
               {newColor === color && (
@@ -53,6 +53,4 @@ const ProfileColorPicker = ({ isOpen, onClose, selectedColor, onSelect }: Profil
       </div>
     </BottomSheet>
   );
-};
-
-export default ProfileColorPicker;
+}
