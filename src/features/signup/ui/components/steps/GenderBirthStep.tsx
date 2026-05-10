@@ -14,6 +14,7 @@ const ALLOWED_KEYS = new Set([
 ]);
 
 function preventNonNumericKey(e: React.KeyboardEvent<HTMLInputElement>) {
+  if (e.nativeEvent.isComposing) return;
   const isDigit = e.key >= "0" && e.key <= "9";
   const isSystemKey = e.ctrlKey || e.metaKey;
   if (!isDigit && !isSystemKey && !ALLOWED_KEYS.has(e.key)) {

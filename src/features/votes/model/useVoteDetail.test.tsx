@@ -1,8 +1,8 @@
+import { showToast } from "@base/ui/Toast";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { act, renderHook, waitFor } from "@testing-library/react";
 import type { ReactNode } from "react";
 import { beforeEach, describe, expect, it, vi } from "vitest";
-import { showToast } from "@base/ui/Toast";
 import type { FreeVotesResponse } from "../api/freeVotesQuery";
 import type { VoteDetail } from "./types";
 import { useVoteDetail } from "./useVoteDetail";

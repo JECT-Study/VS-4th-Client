@@ -21,8 +21,8 @@ export async function checkNickname(nickname: string): Promise<void> {
 
 export function extractNicknameCheckError(error: unknown): string {
   if (axios.isAxiosError(error)) {
-    return error.response?.data?.message ?? "사용할 수 없는 닉네임이에요";
+    return error.response?.data?.message ?? "닉네임 확인 중 오류가 발생했어요. 잠시 후 다시 시도해 주세요.";
   }
   if (error instanceof Error) return error.message;
-  return "사용할 수 없는 닉네임이에요";
+  return "닉네임 확인 중 오류가 발생했어요. 잠시 후 다시 시도해 주세요.";
 }
