@@ -35,11 +35,13 @@ export function VoteDetailPage({ voteId }: { voteId: string }) {
     );
   }
 
+  const hasFooter = isEnded && voteUserType !== "guest";
+
   return (
     <div className="relative">
       <VoteHeader isEnded={isEnded} />
 
-      <main className="pb-32" style={{ paddingBottom: "calc(8rem + env(safe-area-inset-bottom, 0px))" }}>
+      <main style={{ paddingBottom: `calc(${hasFooter ? "8rem" : "2rem"} + env(safe-area-inset-bottom, 0px))` }}>
         <div className="px-5 py-4">
           <VoteContent
             title={data?.title}
@@ -79,7 +81,7 @@ export function VoteDetailPage({ voteId }: { voteId: string }) {
         )}
       </main>
 
-      {isEnded && voteUserType !== "guest" && <VoteFooter />}
+      {hasFooter && <VoteFooter />}
 
       <FreeVoteLimitModal isOpen={isFreeVoteLimitModalOpen} onClose={() => setIsFreeVoteLimitModalOpen(false)} />
     </div>
