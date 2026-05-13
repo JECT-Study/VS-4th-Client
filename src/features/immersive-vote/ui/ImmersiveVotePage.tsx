@@ -9,7 +9,7 @@ export function ImmersiveVotePage() {
     updateVote,
     handleTouchStart,
     handleTouchEnd,
-    handleWheel,
+    containerRef,
     handleTrackTransitionEnd,
     trackClassName,
     trackStyle,
@@ -26,10 +26,10 @@ export function ImmersiveVotePage() {
 
   return (
     <main
+      ref={containerRef}
       className="relative h-dvh overflow-hidden bg-grey-black"
       onTouchStart={handleTouchStart}
       onTouchEnd={handleTouchEnd}
-      onWheel={handleWheel}
     >
       <div className={trackClassName} style={trackStyle} onTransitionEnd={handleTrackTransitionEnd}>
         {displayedVotes.map((vote, index) => (

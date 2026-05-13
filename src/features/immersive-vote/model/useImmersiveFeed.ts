@@ -1,14 +1,17 @@
 import { useQuery, useQueryClient } from "@tanstack/react-query";
-import { type TouchEvent, type WheelEvent, useCallback, useEffect, useRef, useState } from "react";
+import { type TouchEvent, useCallback, useEffect, useRef, useState } from "react";
 import {
   type ImmersiveFeedResponse,
   immersiveFeedQueryKey,
   immersiveFeedQueryOptions,
 } from "../api/immersiveFeedQuery";
-import { SWIPE_UP_THRESHOLD, WHEEL_NAVIGATION_COOLDOWN_MS, WHEEL_NAVIGATION_THRESHOLD } from "../config/constants";
+import {
+  PREFETCH_THRESHOLD,
+  SWIPE_UP_THRESHOLD,
+  WHEEL_NAVIGATION_COOLDOWN_MS,
+  WHEEL_NAVIGATION_THRESHOLD,
+} from "../config/constants";
 import type { ImmersiveFeedItem } from "./types";
-
-const PREFETCH_THRESHOLD = 3;
 
 export function useImmersiveFeed() {
   const queryClient = useQueryClient();
@@ -21,6 +24,7 @@ export function useImmersiveFeed() {
   const lastNavigationTime = useRef(0);
   const nextCursorRef = useRef<number | null>(null);
   const isFetchingMore = useRef(false);
+  const containerRef = useRef<HTMLElement | null>(null);
 
   useEffect(() => {
     if (!initialData) return;
@@ -39,11 +43,16 @@ export function useImmersiveFeed() {
 
     isFetchingMore.current = true;
     const cursor = nextCursorRef.current;
-    queryClient.fetchQuery(immersiveFeedQueryOptions(cursor)).then((result) => {
-      setVotes((prev) => [...prev, ...result.votes]);
-      nextCursorRef.current = result.nextCursor;
-      isFetchingMore.current = false;
-    });
+    queryClient
+      .fetchQuery(immersiveFeedQueryOptions(cursor))
+      .then((result) => {
+        setVotes((prev) => [...prev, ...result.votes]);
+        nextCursorRef.current = result.nextCursor;
+      })
+      .catch(() => {})
+      .finally(() => {
+        isFetchingMore.current = false;
+      });
   }, [currentIndex, feedLength, queryClient]);
 
   const updateVote = useCallback(
@@ -88,14 +97,19 @@ export function useImmersiveFeed() {
     [goToNextVote],
   );
 
-  const handleWheel = useCallback(
-    (event: WheelEvent) => {
-      if (event.deltaY < WHEEL_NAVIGATION_THRESHOLD) return;
-      event.preventDefault();
+  // React onWheel JSX 핸들러는 passive: true로 등록되어 preventDefault가 무시됨.
+  // 페이지 스크롤을 막으려면 DOM에 passive: false로 직접 등록해야 함.
+  useEffect(() => {
+    const el = containerRef.current;
+    if (!el || feedLength === 0) return;
+    const handler = (e: globalThis.WheelEvent) => {
+      if (e.deltaY < WHEEL_NAVIGATION_THRESHOLD) return;
+      e.preventDefault();
       goToNextVote();
-    },
-    [goToNextVote],
-  );
+    };
+    el.addEventListener("wheel", handler, { passive: false });
+    return () => el.removeEventListener("wheel", handler);
+  }, [goToNextVote, feedLength]);
 
   const handleTrackTransitionEnd = useCallback(() => {
     if (feedLength === 0) return;
@@ -103,6 +117,8 @@ export function useImmersiveFeed() {
 
     setIsTransitionEnabled(false);
     setTrackIndex(currentIndex);
+    // transform 제거 → transition 비활성화 → 인덱스 리셋이 한 프레임 내에 완료된 뒤
+    // 다음 프레임에 transition을 다시 활성화해야 시각적 순간이동이 발생하지 않음.
     window.requestAnimationFrame(() => {
       window.requestAnimationFrame(() => setIsTransitionEnabled(true));
     });
@@ -116,26 +132,15 @@ export function useImmersiveFeed() {
 
   const trackClassName = isTransitionEnabled ? "transition-transform duration-500 ease-out" : "";
 
-  const hasVotes = feedLength > 0;
-
-  const safeHandleWheel = useCallback(
-    (event: WheelEvent) => {
-      if (!hasVotes) return;
-      handleWheel(event);
-    },
-    [handleWheel, hasVotes],
-  );
-
   return {
     votes,
     displayedVotes,
     currentVote,
     currentIndex,
     updateVote,
-    goToNextVote,
     handleTouchStart,
     handleTouchEnd,
-    handleWheel: safeHandleWheel,
+    containerRef,
     handleTrackTransitionEnd,
     trackClassName,
     trackStyle,
