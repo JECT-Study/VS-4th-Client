@@ -14,6 +14,7 @@ import { Route as LoginRouteImport } from './../../pages/routes/login'
 import { Route as HomeRouteImport } from './../../pages/routes/home'
 import { Route as ChatRouteImport } from './../../pages/routes/chat'
 import { Route as IndexRouteImport } from './../../pages/routes/index'
+import { Route as ImmersiveVotesIndexRouteImport } from './../../pages/routes/immersive-votes.index'
 import { Route as ChatIndexRouteImport } from './../../pages/routes/chat.index'
 import { Route as VotesVoteIdRouteImport } from './../../pages/routes/votes.$voteId'
 import { Route as ChatChatRoomIdRouteImport } from './../../pages/routes/chat.$chatRoomId'
@@ -43,6 +44,11 @@ const IndexRoute = IndexRouteImport.update({
   path: '/',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ImmersiveVotesIndexRoute = ImmersiveVotesIndexRouteImport.update({
+  id: '/immersive-votes/',
+  path: '/immersive-votes/',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const ChatIndexRoute = ChatIndexRouteImport.update({
   id: '/',
   path: '/',
@@ -68,6 +74,7 @@ export interface FileRoutesByFullPath {
   '/chat/$chatRoomId': typeof ChatChatRoomIdRoute
   '/votes/$voteId': typeof VotesVoteIdRoute
   '/chat/': typeof ChatIndexRoute
+  '/immersive-votes/': typeof ImmersiveVotesIndexRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
@@ -77,6 +84,7 @@ export interface FileRoutesByTo {
   '/chat/$chatRoomId': typeof ChatChatRoomIdRoute
   '/votes/$voteId': typeof VotesVoteIdRoute
   '/chat': typeof ChatIndexRoute
+  '/immersive-votes': typeof ImmersiveVotesIndexRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -88,6 +96,7 @@ export interface FileRoutesById {
   '/chat/$chatRoomId': typeof ChatChatRoomIdRoute
   '/votes/$voteId': typeof VotesVoteIdRoute
   '/chat/': typeof ChatIndexRoute
+  '/immersive-votes/': typeof ImmersiveVotesIndexRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -100,6 +109,7 @@ export interface FileRouteTypes {
     | '/chat/$chatRoomId'
     | '/votes/$voteId'
     | '/chat/'
+    | '/immersive-votes/'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
@@ -109,6 +119,7 @@ export interface FileRouteTypes {
     | '/chat/$chatRoomId'
     | '/votes/$voteId'
     | '/chat'
+    | '/immersive-votes'
   id:
     | '__root__'
     | '/'
@@ -119,6 +130,7 @@ export interface FileRouteTypes {
     | '/chat/$chatRoomId'
     | '/votes/$voteId'
     | '/chat/'
+    | '/immersive-votes/'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -128,6 +140,7 @@ export interface RootRouteChildren {
   LoginRoute: typeof LoginRoute
   SignupRoute: typeof SignupRoute
   VotesVoteIdRoute: typeof VotesVoteIdRoute
+  ImmersiveVotesIndexRoute: typeof ImmersiveVotesIndexRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -165,6 +178,13 @@ declare module '@tanstack/react-router' {
       path: '/'
       fullPath: '/'
       preLoaderRoute: typeof IndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/immersive-votes/': {
+      id: '/immersive-votes/'
+      path: '/immersive-votes'
+      fullPath: '/immersive-votes/'
+      preLoaderRoute: typeof ImmersiveVotesIndexRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/chat/': {
@@ -210,6 +230,7 @@ const rootRouteChildren: RootRouteChildren = {
   LoginRoute: LoginRoute,
   SignupRoute: SignupRoute,
   VotesVoteIdRoute: VotesVoteIdRoute,
+  ImmersiveVotesIndexRoute: ImmersiveVotesIndexRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)

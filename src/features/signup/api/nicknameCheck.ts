@@ -1,4 +1,3 @@
-import { apiClient } from "@base/api/client";
 import axios from "axios";
 
 /* MOCK_START */

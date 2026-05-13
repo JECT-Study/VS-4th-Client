@@ -1,4 +1,3 @@
-import { apiClient } from "@base/api/client";
 import type { ImageColor } from "../model/types";
 
 export interface SaveProfilePayload {

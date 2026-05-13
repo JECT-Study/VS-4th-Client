@@ -1,7 +1,7 @@
 import type { InternalAxiosRequestConfig } from "axios";
+import axios from "axios";
 import { describe, expect, it } from "vitest";
 import { extractNicknameCheckError } from "./nicknameCheck";
-import axios from "axios";
 
 const FALLBACK_MESSAGE = "닉네임 확인 중 오류가 발생했어요. 잠시 후 다시 시도해 주세요.";
 

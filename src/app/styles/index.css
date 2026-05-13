@@ -168,6 +168,21 @@
   }
 }
 
+@keyframes float-emoji {
+  from {
+    transform: translate(-50%, -50%) translateY(0) scale(0.9);
+    opacity: 1;
+  }
+  to {
+    transform: translate(-50%, -50%) translateY(-100vh) scale(1.2);
+    opacity: 0;
+  }
+}
+
+.animate-float-emoji {
+  animation: float-emoji 3s ease-out forwards;
+}
+
 /* HorizontalScroll: 스크롤바 숨김 + iOS 모멘텀 스크롤 */
 .hs-scroll {
   -ms-overflow-style: none;
