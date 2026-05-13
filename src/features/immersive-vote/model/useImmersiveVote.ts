@@ -7,15 +7,8 @@ import { useCallback, useMemo, useState } from "react";
 import { v4 as uuid } from "uuid";
 import { immersiveReactEmoji } from "../api/immersiveVoteEmoji";
 import { immersiveParticipate } from "../api/immersiveVoteParticipate";
-import { FLOATING_EMOJI_DURATION_MS } from "../config/constants";
+import { EMOJI_ASSETS } from "../config/emojiAssets";
 import type { EmojiReactionItem, EmojiType, FloatingEmoji, FloatingEmojiOrigin, ImmersiveFeedItem } from "./types";
-
-const emojiAssets: Array<Omit<EmojiReactionItem, "count" | "isMine">> = [
-  { type: "LIKE", img: "/assets/images/emoji/smiling-face.png", label: "공감" },
-  { type: "SAD", img: "/assets/images/emoji/crying-face.png", label: "슬픔" },
-  { type: "ANGRY", img: "/assets/images/emoji/enraged-face.png", label: "분노" },
-  { type: "WOW", img: "/assets/images/emoji/smiling-face-with-heart-eyes.png", label: "호감" },
-];
 
 export function useImmersiveVote(
   vote: ImmersiveFeedItem,
@@ -34,7 +27,7 @@ export function useImmersiveVote(
 
   const emojiList = useMemo<EmojiReactionItem[]>(
     () =>
-      emojiAssets.map((emoji) => ({
+      EMOJI_ASSETS.map((emoji) => ({
         ...emoji,
         count: vote.emojiSummary[emoji.type],
         isMine: vote.myEmoji === emoji.type,
@@ -43,6 +36,7 @@ export function useImmersiveVote(
   );
 
   const participateMutation = useMutation({
+    mutationKey: ["immersive-vote", "participate"],
     mutationFn: (optionId: number) => immersiveParticipate(vote.voteId, optionId),
     onMutate: (optionId) => {
       const snapshot = {
@@ -86,8 +80,9 @@ export function useImmersiveVote(
         showToast.info(`${response.remainingFreeVotes}회 남았어요`);
       }
       if (isGuest && response.remainingFreeVotes !== null) {
+        const remaining = response.remainingFreeVotes;
         queryClient.setQueryData<FreeVotesResponse>(freeVotesQueryKey, (old) =>
-          old ? { ...old, remainingFreeVotes: response.remainingFreeVotes! } : old,
+          old ? { ...old, remainingFreeVotes: remaining } : old,
         );
       }
     },
@@ -113,6 +108,7 @@ export function useImmersiveVote(
   }, []);
 
   const emojiMutation = useMutation({
+    mutationKey: ["immersive-vote", "emoji"],
     mutationFn: ({ emoji }: { emoji: EmojiType | null; origin: FloatingEmojiOrigin | null }) =>
       immersiveReactEmoji(vote.voteId, emoji),
     onMutate: ({ emoji, origin }) => {
@@ -126,7 +122,7 @@ export function useImmersiveVote(
 
       if (floatingEmoji) {
         setFloatingEmojis((prev) => [...prev, floatingEmoji]);
-        window.setTimeout(() => removeFloatingEmoji(floatingEmoji.id), FLOATING_EMOJI_DURATION_MS);
+        // 제거는 FloatingEmojiContainer의 onAnimationEnd에 위임해 이중 제거를 방지함.
       }
 
       updateVote(vote.voteId, (current) => {
@@ -135,7 +131,8 @@ export function useImmersiveVote(
         const emojiSummary = { ...current.emojiSummary };
         if (previous) emojiSummary[previous] = Math.max(0, emojiSummary[previous] - 1);
         if (nextEmoji) emojiSummary[nextEmoji] += 1;
-        emojiSummary.total = emojiSummary.LIKE + emojiSummary.SAD + emojiSummary.ANGRY + emojiSummary.WOW;
+        const { total: _t, ...counts } = emojiSummary;
+        emojiSummary.total = Object.values(counts).reduce((sum, n) => sum + n, 0);
         return { ...current, emojiSummary, myEmoji: nextEmoji };
       });
       return { ...snapshot, floatingEmojiId: floatingEmoji?.id ?? null };
@@ -160,25 +157,32 @@ export function useImmersiveVote(
     },
   });
 
+  const { mutate: participateMutate, isPending: isParticipatePending } = participateMutation;
+  const { mutate: emojiMutate, isPending: isEmojiPending } = emojiMutation;
+
   const handleOptionClick = useCallback(
     (optionId: number) => {
-      if (participateMutation.isPending) return;
+      if (isParticipatePending) return;
       const isNewGuestVote = isGuest && !vote.myVote.voted && vote.myVote.selectedOptionId !== optionId;
-      if (isNewGuestVote && freeVotesData !== undefined && freeVotesData.remainingFreeVotes === 0) {
-        onFreeVoteLimitExceeded();
-        return;
+      if (isNewGuestVote) {
+        // 로딩 중(undefined)이면 조용히 차단 — 한도 초과 모달을 내보내기엔 근거 없음.
+        if (freeVotesData === undefined) return;
+        if (freeVotesData.remainingFreeVotes === 0) {
+          onFreeVoteLimitExceeded();
+          return;
+        }
       }
-      participateMutation.mutate(optionId);
+      participateMutate(optionId);
     },
-    [isGuest, freeVotesData, onFreeVoteLimitExceeded, participateMutation, vote.myVote],
+    [isGuest, freeVotesData, onFreeVoteLimitExceeded, isParticipatePending, participateMutate, vote.myVote],
   );
 
   const handleEmojiClick = useCallback(
     (emoji: EmojiType, origin: FloatingEmojiOrigin | null) => {
-      if (emojiMutation.isPending) return;
-      emojiMutation.mutate({ emoji, origin });
+      if (isEmojiPending) return;
+      emojiMutate({ emoji, origin });
     },
-    [emojiMutation],
+    [isEmojiPending, emojiMutate],
   );
 
   return {

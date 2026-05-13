@@ -2,6 +2,7 @@ import { showToast } from "@base/ui/Toast";
 import type { FreeVotesResponse } from "@features/votes/api/freeVotesQuery";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { act, renderHook, waitFor } from "@testing-library/react";
+import { AxiosError } from "axios";
 import { type ReactNode, useCallback, useState } from "react";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import type { ImmersiveFeedItem } from "./types";
@@ -189,5 +190,58 @@ describe("useImmersiveVote", () => {
     await waitFor(() => expect(showToast.warning).toHaveBeenCalledWith("이모지 반응에 실패했어요"));
     expect(result.current.vote.myEmoji).toBe(initialVote.myEmoji);
     expect(result.current.vote.emojiSummary).toEqual(initialVote.emojiSummary);
+  });
+
+  it("서버에서 VOTE_FREE_LIMIT_EXCEEDED 에러 반환 시 onLimit을 호출하고 실패 토스트는 띄우지 않는다", async () => {
+    const queryClient = createTestQueryClient();
+    seedGuest(queryClient, 5);
+    const axiosError = new AxiosError("limit exceeded", undefined, undefined, undefined, {
+      status: 400,
+      data: { code: "VOTE_FREE_LIMIT_EXCEEDED" },
+    } as never);
+    mockImmersiveParticipate.mockRejectedValue(axiosError);
+    const onLimit = vi.fn();
+    const { result } = renderUseImmersiveVote(queryClient, makeVote(), onLimit);
+
+    act(() => result.current.handleOptionClick(10));
+
+    await waitFor(() => expect(onLimit).toHaveBeenCalledTimes(1));
+    expect(showToast.warning).not.toHaveBeenCalled();
+  });
+
+  it("비회원 신규 투표 성공 시 잔여 횟수 토스트를 띄우고 캐시를 갱신한다", async () => {
+    const queryClient = createTestQueryClient();
+    seedGuest(queryClient, 5);
+    mockImmersiveParticipate.mockResolvedValue({
+      voteId: 101,
+      action: "VOTED",
+      selectedOptionId: 10,
+      options: [
+        { optionId: 10, label: "옵션 A", voteCount: 6, ratio: 60 },
+        { optionId: 11, label: "옵션 B", voteCount: 4, ratio: 40 },
+      ],
+      remainingFreeVotes: 2,
+    });
+    const { result } = renderUseImmersiveVote(queryClient, makeVote());
+
+    act(() => result.current.handleOptionClick(10));
+
+    await waitFor(() => expect(showToast.info).toHaveBeenCalledWith("2회 남았어요"));
+    const cached = queryClient.getQueryData<FreeVotesResponse>(["me", "free-votes"]);
+    expect(cached?.remainingFreeVotes).toBe(2);
+  });
+
+  it("비회원이고 freeVotesData가 undefined(로딩 중)이면 API 호출 없이 조용히 차단한다", () => {
+    const queryClient = createTestQueryClient();
+    // freeVotesData를 시드하지 않아 undefined 상태 유지
+    queryClient.setQueryData<null>(["user", "me"], null);
+    const onLimit = vi.fn();
+    const { result } = renderUseImmersiveVote(queryClient, makeVote(), onLimit);
+
+    act(() => result.current.handleOptionClick(10));
+
+    expect(mockImmersiveParticipate).not.toHaveBeenCalled();
+    // undefined는 "0회"가 아니라 "로딩 중"이므로 한도 초과 모달을 띄우면 안 됨.
+    expect(onLimit).not.toHaveBeenCalled();
   });
 });

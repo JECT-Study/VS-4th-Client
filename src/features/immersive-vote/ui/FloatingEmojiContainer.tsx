@@ -1,11 +1,5 @@
-import type { EmojiType, FloatingEmoji } from "../model/types";
-
-const emojiImgs: Record<EmojiType, string> = {
-  LIKE: "/assets/images/emoji/smiling-face.png",
-  SAD: "/assets/images/emoji/crying-face.png",
-  ANGRY: "/assets/images/emoji/enraged-face.png",
-  WOW: "/assets/images/emoji/smiling-face-with-heart-eyes.png",
-};
+import { EMOJI_IMGS } from "../config/emojiAssets";
+import type { FloatingEmoji } from "../model/types";
 
 interface FloatingEmojiContainerProps {
   floatingEmojis: FloatingEmoji[];
@@ -18,7 +12,7 @@ export function FloatingEmojiContainer({ floatingEmojis, onAnimationEnd }: Float
       {floatingEmojis.map((item) => (
         <img
           key={item.id}
-          src={emojiImgs[item.emoji]}
+          src={EMOJI_IMGS[item.emoji]}
           alt=""
           className="absolute animate-float-emoji w-6 h-6"
           style={{ left: item.x, top: item.y }}
