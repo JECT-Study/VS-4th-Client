@@ -1,40 +1,52 @@
-export type ChatTabType = "active" | "ended";
+export type ChatTabType = "ONGOING" | "ENDED";
 
-export interface ChatVoteItem {
-  id: number;
+export interface ChatListItemResponse {
+  voteId: number;
   title: string;
-  description: string;
   thumbnailUrl: string;
+  optionA: string;
+  optionB: string;
+  participantCount: number;
   lastMessage: string;
-  remainingTime?: string;
-  participantCount: number;
-  unreadCount?: number;
-  timeLabel: string;
-  status: "active" | "ended";
+  lastMessageAt: string;
+  endAt: string;
+  unreadCount: number;
 }
 
-export interface VoteOptionSummary {
-  label: string;
-  ratio: number;
-  color: "orange" | "purple";
+export interface ChatListResponse {
+  chats: ChatListItemResponse[];
 }
 
-export interface ChatMessage {
-  id: number;
-  nickname: string;
-  optionLabel: string;
-  optionColor: "orange" | "purple";
-  message: string;
-  time: string;
-  isMine?: boolean;
-}
-
-export interface ChatRoomDetail {
-  id: number;
+export interface ChatRoomHeaderResponse {
+  voteId: number;
   title: string;
+  status: ChatTabType;
   participantCount: number;
-  remainingTime: string;
-  status: "active" | "ended";
-  options: [VoteOptionSummary, VoteOptionSummary];
-  messages: ChatMessage[];
+  optionA: string;
+  optionB: string;
+  endAt: string;
+}
+
+export interface ChatGaugeResponse {
+  optionARatio: number;
+  optionBRatio: number;
+  participantCount: number;
+}
+
+export type SenderVoteOption = "A" | "B";
+
+export interface ChatMessageResponse {
+  messageId: number;
+  content: string;
+  sentAt: string;
+  senderNickname: string;
+  senderProfileIcon: string;
+  senderVoteOption: SenderVoteOption;
+  isMine: boolean;
+}
+
+export interface ChatMessagesResponse {
+  messages: ChatMessageResponse[];
+  nextCursor: number | null;
+  hasNext: boolean;
 }

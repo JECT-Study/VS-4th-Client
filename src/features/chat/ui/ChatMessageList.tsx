@@ -1,10 +1,13 @@
-import type { ChatMessage } from "../model/types";
+import { formatTimeLabel } from "../lib/formatChatTime";
+import type { ChatMessageResponse } from "../model/types";
 
 interface ChatMessageListProps {
-  messages: ChatMessage[];
+  messages: ChatMessageResponse[];
+  optionA: string;
+  optionB: string;
 }
 
-export function ChatMessageList({ messages }: ChatMessageListProps) {
+export function ChatMessageList({ messages, optionA, optionB }: ChatMessageListProps) {
   if (messages.length === 0) {
     return (
       <div className="flex min-h-[420px] flex-col items-center justify-center px-5 text-center">
@@ -19,22 +22,24 @@ export function ChatMessageList({ messages }: ChatMessageListProps) {
   return (
     <section className="px-5 py-4 space-y-5">
       {messages.map((message) => {
-        const optionTextColor = message.optionColor === "orange" ? "text-secondary" : "text-primary";
-        const avatarBg = message.optionColor === "orange" ? "bg-yellow-100" : "bg-blue-100";
+        const isOptionA = message.senderVoteOption === "A";
+        const optionLabel = isOptionA ? optionA : optionB;
+        const optionTextColor = isOptionA ? "text-secondary" : "text-primary";
+        const avatarBg = isOptionA ? "bg-yellow-100" : "bg-blue-100";
 
         if (message.isMine) {
           return (
-            <div key={message.id} className="flex justify-end">
+            <div key={message.messageId} className="flex justify-end">
               <div className="max-w-[75%]">
                 <div className="flex justify-end gap-1 mb-1 text-label-s">
-                  <span className="text-grey-dark">{message.nickname}</span>
-                  <span className={optionTextColor}>{message.optionLabel}</span>
+                  <span className="text-grey-dark">{message.senderNickname}</span>
+                  <span className={optionTextColor}>{optionLabel}</span>
                 </div>
 
                 <div className="flex items-end gap-2">
-                  <span className="text-label-s text-grey-light">{message.time}</span>
+                  <span className="text-label-s text-grey-light">{formatTimeLabel(message.sentAt)}</span>
                   <p className="px-4 py-3 bg-white border rounded-2xl border-grey-stroke text-label-m text-grey-black">
-                    {message.message}
+                    {message.content}
                   </p>
                 </div>
               </div>
@@ -43,18 +48,24 @@ export function ChatMessageList({ messages }: ChatMessageListProps) {
         }
 
         return (
-          <div key={message.id} className="flex gap-3">
-            <div className={`flex h-9 w-9 shrink-0 items-center justify-center rounded-full ${avatarBg}`}>⚡</div>
+          <div key={message.messageId} className="flex gap-3">
+            <div className={`flex h-9 w-9 shrink-0 items-center justify-center rounded-full ${avatarBg}`}>
+              {message.senderProfileIcon ? (
+                <img src={message.senderProfileIcon} alt="" className="object-cover w-full h-full rounded-full" />
+              ) : (
+                "⚡"
+              )}
+            </div>
 
             <div className="max-w-[75%]">
               <div className="flex gap-1 mb-1 text-label-s">
-                <span className="text-grey-dark">{message.nickname}</span>
-                <span className={optionTextColor}>{message.optionLabel}</span>
+                <span className="text-grey-dark">{message.senderNickname}</span>
+                <span className={optionTextColor}>{optionLabel}</span>
               </div>
 
               <div className="flex items-end gap-2">
-                <p className="px-4 py-3 rounded-2xl bg-grey-chat text-label-m text-grey-black">{message.message}</p>
-                <span className="text-label-s text-grey-light">{message.time}</span>
+                <p className="px-4 py-3 rounded-2xl bg-grey-chat text-label-m text-grey-black">{message.content}</p>
+                <span className="text-label-s text-grey-light">{formatTimeLabel(message.sentAt)}</span>
               </div>
             </div>
           </div>

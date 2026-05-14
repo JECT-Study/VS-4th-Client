@@ -3,7 +3,7 @@ import { useState } from "react";
 
 import { BottomTabBar } from "@/features/common/ui/BottomTabBar";
 
-import { activeChatVotes, endedChatVotes } from "../model/mockChatData";
+import { useChatListQuery } from "../hooks/useChatListQuery";
 import type { ChatTabType } from "../model/types";
 import { ChatEmptyState } from "./ChatEmptyState";
 import { ChatList } from "./ChatList";
@@ -11,9 +11,11 @@ import { ChatTabs } from "./ChatTabs";
 
 export function ChatListPage() {
   const navigate = useNavigate();
-  const [activeTab, setActiveTab] = useState<ChatTabType>("active");
+  const [activeTab, setActiveTab] = useState<ChatTabType>("ONGOING");
 
-  const currentItems = activeTab === "active" ? activeChatVotes : endedChatVotes;
+  const { data, isLoading, isError } = useChatListQuery(activeTab);
+
+  const currentItems = data?.chats ?? [];
 
   return (
     <main className="min-h-screen pb-20 bg-white">
@@ -23,21 +25,30 @@ export function ChatListPage() {
 
       <ChatTabs activeTab={activeTab} onChangeTab={setActiveTab} />
 
-      {currentItems.length > 0 ? (
+      {isLoading && (
+        <div className="py-10 text-center text-label-m text-grey-light">채팅 목록을 불러오는 중입니다.</div>
+      )}
+
+      {isError && (
+        <div className="py-10 text-center text-label-m text-grey-light">채팅 목록을 불러오지 못했습니다.</div>
+      )}
+
+      {!isLoading && !isError && currentItems.length > 0 && (
         <ChatList
           items={currentItems}
-          onClickItem={(id) => {
+          status={activeTab}
+          onClickItem={(voteId) => {
             navigate({
               to: "/chat/$chatRoomId",
               params: {
-                chatRoomId: String(id),
+                chatRoomId: String(voteId),
               },
             });
           }}
         />
-      ) : (
-        <ChatEmptyState />
       )}
+
+      {!isLoading && !isError && currentItems.length === 0 && <ChatEmptyState />}
 
       <BottomTabBar
         activeTab="chat"

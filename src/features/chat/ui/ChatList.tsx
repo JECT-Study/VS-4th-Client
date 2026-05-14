@@ -1,16 +1,17 @@
-import type { ChatVoteItem } from "../model/types";
+import type { ChatListItemResponse, ChatTabType } from "../model/types";
 import { ChatListItem } from "./ChatListItem";
 
 interface ChatListProps {
-  items: ChatVoteItem[];
+  items: ChatListItemResponse[];
+  status: ChatTabType;
   onClickItem?: (id: number) => void;
 }
 
-export function ChatList({ items, onClickItem }: ChatListProps) {
+export function ChatList({ items, status, onClickItem }: ChatListProps) {
   return (
     <div>
       {items.map((item) => (
-        <ChatListItem key={`${item.status}-${item.id}`} item={item} onClick={onClickItem} />
+        <ChatListItem key={`${status}-${item.voteId}`} item={item} status={status} onClick={onClickItem} />
       ))}
     </div>
   );
