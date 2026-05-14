@@ -7,7 +7,7 @@ export const Route = createFileRoute("/signup")({
   beforeLoad: async ({ context: { queryClient } }) => {
     let user: Awaited<ReturnType<typeof userQueryOptions>>["queryFn"] | null = null;
     try {
-      user = await queryClient.fetchQuery(userQueryOptions()) as typeof user;
+      user = (await queryClient.fetchQuery(userQueryOptions())) as typeof user;
     } catch (err) {
       if (isRedirect(err)) throw err;
       return;

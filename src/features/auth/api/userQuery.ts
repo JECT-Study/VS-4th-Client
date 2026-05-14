@@ -1,18 +1,5 @@
-import { apiClient } from "@base/api/client";
 import { queryOptions } from "@tanstack/react-query";
-import { isAxiosError } from "axios";
 import type { User } from "../model/types";
-// MOCK_START — 제거 시 이 줄부터 MOCK_END까지와 mockUser import를 삭제
-const mockUser: User = {
-  email: "test@example.com",
-  nickname: "테스트유저",
-  birthDate: "1998-03-15",
-  gender: "FEMALE",
-  imageColor: "GREEN",
-  userStatus: "ACTIVE",
-};
-
-// MOCK_END
 
 export const userQueryOptions = () =>
   queryOptions<User | null>({

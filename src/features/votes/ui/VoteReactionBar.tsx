@@ -47,6 +47,7 @@ export function VoteReactionBar({
             <span className="text-label-m text-grey-dark">{totalEmojiCount}</span>
           </button>
         }
+        className="px-5 pt-2 pb-1 bg-grey-stroke rounded-[20px]"
       >
         <div className="flex gap-6 items-center">
           {emojiList.map(({ type, count, isMine, img }) => (

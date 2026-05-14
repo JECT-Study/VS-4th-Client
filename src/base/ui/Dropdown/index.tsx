@@ -24,6 +24,7 @@ interface PositionState {
 
 const MARGIN = 8;
 const ARROW_HALF = 8;
+const DEFAULT_ARROW_BACKGROUND = "#EDECEF";
 const EASING = "cubic-bezier(0.22, 1, 0.36, 1)";
 const DURATION_IN = 220;
 const DURATION_OUT = 150;
@@ -103,12 +104,12 @@ function computePosition(
   return { x, y, placement, arrowX, arrowY, transformOrigin };
 }
 
-function getArrowStyle(pos: PositionState): CSSProperties {
+function getArrowStyle(pos: PositionState, background: string): CSSProperties {
   const base: CSSProperties = {
     position: "absolute",
     width: ARROW_HALF * 2,
     height: ARROW_HALF * 2,
-    background: "#EDECEF",
+    background,
     transform: "rotate(45deg)",
   };
   switch (pos.placement) {
@@ -127,9 +128,11 @@ function Dropdown({ trigger, children, placement: preferred = "bottom", offset =
   const [isOpen, setIsOpen] = useState(false);
   const [isClosing, setIsClosing] = useState(false);
   const [position, setPosition] = useState<PositionState | null>(null);
+  const [arrowBackground, setArrowBackground] = useState(DEFAULT_ARROW_BACKGROUND);
 
   const triggerRef = useRef<HTMLDivElement>(null);
   const contentRef = useRef<HTMLDivElement>(null);
+  const contentBodyRef = useRef<HTMLDivElement>(null);
   const touchOrigin = useRef<{ x: number; y: number } | null>(null);
 
   const startClose = () => setIsClosing(true);
@@ -156,7 +159,9 @@ function Dropdown({ trigger, children, placement: preferred = "bottom", offset =
 
   // Calculate position synchronously before browser paint to avoid flicker
   useLayoutEffect(() => {
-    if (!isOpen || !triggerRef.current || !contentRef.current) return;
+    if (!isOpen || !triggerRef.current || !contentRef.current || !contentBodyRef.current) return;
+    const contentBackground = getComputedStyle(contentBodyRef.current).backgroundColor;
+    setArrowBackground(contentBackground === "rgba(0, 0, 0, 0)" ? DEFAULT_ARROW_BACKGROUND : contentBackground);
     setPosition(computePosition(triggerRef.current, contentRef.current, preferred, offset));
   }, [isOpen, preferred, offset]);
 
@@ -226,7 +231,6 @@ function Dropdown({ trigger, children, placement: preferred = "bottom", offset =
             position: "fixed",
             top: position?.y ?? 0,
             left: position?.x ?? 0,
-            // Hidden until position is computed to prevent (0,0) flash
             visibility: position ? "visible" : "hidden",
             zIndex: 9999,
             transformOrigin: position?.transformOrigin ?? "top left",
@@ -237,8 +241,10 @@ function Dropdown({ trigger, children, placement: preferred = "bottom", offset =
               : undefined,
           }}
         >
-          {position && <div aria-hidden style={getArrowStyle(position)} />}
-          <div className={clsx("relative bg-grey-stroke rounded-[20px]", "px-5 pt-2 pb-1", className)}>{children}</div>
+          {position && <div aria-hidden style={getArrowStyle(position, arrowBackground)} />}
+          <div ref={contentBodyRef} className={clsx("relative", className)}>
+            {children}
+          </div>
         </div>,
         document.body,
       )

@@ -1,4 +1,5 @@
 import { Modal } from "@base/ui/Modal";
+import { useNavigate } from "@tanstack/react-router";
 
 type FreeVoteLimitModalProps = {
   isOpen: boolean;
@@ -6,6 +7,13 @@ type FreeVoteLimitModalProps = {
 };
 
 const FreeVoteLimitModal = ({ isOpen, onClose }: FreeVoteLimitModalProps) => {
+  const navigate = useNavigate();
+
+  const goToLogin = () => {
+    onClose();
+    navigate({ to: "/login" });
+  };
+
   return (
     <Modal isOpen={isOpen} onClose={onClose}>
       <div className="px-5 pt-8 pb-2">
@@ -15,7 +23,11 @@ const FreeVoteLimitModal = ({ isOpen, onClose }: FreeVoteLimitModalProps) => {
         </p>
 
         <div className="mt-8 flex flex-col gap-[2px]">
-          <button type="button" className="w-full text-grey-divider bg-primary text-body-m py-3 rounded-lg">
+          <button
+            type="button"
+            className="w-full text-grey-divider bg-primary text-body-m py-3 rounded-lg"
+            onClick={goToLogin}
+          >
             회원가입/로그인
           </button>
           <button
