@@ -67,4 +67,7 @@ export default defineConfig({
     strictPort: true,
   },
   build: { sourcemap: true },
+  define: {
+    global: "globalThis",
+  },
 });
