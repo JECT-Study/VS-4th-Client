@@ -13,9 +13,9 @@ import {
 } from "../config/constants";
 import type { ImmersiveFeedItem } from "./types";
 
-export function useImmersiveFeed() {
+export function useImmersiveFeed(startVoteId?: number) {
   const queryClient = useQueryClient();
-  const { data: initialData } = useQuery(immersiveFeedQueryOptions());
+  const { data: initialData, isError } = useQuery(immersiveFeedQueryOptions(startVoteId));
 
   const [votes, setVotes] = useState<ImmersiveFeedItem[]>([]);
   const [trackIndex, setTrackIndex] = useState(0);
@@ -145,5 +145,6 @@ export function useImmersiveFeed() {
     trackClassName,
     trackStyle,
     isLoading: !initialData,
+    isError,
   };
 }
