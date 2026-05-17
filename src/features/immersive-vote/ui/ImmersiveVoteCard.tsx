@@ -6,6 +6,7 @@ import { useQuery } from "@tanstack/react-query";
 import { useCallback, useRef, useState } from "react";
 import type { FloatingEmojiOrigin, ImmersiveFeedItem } from "../model/types";
 import { useImmersiveVote } from "../model/useImmersiveVote";
+import { useImmersiveVoteLive } from "../model/useImmersiveVoteLive";
 import { EmojiReactionButton } from "./EmojiReactionButton";
 import { FloatingEmojiContainer } from "./FloatingEmojiContainer";
 import { ImmersiveShareModal } from "./ImmersiveShareModal";
@@ -32,6 +33,7 @@ export function ImmersiveVoteCard({ vote, updateVote }: ImmersiveVoteCardProps) 
     updateVote,
     () => setIsFreeVoteLimitModalOpen(true),
   );
+  useImmersiveVoteLive(vote, updateVote);
 
   const openChat = () => {
     if (user === null) {

@@ -60,3 +60,9 @@ export interface ImmersiveShareResponse {
   title: string;
   thumbnailUrl: string | null;
 }
+
+export interface ImmersiveLivePayload {
+  options: Array<{ optionId: number; voteCount: number; ratio: number }>;
+  currentViewerCount: number;
+  totalParticipantCount: number;
+}
