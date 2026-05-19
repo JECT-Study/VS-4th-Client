@@ -1,8 +1,11 @@
 import { BottomTabBar } from "@features/common/ui/BottomTabBar";
+import { useSearch } from "@tanstack/react-router";
 import { useImmersiveFeed } from "../model/useImmersiveFeed";
 import { ImmersiveVoteCard } from "./ImmersiveVoteCard";
+import { ImmersiveVoteErrorPage } from "./ImmersiveVoteErrorPage";
 
 export function ImmersiveVotePage() {
+  const { startVoteId } = useSearch({ from: "/immersive-votes/" });
   const {
     displayedVotes,
     currentVote,
@@ -14,7 +17,12 @@ export function ImmersiveVotePage() {
     trackClassName,
     trackStyle,
     isLoading,
-  } = useImmersiveFeed();
+    isError,
+  } = useImmersiveFeed(startVoteId);
+
+  if (isError) {
+    return <ImmersiveVoteErrorPage />;
+  }
 
   if (isLoading) {
     return <div className="flex h-dvh items-center justify-center bg-grey-black text-white/60">불러오는 중...</div>;

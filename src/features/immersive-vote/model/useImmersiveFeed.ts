@@ -1,3 +1,4 @@
+import * as stompClient from "@base/api/stompClient";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { type TouchEvent, useCallback, useEffect, useRef, useState } from "react";
 import {
@@ -13,9 +14,9 @@ import {
 } from "../config/constants";
 import type { ImmersiveFeedItem } from "./types";
 
-export function useImmersiveFeed() {
+export function useImmersiveFeed(startVoteId?: number) {
   const queryClient = useQueryClient();
-  const { data: initialData } = useQuery(immersiveFeedQueryOptions());
+  const { data: initialData, isError } = useQuery(immersiveFeedQueryOptions(startVoteId));
 
   const [votes, setVotes] = useState<ImmersiveFeedItem[]>([]);
   const [trackIndex, setTrackIndex] = useState(0);
@@ -25,6 +26,11 @@ export function useImmersiveFeed() {
   const nextCursorRef = useRef<number | null>(null);
   const isFetchingMore = useRef(false);
   const containerRef = useRef<HTMLElement | null>(null);
+
+  useEffect(() => {
+    stompClient.activate();
+    return () => { stompClient.deactivate(); };
+  }, []);
 
   useEffect(() => {
     if (!initialData) return;
@@ -145,5 +151,6 @@ export function useImmersiveFeed() {
     trackClassName,
     trackStyle,
     isLoading: !initialData,
+    isError,
   };
 }
