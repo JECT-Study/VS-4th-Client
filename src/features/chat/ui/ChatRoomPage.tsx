@@ -10,8 +10,7 @@ import { useSendChatMessageMutation } from "../hooks/useSendChatMessageMutation"
 
 export function ChatRoomPage() {
   const params = useParams({ strict: false });
-  const voteId = Number(params.voteId);
-
+  const voteId = Number(params.chatRoomId);
   const { data: header, isLoading: isHeaderLoading, isError: isHeaderError } = useChatRoomHeaderQuery(voteId);
 
   const {
