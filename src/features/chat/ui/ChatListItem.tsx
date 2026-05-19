@@ -1,23 +1,27 @@
-import type { ChatVoteItem } from "../model/types";
+import { formatRemainingTime, formatTimeLabel } from "../lib/formatChatTime";
+import type { ChatListItemResponse, ChatTabType } from "../model/types";
 
 interface ChatListItemProps {
-  item: ChatVoteItem;
+  item: ChatListItemResponse;
+  status: ChatTabType;
   onClick?: (id: number) => void;
 }
 
-export function ChatListItem({ item, onClick }: ChatListItemProps) {
+export function ChatListItem({ item, status, onClick }: ChatListItemProps) {
   const unreadLabel = item.unreadCount && item.unreadCount >= 300 ? "300+" : item.unreadCount;
+  const isEnded = status === "ENDED";
+  const isOngoing = status === "ONGOING";
 
   return (
     <button
       type="button"
-      onClick={() => onClick?.(item.id)}
+      onClick={() => onClick?.(item.voteId)}
       className="flex w-full gap-3 px-5 py-3 text-left border-b border-grey-divider"
     >
       <div className="relative h-[52px] w-[52px] shrink-0 overflow-hidden rounded-lg bg-grey-divider">
         <img src={item.thumbnailUrl} alt="" className="object-cover w-full h-full" />
 
-        {item.status === "ended" && (
+        {isEnded && (
           <div className="absolute inset-0 flex items-center justify-center bg-black/50">
             <span className="text-white text-label-l">종료</span>
           </div>
@@ -30,21 +34,26 @@ export function ChatListItem({ item, onClick }: ChatListItemProps) {
           <span className="shrink-0 text-label-l text-grey-light">{item.participantCount}</span>
         </div>
 
-        <p className="mt-1 truncate text-label-s text-grey-dark">{item.description}</p>
+        <p className="mt-1 truncate text-label-s text-grey-dark">
+          {item.optionA} vs {item.optionB}
+        </p>
+
         <p className="mt-1 truncate text-label-s text-grey-light">{item.lastMessage}</p>
 
-        {item.status === "active" && item.remainingTime && (
+        {isOngoing && (
           <div className="flex items-center gap-1 mt-2 text-label-s text-grey-light">
             <span>◷</span>
-            <span>{item.remainingTime}</span>
+            <span>{formatRemainingTime(item.endAt)}</span>
           </div>
         )}
       </div>
 
       <div className="flex flex-col items-end gap-4 shrink-0">
-        <span className="text-label-s text-grey-light">{item.timeLabel}</span>
+        <span className="text-label-s text-grey-light">
+          {formatTimeLabel(isOngoing ? item.lastMessageAt : item.endAt)}
+        </span>
 
-        {item.status === "active" && unreadLabel && (
+        {isOngoing && unreadLabel && (
           <span className="rounded-full bg-primary px-2 py-[2px] text-label-s text-white">{unreadLabel}</span>
         )}
       </div>

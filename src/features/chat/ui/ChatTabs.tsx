@@ -6,8 +6,8 @@ interface ChatTabsProps {
 }
 
 const tabs: Array<{ key: ChatTabType; label: string }> = [
-  { key: "active", label: "투표 진행 중" },
-  { key: "ended", label: "투표 종료" },
+  { key: "ONGOING", label: "투표 진행 중" },
+  { key: "ENDED", label: "투표 종료" },
 ];
 
 export function ChatTabs({ activeTab, onChangeTab }: ChatTabsProps) {
