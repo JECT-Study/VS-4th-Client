@@ -1,3 +1,4 @@
+import * as stompClient from "@base/api/stompClient";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { type TouchEvent, useCallback, useEffect, useRef, useState } from "react";
 import {
@@ -25,6 +26,11 @@ export function useImmersiveFeed(startVoteId?: number) {
   const nextCursorRef = useRef<number | null>(null);
   const isFetchingMore = useRef(false);
   const containerRef = useRef<HTMLElement | null>(null);
+
+  useEffect(() => {
+    stompClient.activate();
+    return () => { stompClient.deactivate(); };
+  }, []);
 
   useEffect(() => {
     if (!initialData) return;

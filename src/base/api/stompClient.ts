@@ -6,10 +6,10 @@ const client = new Client({
   reconnectDelay: 5000,
 });
 
-client.activate();
-
 export const subscribe = (destination: string, callback: (message: IMessage) => void): StompSubscription =>
   client.subscribe(destination, callback);
 
-export const activate = () => client.activate();
+export const activate = () => {
+  if (!client.active) client.activate();
+};
 export const deactivate = () => client.deactivate();
