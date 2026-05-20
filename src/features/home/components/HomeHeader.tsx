@@ -5,7 +5,7 @@ interface HomeHeaderProps {
 
 export function HomeHeader({ hasUnreadNotification = false, onClickNotification }: HomeHeaderProps) {
   return (
-    <header className="sticky top-0 z-20 flex items-center justify-between px-5 bg-white h-14">
+    <header className="fixed top-0 left-1/2 -translate-x-1/2 w-full max-w-md z-20 flex items-center justify-between px-5 bg-white h-14">
       <button type="button" aria-label="홈" className="flex items-center justify-center h-9 w-9">
         <img src="/assets/images/app/pwa-64x64.png" alt="VS" className="w-5 h-5" />
       </button>
