@@ -29,7 +29,9 @@ export function useImmersiveFeed(startVoteId?: number) {
 
   useEffect(() => {
     stompClient.activate();
-    return () => { stompClient.deactivate(); };
+    return () => {
+      stompClient.deactivate();
+    };
   }, []);
 
   useEffect(() => {
