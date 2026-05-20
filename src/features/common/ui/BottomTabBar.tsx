@@ -10,7 +10,7 @@ export function BottomTabBar() {
       <nav className="fixed bottom-0 z-20 grid w-full h-16 max-w-md grid-cols-4 pb-1 -translate-x-1/2 bg-white border-t left-1/2 border-grey-stroke">
         {bottomTabs.map((tab) => {
           // 현재 경로가 탭의 path로 시작하면 활성화된 것으로 간주 (예: /mypage/account 접속 시에도 마이 탭 활성화)
-          const isActive = tab.path === "/" ? currentPath === "/" : currentPath.startsWith(tab.path);
+          const isActive = currentPath.startsWith(tab.path);
           const iconSrc = isActive ? tab.activeIcon : tab.icon;
 
           return (
