@@ -15,6 +15,7 @@ import { Route as LoginRouteImport } from './../../pages/routes/login'
 import { Route as HomeRouteImport } from './../../pages/routes/home'
 import { Route as ChatRouteImport } from './../../pages/routes/chat'
 import { Route as IndexRouteImport } from './../../pages/routes/index'
+import { Route as MypageIndexRouteImport } from './../../pages/routes/mypage.index'
 import { Route as ImmersiveVotesIndexRouteImport } from './../../pages/routes/immersive-votes.index'
 import { Route as ChatIndexRouteImport } from './../../pages/routes/chat.index'
 import { Route as VotesVoteIdRouteImport } from './../../pages/routes/votes.$voteId'
@@ -52,6 +53,11 @@ const IndexRoute = IndexRouteImport.update({
   id: '/',
   path: '/',
   getParentRoute: () => rootRouteImport,
+} as any)
+const MypageIndexRoute = MypageIndexRouteImport.update({
+  id: '/',
+  path: '/',
+  getParentRoute: () => MypageRoute,
 } as any)
 const ImmersiveVotesIndexRoute = ImmersiveVotesIndexRouteImport.update({
   id: '/immersive-votes/',
@@ -103,12 +109,12 @@ export interface FileRoutesByFullPath {
   '/votes/$voteId': typeof VotesVoteIdRoute
   '/chat/': typeof ChatIndexRoute
   '/immersive-votes/': typeof ImmersiveVotesIndexRoute
+  '/mypage/': typeof MypageIndexRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/home': typeof HomeRoute
   '/login': typeof LoginRoute
-  '/mypage': typeof MypageRouteWithChildren
   '/signup': typeof SignupRoute
   '/chat/$chatRoomId': typeof ChatChatRoomIdRoute
   '/mypage/account': typeof MypageAccountRoute
@@ -117,6 +123,7 @@ export interface FileRoutesByTo {
   '/votes/$voteId': typeof VotesVoteIdRoute
   '/chat': typeof ChatIndexRoute
   '/immersive-votes': typeof ImmersiveVotesIndexRoute
+  '/mypage': typeof MypageIndexRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -133,6 +140,7 @@ export interface FileRoutesById {
   '/votes/$voteId': typeof VotesVoteIdRoute
   '/chat/': typeof ChatIndexRoute
   '/immersive-votes/': typeof ImmersiveVotesIndexRoute
+  '/mypage/': typeof MypageIndexRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -150,12 +158,12 @@ export interface FileRouteTypes {
     | '/votes/$voteId'
     | '/chat/'
     | '/immersive-votes/'
+    | '/mypage/'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
     | '/home'
     | '/login'
-    | '/mypage'
     | '/signup'
     | '/chat/$chatRoomId'
     | '/mypage/account'
@@ -164,6 +172,7 @@ export interface FileRouteTypes {
     | '/votes/$voteId'
     | '/chat'
     | '/immersive-votes'
+    | '/mypage'
   id:
     | '__root__'
     | '/'
@@ -179,6 +188,7 @@ export interface FileRouteTypes {
     | '/votes/$voteId'
     | '/chat/'
     | '/immersive-votes/'
+    | '/mypage/'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -235,6 +245,13 @@ declare module '@tanstack/react-router' {
       fullPath: '/'
       preLoaderRoute: typeof IndexRouteImport
       parentRoute: typeof rootRouteImport
+    }
+    '/mypage/': {
+      id: '/mypage/'
+      path: '/'
+      fullPath: '/mypage/'
+      preLoaderRoute: typeof MypageIndexRouteImport
+      parentRoute: typeof MypageRoute
     }
     '/immersive-votes/': {
       id: '/immersive-votes/'
@@ -304,12 +321,14 @@ interface MypageRouteChildren {
   MypageAccountRoute: typeof MypageAccountRoute
   MypageProfileRoute: typeof MypageProfileRoute
   MypageVotesRoute: typeof MypageVotesRoute
+  MypageIndexRoute: typeof MypageIndexRoute
 }
 
 const MypageRouteChildren: MypageRouteChildren = {
   MypageAccountRoute: MypageAccountRoute,
   MypageProfileRoute: MypageProfileRoute,
   MypageVotesRoute: MypageVotesRoute,
+  MypageIndexRoute: MypageIndexRoute,
 }
 
 const MypageRouteWithChildren =
