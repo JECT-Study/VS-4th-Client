@@ -25,7 +25,7 @@ export function HomePage() {
   };
 
   return (
-    <main className="pb-20 bg-white min-h-dvh">
+    <main className="pb-20 pt-14bg-white min-h-dvh">
       <HomeHeader hasUnreadNotification onClickNotification={handleClickNotification} />
 
       <TodayRecommendationSlider votes={todayRecommendations} onClickVote={handleClickVote} />
