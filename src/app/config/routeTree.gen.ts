@@ -19,6 +19,7 @@ import { Route as MypageIndexRouteImport } from './../../pages/routes/mypage.ind
 import { Route as ImmersiveVotesIndexRouteImport } from './../../pages/routes/immersive-votes.index'
 import { Route as ChatIndexRouteImport } from './../../pages/routes/chat.index'
 import { Route as VotesVoteIdRouteImport } from './../../pages/routes/votes.$voteId'
+import { Route as MypageWithdrawalRouteImport } from './../../pages/routes/mypage.withdrawal'
 import { Route as MypageVotesRouteImport } from './../../pages/routes/mypage.votes'
 import { Route as MypageProfileRouteImport } from './../../pages/routes/mypage.profile'
 import { Route as MypageAccountRouteImport } from './../../pages/routes/mypage.account'
@@ -74,6 +75,11 @@ const VotesVoteIdRoute = VotesVoteIdRouteImport.update({
   path: '/votes/$voteId',
   getParentRoute: () => rootRouteImport,
 } as any)
+const MypageWithdrawalRoute = MypageWithdrawalRouteImport.update({
+  id: '/withdrawal',
+  path: '/withdrawal',
+  getParentRoute: () => MypageRoute,
+} as any)
 const MypageVotesRoute = MypageVotesRouteImport.update({
   id: '/votes',
   path: '/votes',
@@ -106,6 +112,7 @@ export interface FileRoutesByFullPath {
   '/mypage/account': typeof MypageAccountRoute
   '/mypage/profile': typeof MypageProfileRoute
   '/mypage/votes': typeof MypageVotesRoute
+  '/mypage/withdrawal': typeof MypageWithdrawalRoute
   '/votes/$voteId': typeof VotesVoteIdRoute
   '/chat/': typeof ChatIndexRoute
   '/immersive-votes/': typeof ImmersiveVotesIndexRoute
@@ -120,6 +127,7 @@ export interface FileRoutesByTo {
   '/mypage/account': typeof MypageAccountRoute
   '/mypage/profile': typeof MypageProfileRoute
   '/mypage/votes': typeof MypageVotesRoute
+  '/mypage/withdrawal': typeof MypageWithdrawalRoute
   '/votes/$voteId': typeof VotesVoteIdRoute
   '/chat': typeof ChatIndexRoute
   '/immersive-votes': typeof ImmersiveVotesIndexRoute
@@ -137,6 +145,7 @@ export interface FileRoutesById {
   '/mypage/account': typeof MypageAccountRoute
   '/mypage/profile': typeof MypageProfileRoute
   '/mypage/votes': typeof MypageVotesRoute
+  '/mypage/withdrawal': typeof MypageWithdrawalRoute
   '/votes/$voteId': typeof VotesVoteIdRoute
   '/chat/': typeof ChatIndexRoute
   '/immersive-votes/': typeof ImmersiveVotesIndexRoute
@@ -155,6 +164,7 @@ export interface FileRouteTypes {
     | '/mypage/account'
     | '/mypage/profile'
     | '/mypage/votes'
+    | '/mypage/withdrawal'
     | '/votes/$voteId'
     | '/chat/'
     | '/immersive-votes/'
@@ -169,6 +179,7 @@ export interface FileRouteTypes {
     | '/mypage/account'
     | '/mypage/profile'
     | '/mypage/votes'
+    | '/mypage/withdrawal'
     | '/votes/$voteId'
     | '/chat'
     | '/immersive-votes'
@@ -185,6 +196,7 @@ export interface FileRouteTypes {
     | '/mypage/account'
     | '/mypage/profile'
     | '/mypage/votes'
+    | '/mypage/withdrawal'
     | '/votes/$voteId'
     | '/chat/'
     | '/immersive-votes/'
@@ -274,6 +286,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof VotesVoteIdRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/mypage/withdrawal': {
+      id: '/mypage/withdrawal'
+      path: '/withdrawal'
+      fullPath: '/mypage/withdrawal'
+      preLoaderRoute: typeof MypageWithdrawalRouteImport
+      parentRoute: typeof MypageRoute
+    }
     '/mypage/votes': {
       id: '/mypage/votes'
       path: '/votes'
@@ -321,6 +340,7 @@ interface MypageRouteChildren {
   MypageAccountRoute: typeof MypageAccountRoute
   MypageProfileRoute: typeof MypageProfileRoute
   MypageVotesRoute: typeof MypageVotesRoute
+  MypageWithdrawalRoute: typeof MypageWithdrawalRoute
   MypageIndexRoute: typeof MypageIndexRoute
 }
 
@@ -328,6 +348,7 @@ const MypageRouteChildren: MypageRouteChildren = {
   MypageAccountRoute: MypageAccountRoute,
   MypageProfileRoute: MypageProfileRoute,
   MypageVotesRoute: MypageVotesRoute,
+  MypageWithdrawalRoute: MypageWithdrawalRoute,
   MypageIndexRoute: MypageIndexRoute,
 }
 
