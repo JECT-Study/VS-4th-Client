@@ -1,5 +1,3 @@
-import { BottomTabBar } from "@/features/common/ui/BottomTabBar";
-import { useNavigate } from "@tanstack/react-router";
 import { HomeHeader } from "./components/HomeHeader";
 import { HotTopicTop3 } from "./components/HotTopicTop3";
 import { ScrollToTopButton } from "./components/ScrollToTopButton";
@@ -11,7 +9,6 @@ import { useScrollTopButton } from "./hooks/useScrollTopButton";
 import { useVoteFilter } from "./hooks/useVoteFilter";
 
 export function HomePage() {
-  const navigate = useNavigate();
   const { isVisible, scrollToTop } = useScrollTopButton();
   const { sortType, setSortType, excludeEnded, setExcludeEnded, filteredVotes } = useVoteFilter(allVotes);
 
@@ -25,10 +22,6 @@ export function HomePage() {
     console.log("notification");
     // TODO: 회원/비회원 및 읽음 여부에 따라 알림 페이지 분기
     // navigate({ to: "/notifications" });
-  };
-
-  const handleClickTab = (path: string) => {
-    navigate({ to: path });
   };
 
   return (
@@ -54,7 +47,6 @@ export function HomePage() {
 
       <ScrollToTopButton isVisible={isVisible} onClick={scrollToTop} />
 
-      <BottomTabBar activeTab="home" onClickTab={handleClickTab} />
     </main>
   );
 }

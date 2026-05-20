@@ -1,8 +1,5 @@
 import { useNavigate } from "@tanstack/react-router";
 import { useState } from "react";
-
-import { BottomTabBar } from "@/features/common/ui/BottomTabBar";
-
 import { useChatListQuery } from "../hooks/useChatListQuery";
 import type { ChatTabType } from "../model/types";
 import { ChatEmptyState } from "./ChatEmptyState";
@@ -49,13 +46,6 @@ export function ChatListPage() {
       )}
 
       {!isLoading && !isError && currentItems.length === 0 && <ChatEmptyState />}
-
-      <BottomTabBar
-        activeTab="chat"
-        onClickTab={(path) => {
-          navigate({ to: path });
-        }}
-      />
     </main>
   );
 }
