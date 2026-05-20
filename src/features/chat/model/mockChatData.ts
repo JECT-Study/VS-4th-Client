@@ -1,171 +1,102 @@
-import type { ChatRoomDetail, ChatVoteItem } from "./types";
+import type {
+  ChatListItemResponse,
+  ChatRoomHeaderResponse,
+  ChatGaugeResponse,
+  ChatMessagesResponse
+} from "./types";
 
-export const activeChatVotes: ChatVoteItem[] = [
+// 1. 진행 중인 채팅 목록 (ChatListItemResponse 규격 적용)
+export const activeChatVotes: ChatListItemResponse[] = [
   {
-    id: 7,
+    voteId: 7,
     title: "직장인 점심시간 혼밥 vs...",
-    description: "혼밥이 편하다 vs 그래도 밥은 같이 먹는...",
     thumbnailUrl: "https://images.unsplash.com/photo-1517248135467-4c7edcad34c4?w=120&auto=format&fit=crop",
-    lastMessage: "팀끼리먹는다거나 친한 사람이랑만 먹을수있는 분...",
-    remainingTime: "23:47:45",
+    optionA: "혼밥이 편하다",
+    optionB: "그래도 밥은 같이 먹는...",
     participantCount: 23,
+    lastMessage: "팀끼리먹는다거나 친한 사람이랑만 먹을수있는 분...",
+    lastMessageAt: "19:51", // 예전 timeLabel
+    endAt: "2026-05-21T23:59:59Z", // 예전 remainingTime 대신 실제 날짜 포맷 사용
     unreadCount: 51,
-    timeLabel: "19:51",
-    status: "active",
   },
   {
-    id: 8,
+    voteId: 8,
     title: "공부 장소 어디가 제일 집중...",
-    description: "집 vs 독서실",
     thumbnailUrl: "https://images.unsplash.com/photo-1522202176988-66273c2fd55f?w=120&auto=format&fit=crop",
-    lastMessage: "쉬는 공간이랑 공부하는 공간을 분리하는게 좋더...",
-    remainingTime: "15:42:19",
+    optionA: "집",
+    optionB: "독서실",
     participantCount: 8,
+    lastMessage: "쉬는 공간이랑 공부하는 공간을 분리하는게 좋더...",
+    lastMessageAt: "15:10",
+    endAt: "2026-05-21T15:42:19Z",
     unreadCount: 15,
-    timeLabel: "15:10",
-    status: "active",
-  },
-  {
-    id: 10,
-    title: "대기업 무급 인턴",
-    description: "한다 vs 안한다",
-    thumbnailUrl: "https://images.unsplash.com/photo-1486406146926-c627a92ad1ab?w=120&auto=format&fit=crop",
-    lastMessage: "어차피 인턴은 월급 얼마 안됨 그냥 이력서에 대기...",
-    remainingTime: "15:42:14",
-    participantCount: 48,
-    unreadCount: 74,
-    timeLabel: "14:05",
-    status: "active",
-  },
-  {
-    id: 11,
-    title: "연봉은 비슷한데 야근 많...",
-    description: "야근 많은 대기업 vs 야근없는 중소",
-    thumbnailUrl: "https://images.unsplash.com/photo-1497366216548-37526070297c?w=120&auto=format&fit=crop",
-    lastMessage: "대기업다녀봤자 언제 잘릴지 모르는데 워라밸이라...",
-    remainingTime: "15:42:23",
-    participantCount: 165,
-    unreadCount: 300,
-    timeLabel: "09:11",
-    status: "active",
-  },
-  {
-    id: 12,
-    title: "헬스장 PT 등록할까 말까",
-    description: "해라 vs 하지마라",
-    thumbnailUrl: "https://images.unsplash.com/photo-1571019613454-1cb2f99b2d8b?w=120&auto=format&fit=crop",
-    lastMessage: "진짜 하루도 안빠지고 갈 자신있으면 하고 아니면...",
-    remainingTime: "15:42:23",
-    participantCount: 5,
-    unreadCount: 4,
-    timeLabel: "03:36",
-    status: "active",
   },
 ];
 
-export const endedChatVotes: ChatVoteItem[] = [
+// 2. 종료된 채팅 목록
+export const endedChatVotes: ChatListItemResponse[] = [
   {
-    id: 9,
+    voteId: 9,
     title: "소개팅 전 SNS 체크하기",
-    description: "찬성 vs 반대",
     thumbnailUrl: "https://images.unsplash.com/photo-1511988617509-a57c8a288659?w=120&auto=format&fit=crop",
-    lastMessage: "팀끼리먹는다거나 친한 사람이랑만 먹을수있는 분...",
+    optionA: "찬성",
+    optionB: "반대",
     participantCount: 23,
-    timeLabel: "04.20",
-    status: "ended",
-  },
-  {
-    id: 8,
-    title: "공부 장소 어디가 제일 집중...",
-    description: "집 vs 독서실",
-    thumbnailUrl: "https://images.unsplash.com/photo-1522202176988-66273c2fd55f?w=120&auto=format&fit=crop",
-    lastMessage: "쉬는 공간이랑 공부하는 공간을 분리하는게 좋더...",
-    participantCount: 8,
-    timeLabel: "04.19",
-    status: "ended",
-  },
-  {
-    id: 10,
-    title: "대기업 무급 인턴",
-    description: "한다 vs 안한다",
-    thumbnailUrl: "https://images.unsplash.com/photo-1486406146926-c627a92ad1ab?w=120&auto=format&fit=crop",
-    lastMessage: "어차피 인턴은 월급 얼마 안됨 그냥 이력서에 대기...",
-    participantCount: 48,
-    timeLabel: "04.15",
-    status: "ended",
-  },
-  {
-    id: 11,
-    title: "연봉은 비슷한데 야근 많...",
-    description: "야근 많은 대기업 vs 야근없는 중소",
-    thumbnailUrl: "https://images.unsplash.com/photo-1497366216548-37526070297c?w=120&auto=format&fit=crop",
-    lastMessage: "대기업다녀봤자 언제 잘릴지 모르는데 워라밸이라...",
-    participantCount: 165,
-    timeLabel: "04.07",
-    status: "ended",
-  },
-  {
-    id: 12,
-    title: "헬스장 PT 등록할까 말까",
-    description: "해라 vs 하지마라",
-    thumbnailUrl: "https://images.unsplash.com/photo-1571019613454-1cb2f99b2d8b?w=120&auto=format&fit=crop",
-    lastMessage: "진짜 하루도 안빠지고 갈 자신있으면 하고 아니면...",
-    participantCount: 5,
-    timeLabel: "04.07",
-    status: "ended",
+    lastMessage: "팀끼리먹는다거나 친한 사람이랑만 먹을수있는 분...",
+    lastMessageAt: "2026-04-20T12:00:00Z",
+    endAt: "2026-04-20T00:00:00Z",
+    unreadCount: 0,
   },
 ];
 
-export const chatRoomDetail: ChatRoomDetail = {
-  id: 7,
+// 3. 채팅방 상세 - 헤더 정보 (ChatRoomHeaderResponse 규격 적용)
+export const mockChatRoomHeader: ChatRoomHeaderResponse = {
+  voteId: 7,
   title: "올해 물가가 더 오를까요 안 오를...",
+  status: "ONGOING",
   participantCount: 25,
-  remainingTime: "13:01:48",
-  status: "active",
-  options: [
-    {
-      label: "오른다",
-      ratio: 64,
-      color: "orange",
-    },
-    {
-      label: "떨어진다",
-      ratio: 36,
-      color: "purple",
-    },
-  ],
+  optionA: "오른다",
+  optionB: "떨어진다",
+  endAt: "2026-05-21T23:59:59Z",
+};
+
+// 4. 채팅방 상세 - 게이지 바 정보 (ChatGaugeResponse 규격 적용)
+export const mockChatGauge: ChatGaugeResponse = {
+  optionARatio: 64,
+  optionBRatio: 36,
+  participantCount: 25,
+};
+
+// 5. 채팅방 상세 - 메시지 목록 (ChatMessagesResponse 규격 적용)
+export const mockChatMessages: ChatMessagesResponse = {
+  hasNext: false,
+  nextCursor: null,
   messages: [
     {
-      id: 1,
-      nickname: "초원 위의 말_45",
-      optionLabel: "떨어진다",
-      optionColor: "purple",
-      message: "저는 내릴 거라고 봐요 정부에서 물가 안정화 정책 많이 내놓고 있잖나요",
-      time: "14:15",
+      messageId: 1,
+      content: "저는 내릴 거라고 봐요 정부에서 물가 안정화 정책 많이 내놓고 있잖나요",
+      sentAt: "14:15",
+      senderNickname: "초원 위의 말_45",
+      senderProfileIcon: "default-icon.png",
+      senderVoteOption: "B", // 떨어진다 (Option B)
+      isMine: false,
     },
     {
-      id: 2,
-      nickname: "초원 위의 양_764",
-      optionLabel: "오른다",
-      optionColor: "orange",
-      message: "맞아요 국제 유가도 계속 오르는 추세고",
-      time: "14:16",
+      messageId: 2,
+      content: "맞아요 국제 유가도 계속 오르는 추세고",
+      sentAt: "14:16",
+      senderNickname: "초원 위의 양_764",
+      senderProfileIcon: "default-icon.png",
+      senderVoteOption: "A", // 오른다 (Option A)
+      isMine: false,
     },
     {
-      id: 3,
-      nickname: "슈퍼강아지_485",
-      optionLabel: "오른다",
-      optionColor: "orange",
-      message: "올해는 정말 어려울 것 같네요 ㅜㅜ",
-      time: "14:16",
-    },
-    {
-      id: 4,
-      nickname: "슈퍼강아지_240",
-      optionLabel: "오른다",
-      optionColor: "orange",
-      message: "그래도 희망을 가져봐요!",
-      time: "14:17",
+      messageId: 4,
+      content: "그래도 희망을 가져봐요!",
+      sentAt: "14:17",
+      senderNickname: "나",
+      senderProfileIcon: "my-icon.png",
+      senderVoteOption: "A",
       isMine: true,
     },
   ],
