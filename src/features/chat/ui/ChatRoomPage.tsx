@@ -3,10 +3,12 @@ import { ChatInputBar } from "./ChatInputBar";
 import { ChatMessageList } from "./ChatMessageList";
 import { ChatRoomHeader } from "./ChatRoomHeader";
 import { VoteSummaryCard } from "./VoteSummaryCard";
-import { useChatGaugeQuery } from "../hooks/useChatGaugeQuery";
-import { useChatMessagesQuery } from "../hooks/useChatMessagesQuery";
-import { useChatRoomHeaderQuery } from "../hooks/useChatRoomHeaderQuery";
-import { useSendChatMessageMutation } from "../hooks/useSendChatMessageMutation";
+
+import { useChatGaugeQuery } from "../api/chatGaugeQuery";
+import { useChatMessagesQuery } from "../api/chatMessagesQuery";
+import { useChatRoomHeaderQuery } from "../api/chatRoomHeaderQuery";
+import { useSendChatMessageMutation } from "../api/sendChatMessageMutation";
+import { useChatWebSocket } from "../model/useChatWebSocket";
 
 export function ChatRoomPage() {
   const params = useParams({ strict: false });
@@ -25,6 +27,9 @@ export function ChatRoomPage() {
   const { data: messagesData, isLoading: isMessagesLoading, isError: isMessagesError } = useChatMessagesQuery(voteId);
 
   const sendMessageMutation = useSendChatMessageMutation(voteId);
+
+  // 실시간 웹소켓 구독 시작
+  useChatWebSocket(voteId);
 
   const isLoading = isHeaderLoading || isGaugeLoading || isMessagesLoading;
   const isError = isHeaderError || isGaugeError || isMessagesError;

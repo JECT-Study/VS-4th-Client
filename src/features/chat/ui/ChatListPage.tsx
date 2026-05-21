@@ -1,6 +1,6 @@
 import { useNavigate } from "@tanstack/react-router";
 import { useState } from "react";
-import { useChatListQuery } from "../hooks/useChatListQuery";
+import { useChatListQuery } from "../api/chatListQuery";
 import type { ChatTabType } from "../model/types";
 import { ChatEmptyState } from "./ChatEmptyState";
 import { ChatList } from "./ChatList";
