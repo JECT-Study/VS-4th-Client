@@ -159,14 +159,14 @@ export const bottomTabs: BottomTabItem[] = [
   {
     key: "home",
     label: "홈",
-    path: "/",
+    path: "/home",
     icon: "/assets/icons/home.svg",
     activeIcon: "/assets/icons/home-active.svg",
   },
   {
     key: "vote",
-    label: "VOTE",
-    path: "/vote",
+    label: "몰입형 투표",
+    path: "/immersive-votes",
     icon: "/assets/icons/vote.svg",
     activeIcon: "/assets/icons/vote-active.svg",
   },
@@ -180,7 +180,7 @@ export const bottomTabs: BottomTabItem[] = [
   {
     key: "my",
     label: "마이",
-    path: "/my",
+    path: "/mypage",
     icon: "/assets/icons/my.svg",
     activeIcon: "/assets/icons/my-active.svg",
   },

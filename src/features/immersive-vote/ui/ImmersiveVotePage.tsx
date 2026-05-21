@@ -1,4 +1,3 @@
-import { BottomTabBar } from "@features/common/ui/BottomTabBar";
 import { useSearch } from "@tanstack/react-router";
 import { useImmersiveFeed } from "../model/useImmersiveFeed";
 import { ImmersiveVoteCard } from "./ImmersiveVoteCard";
@@ -44,7 +43,6 @@ export function ImmersiveVotePage() {
           <ImmersiveVoteCard key={`${vote.voteId}-${index}`} vote={vote} updateVote={updateVote} />
         ))}
       </div>
-      <BottomTabBar activeTab="vote" />
     </main>
   );
 }

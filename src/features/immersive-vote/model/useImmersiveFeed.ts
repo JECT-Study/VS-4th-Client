@@ -36,14 +36,18 @@ export function useImmersiveFeed(startVoteId?: number) {
 
   useEffect(() => {
     if (!initialData) return;
-    setVotes(initialData.votes);
-    nextCursorRef.current = initialData.nextCursor;
+    // 1. 방어 코드: initialData.votes가 없더라도 항상 배열을 유지하도록 보장합니다.
+    setVotes(initialData.votes ?? []);
+    nextCursorRef.current = initialData.nextCursor ?? null;
   }, [initialData]);
 
-  const feedLength = votes.length;
+  // 2. 방어 코드: votes가 비정상적인 상태여도 feedLength가 undefined가 되지 않게 기본값 0 할당
+  const feedLength = votes?.length ?? 0;
   const currentIndex = feedLength === 0 ? 0 : ((trackIndex % feedLength) + feedLength) % feedLength;
-  const currentVote = votes[currentIndex] ?? votes[0];
-  const displayedVotes = [...votes, ...votes];
+
+  // 3. 방어 코드: votes가 빈 배열일 경우 undefined를 안전하게 반환
+  const currentVote = (votes && votes[currentIndex]) ?? (votes && votes[0]);
+  const displayedVotes = votes ? [...votes, ...votes] : [];
 
   useEffect(() => {
     if (isFetchingMore.current || !nextCursorRef.current) return;
@@ -52,28 +56,29 @@ export function useImmersiveFeed(startVoteId?: number) {
     isFetchingMore.current = true;
     const cursor = nextCursorRef.current;
     queryClient
-      .fetchQuery(immersiveFeedQueryOptions(cursor))
-      .then((result) => {
-        setVotes((prev) => [...prev, ...result.votes]);
-        nextCursorRef.current = result.nextCursor;
-      })
-      .catch(() => {})
-      .finally(() => {
-        isFetchingMore.current = false;
-      });
+        .fetchQuery(immersiveFeedQueryOptions(cursor))
+        .then((result) => {
+          // 4. 추가 로드 시에도 방어 코드 적용
+          setVotes((prev) => [...prev, ...(result.votes ?? [])]);
+          nextCursorRef.current = result.nextCursor ?? null;
+        })
+        .catch(() => {})
+        .finally(() => {
+          isFetchingMore.current = false;
+        });
   }, [currentIndex, feedLength, queryClient]);
 
   const updateVote = useCallback(
-    (voteId: number, updater: (vote: ImmersiveFeedItem) => ImmersiveFeedItem) => {
-      const updateVotes = (votes: ImmersiveFeedItem[]) =>
-        votes.map((vote) => (vote.voteId === voteId ? updater(vote) : vote));
+      (voteId: number, updater: (vote: ImmersiveFeedItem) => ImmersiveFeedItem) => {
+        const updateVotes = (votesList: ImmersiveFeedItem[]) =>
+            (votesList ?? []).map((vote) => (vote.voteId === voteId ? updater(vote) : vote));
 
-      setVotes(updateVotes);
-      queryClient.setQueriesData<ImmersiveFeedResponse>({ queryKey: immersiveFeedQueryKey }, (old) =>
-        old ? { ...old, votes: updateVotes(old.votes) } : old,
-      );
-    },
-    [queryClient],
+        setVotes(updateVotes);
+        queryClient.setQueriesData<ImmersiveFeedResponse>({ queryKey: immersiveFeedQueryKey }, (old) =>
+            old ? { ...old, votes: updateVotes(old.votes) } : old,
+        );
+      },
+      [queryClient],
   );
 
   const goToNextVote = useCallback(() => {
@@ -91,22 +96,20 @@ export function useImmersiveFeed(startVoteId?: number) {
   }, []);
 
   const handleTouchEnd = useCallback(
-    (event: TouchEvent) => {
-      if (touchStartY.current === null) return;
-      const touchEndY = event.changedTouches[0]?.clientY;
-      if (touchEndY === undefined) return;
+      (event: TouchEvent) => {
+        if (touchStartY.current === null) return;
+        const touchEndY = event.changedTouches[0]?.clientY;
+        if (touchEndY === undefined) return;
 
-      const deltaY = touchEndY - touchStartY.current;
-      if (deltaY < -SWIPE_UP_THRESHOLD) {
-        goToNextVote();
-      }
-      touchStartY.current = null;
-    },
-    [goToNextVote],
+        const deltaY = touchEndY - touchStartY.current;
+        if (deltaY < -SWIPE_UP_THRESHOLD) {
+          goToNextVote();
+        }
+        touchStartY.current = null;
+      },
+      [goToNextVote],
   );
 
-  // React onWheel JSX 핸들러는 passive: true로 등록되어 preventDefault가 무시됨.
-  // 페이지 스크롤을 막으려면 DOM에 passive: false로 직접 등록해야 함.
   useEffect(() => {
     const el = containerRef.current;
     if (!el || feedLength === 0) return;
@@ -125,8 +128,7 @@ export function useImmersiveFeed(startVoteId?: number) {
 
     setIsTransitionEnabled(false);
     setTrackIndex(currentIndex);
-    // transform 제거 → transition 비활성화 → 인덱스 리셋이 한 프레임 내에 완료된 뒤
-    // 다음 프레임에 transition을 다시 활성화해야 시각적 순간이동이 발생하지 않음.
+
     window.requestAnimationFrame(() => {
       window.requestAnimationFrame(() => setIsTransitionEnabled(true));
     });

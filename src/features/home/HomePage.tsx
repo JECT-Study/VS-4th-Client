@@ -1,5 +1,3 @@
-import { BottomTabBar } from "@/features/common/ui/BottomTabBar";
-import { useNavigate } from "@tanstack/react-router";
 import { HomeHeader } from "./components/HomeHeader";
 import { HotTopicTop3 } from "./components/HotTopicTop3";
 import { ScrollToTopButton } from "./components/ScrollToTopButton";
@@ -11,7 +9,6 @@ import { useScrollTopButton } from "./hooks/useScrollTopButton";
 import { useVoteFilter } from "./hooks/useVoteFilter";
 
 export function HomePage() {
-  const navigate = useNavigate();
   const { isVisible, scrollToTop } = useScrollTopButton();
   const { sortType, setSortType, excludeEnded, setExcludeEnded, filteredVotes } = useVoteFilter(allVotes);
 
@@ -27,12 +24,8 @@ export function HomePage() {
     // navigate({ to: "/notifications" });
   };
 
-  const handleClickTab = (path: string) => {
-    navigate({ to: path });
-  };
-
   return (
-    <main className="pb-20 bg-white min-h-dvh">
+    <main className="min-h-dvh bg-white pt-14 pb-20">
       <HomeHeader hasUnreadNotification onClickNotification={handleClickNotification} />
 
       <TodayRecommendationSlider votes={todayRecommendations} onClickVote={handleClickVote} />
@@ -54,7 +47,6 @@ export function HomePage() {
 
       <ScrollToTopButton isVisible={isVisible} onClick={scrollToTop} />
 
-      <BottomTabBar activeTab="home" onClickTab={handleClickTab} />
     </main>
   );
 }
