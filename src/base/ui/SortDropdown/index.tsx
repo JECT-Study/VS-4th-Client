@@ -17,21 +17,6 @@ const EASING = "cubic-bezier(0.22, 1, 0.36, 1)";
 const DURATION_IN = 220;
 const DURATION_OUT = 150;
 
-function ChevronIcon({ open }: { open: boolean }) {
-  return (
-    <svg
-      width="14"
-      height="14"
-      viewBox="0 0 14 14"
-      fill="none"
-      aria-hidden="true"
-      className={clsx("flex-shrink-0 transition-transform duration-200", open && "rotate-180")}
-    >
-      <path d="M3 5l4 4 4-4" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
-    </svg>
-  );
-}
-
 function SortDropdown<T extends string = string>({ options, value, onChange, className }: SortDropdownProps<T>) {
   const [isOpen, setIsOpen] = useState(false);
   const [isClosing, setIsClosing] = useState(false);
