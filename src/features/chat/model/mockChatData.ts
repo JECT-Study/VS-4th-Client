@@ -1,9 +1,4 @@
-import type {
-  ChatListItemResponse,
-  ChatRoomHeaderResponse,
-  ChatGaugeResponse,
-  ChatMessagesResponse
-} from "./types";
+import type { ChatListItemResponse, ChatRoomHeaderResponse, ChatGaugeResponse, ChatMessagesResponse } from "./types";
 
 // 1. 진행 중인 채팅 목록 (ChatListItemResponse 규격 적용)
 export const activeChatVotes: ChatListItemResponse[] = [
