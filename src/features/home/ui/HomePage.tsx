@@ -1,12 +1,12 @@
-import { HomeHeader } from "./HomeHeader.tsx";
-import { HotTopicTop3 } from "./HotTopicTop3.tsx";
-import { ScrollToTopButton } from "./ScrollToTopButton.tsx";
-import { TodayRecommendationSlider } from "./TodayRecommendationSlider.tsx";
-import { VoteFeedList } from "./VoteFeedList.tsx";
-import { VoteFilterBar } from "./VoteFilterBar.tsx";
-import { allVotes, hotTopicVotes, todayRecommendations } from "../config/mockHomeData.ts";
-import { useScrollTopButton } from "../model/useScrollTopButton.ts";
-import { useVoteFilter } from "../model/useVoteFilter.ts";
+import { HomeHeader } from "@features/home/ui/HomeHeader.tsx";
+import { HotTopicTop3 } from "@features/home/ui/HotTopicTop3.tsx";
+import { ScrollToTopButton } from "@features/home/ui/ScrollToTopButton.tsx";
+import { TodayRecommendationSlider } from "@features/home/ui/TodayRecommendationSlider.tsx";
+import { VoteFeedList } from "@features/home/ui/VoteFeedList.tsx";
+import { VoteFilterBar } from "@features/home/ui/VoteFilterBar.tsx";
+import { allVotes, hotTopicVotes, todayRecommendations } from "@features/home/config/mockHomeData.ts";
+import { useScrollTopButton } from "@features/home/model/useScrollTopButton.ts";
+import { useVoteFilter } from "@features/home/model/useVoteFilter.ts";
 import {useNavigate} from "@tanstack/react-router";
 
 export function HomePage() {
