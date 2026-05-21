@@ -37,12 +37,12 @@ export function NotificationPage() {
     const [notifications, setNotifications] = useState(MOCK_NOTIFICATIONS);
 
     const handleReadAll = () => {
-        setNotifications(notifications.map(n => ({ ...n, isRead: true })));
+        setNotifications((prev) => prev.map((n) => ({ ...n, isRead: true })));
     };
 
     const handleClickItem = (id: number) => {
         // 1. 해당 알림 읽음 처리 (API 호출)
-        setNotifications(notifications.map(n => n.id === id ? { ...n, isRead: true } : n));
+        setNotifications((prev) => prev.map((n) => n.id === id ? { ...n, isRead: true } : n));
         // 2. 해당 투표 결과 페이지로 이동
         console.log(`Maps to vote result: ${id}`);
     };
