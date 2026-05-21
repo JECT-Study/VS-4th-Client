@@ -72,10 +72,7 @@ export function VoteOptionsSection({
             <circle cx="8" cy="8" r="5.4" stroke="currentColor" strokeWidth="1.2" />
             <path d="M8 5V8L10.2 10.2" stroke="currentColor" strokeWidth="1.2" strokeLinecap="round" />
           </svg>
-          <span className="flex items-center gap-[3px]">
-            {endAt && <VoteTimeRemaining endAt={endAt} endLabel="투표 종료" />}
-            <span className="text-label-s">남음</span>
-          </span>
+          {endAt && <VoteTimeRemaining endAt={endAt} />}
         </span>
       </div>
     </div>

@@ -3,7 +3,6 @@ import {
   type ClosedVoteSortType,
   closedParticipatedVotesQueryOptions,
 } from "@features/mypage/api/participatedVotesQuery";
-import { VoteTimeRemaining } from "@features/votes/ui/VoteTimeRemaining";
 import { useQuery } from "@tanstack/react-query";
 import { Link } from "@tanstack/react-router";
 import { useState } from "react";
@@ -71,7 +70,7 @@ export function ClosedParticipatedVoteList() {
                     <circle cx="8" cy="8" r="5.4" stroke="currentColor" strokeWidth="1.2" />
                     <path d="M8 5V8L10.2 10.2" stroke="currentColor" strokeWidth="1.2" strokeLinecap="round" />
                   </svg>
-                  <VoteTimeRemaining endAt={item.endAt} />
+                  <span className="text-label-s">00:00:00</span>
                 </div>
               </div>
 
