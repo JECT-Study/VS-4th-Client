@@ -21,7 +21,7 @@ function RouteComponent() {
 
       {isPending ? <Spinner /> : user ? <MemberMyPage user={user} /> : <GuestMyPage />}
 
-      <BottomTabBar activeTab="my" />
+      <BottomTabBar />
     </div>
   );
 }
