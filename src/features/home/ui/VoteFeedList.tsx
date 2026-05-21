@@ -1,5 +1,5 @@
-import type { VoteItem } from "../types/home";
-import { VoteCard } from "./VoteCard";
+import type { VoteItem } from "../model/home.ts";
+import { VoteCard } from "./VoteCard.tsx";
 
 interface VoteFeedListProps {
   votes: VoteItem[];

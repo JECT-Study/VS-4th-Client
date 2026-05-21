@@ -1,4 +1,4 @@
-import type { VoteItem } from "../types/home";
+import type { VoteItem } from "../model/home.ts";
 
 interface VoteCardProps {
   vote: VoteItem;

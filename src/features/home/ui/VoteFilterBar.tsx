@@ -1,4 +1,4 @@
-import type { VoteSortType } from "../types/home";
+import type { VoteSortType } from "../model/home.ts";
 
 interface VoteFilterBarProps {
   sortType: VoteSortType;
