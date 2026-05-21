@@ -9,38 +9,247 @@
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
 import { Route as rootRouteImport } from './../../pages/routes/__root'
+import { Route as SignupRouteImport } from './../../pages/routes/signup'
+import { Route as NotificationRouteImport } from './../../pages/routes/notification'
+import { Route as MypageRouteImport } from './../../pages/routes/mypage'
 import { Route as LoginRouteImport } from './../../pages/routes/login'
+import { Route as HomeRouteImport } from './../../pages/routes/home'
+import { Route as ChatRouteImport } from './../../pages/routes/chat'
+import { Route as IndexRouteImport } from './../../pages/routes/index'
+import { Route as MypageIndexRouteImport } from './../../pages/routes/mypage.index'
+import { Route as ImmersiveVotesIndexRouteImport } from './../../pages/routes/immersive-votes.index'
+import { Route as ChatIndexRouteImport } from './../../pages/routes/chat.index'
+import { Route as VotesVoteIdRouteImport } from './../../pages/routes/votes.$voteId'
+import { Route as MypageWithdrawalRouteImport } from './../../pages/routes/mypage.withdrawal'
+import { Route as MypageVotesRouteImport } from './../../pages/routes/mypage.votes'
+import { Route as MypageProfileRouteImport } from './../../pages/routes/mypage.profile'
+import { Route as MypageAccountRouteImport } from './../../pages/routes/mypage.account'
+import { Route as ChatChatRoomIdRouteImport } from './../../pages/routes/chat.$chatRoomId'
 
+const SignupRoute = SignupRouteImport.update({
+  id: '/signup',
+  path: '/signup',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const NotificationRoute = NotificationRouteImport.update({
+  id: '/notification',
+  path: '/notification',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const MypageRoute = MypageRouteImport.update({
+  id: '/mypage',
+  path: '/mypage',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const LoginRoute = LoginRouteImport.update({
   id: '/login',
   path: '/login',
   getParentRoute: () => rootRouteImport,
 } as any)
+const HomeRoute = HomeRouteImport.update({
+  id: '/home',
+  path: '/home',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ChatRoute = ChatRouteImport.update({
+  id: '/chat',
+  path: '/chat',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const IndexRoute = IndexRouteImport.update({
+  id: '/',
+  path: '/',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const MypageIndexRoute = MypageIndexRouteImport.update({
+  id: '/',
+  path: '/',
+  getParentRoute: () => MypageRoute,
+} as any)
+const ImmersiveVotesIndexRoute = ImmersiveVotesIndexRouteImport.update({
+  id: '/immersive-votes/',
+  path: '/immersive-votes/',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ChatIndexRoute = ChatIndexRouteImport.update({
+  id: '/',
+  path: '/',
+  getParentRoute: () => ChatRoute,
+} as any)
+const VotesVoteIdRoute = VotesVoteIdRouteImport.update({
+  id: '/votes/$voteId',
+  path: '/votes/$voteId',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const MypageWithdrawalRoute = MypageWithdrawalRouteImport.update({
+  id: '/withdrawal',
+  path: '/withdrawal',
+  getParentRoute: () => MypageRoute,
+} as any)
+const MypageVotesRoute = MypageVotesRouteImport.update({
+  id: '/votes',
+  path: '/votes',
+  getParentRoute: () => MypageRoute,
+} as any)
+const MypageProfileRoute = MypageProfileRouteImport.update({
+  id: '/profile',
+  path: '/profile',
+  getParentRoute: () => MypageRoute,
+} as any)
+const MypageAccountRoute = MypageAccountRouteImport.update({
+  id: '/account',
+  path: '/account',
+  getParentRoute: () => MypageRoute,
+} as any)
+const ChatChatRoomIdRoute = ChatChatRoomIdRouteImport.update({
+  id: '/$chatRoomId',
+  path: '/$chatRoomId',
+  getParentRoute: () => ChatRoute,
+} as any)
 
 export interface FileRoutesByFullPath {
+  '/': typeof IndexRoute
+  '/chat': typeof ChatRouteWithChildren
+  '/home': typeof HomeRoute
   '/login': typeof LoginRoute
+  '/mypage': typeof MypageRouteWithChildren
+  '/notification': typeof NotificationRoute
+  '/signup': typeof SignupRoute
+  '/chat/$chatRoomId': typeof ChatChatRoomIdRoute
+  '/mypage/account': typeof MypageAccountRoute
+  '/mypage/profile': typeof MypageProfileRoute
+  '/mypage/votes': typeof MypageVotesRoute
+  '/mypage/withdrawal': typeof MypageWithdrawalRoute
+  '/votes/$voteId': typeof VotesVoteIdRoute
+  '/chat/': typeof ChatIndexRoute
+  '/immersive-votes/': typeof ImmersiveVotesIndexRoute
+  '/mypage/': typeof MypageIndexRoute
 }
 export interface FileRoutesByTo {
+  '/': typeof IndexRoute
+  '/home': typeof HomeRoute
   '/login': typeof LoginRoute
+  '/notification': typeof NotificationRoute
+  '/signup': typeof SignupRoute
+  '/chat/$chatRoomId': typeof ChatChatRoomIdRoute
+  '/mypage/account': typeof MypageAccountRoute
+  '/mypage/profile': typeof MypageProfileRoute
+  '/mypage/votes': typeof MypageVotesRoute
+  '/mypage/withdrawal': typeof MypageWithdrawalRoute
+  '/votes/$voteId': typeof VotesVoteIdRoute
+  '/chat': typeof ChatIndexRoute
+  '/immersive-votes': typeof ImmersiveVotesIndexRoute
+  '/mypage': typeof MypageIndexRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
+  '/': typeof IndexRoute
+  '/chat': typeof ChatRouteWithChildren
+  '/home': typeof HomeRoute
   '/login': typeof LoginRoute
+  '/mypage': typeof MypageRouteWithChildren
+  '/notification': typeof NotificationRoute
+  '/signup': typeof SignupRoute
+  '/chat/$chatRoomId': typeof ChatChatRoomIdRoute
+  '/mypage/account': typeof MypageAccountRoute
+  '/mypage/profile': typeof MypageProfileRoute
+  '/mypage/votes': typeof MypageVotesRoute
+  '/mypage/withdrawal': typeof MypageWithdrawalRoute
+  '/votes/$voteId': typeof VotesVoteIdRoute
+  '/chat/': typeof ChatIndexRoute
+  '/immersive-votes/': typeof ImmersiveVotesIndexRoute
+  '/mypage/': typeof MypageIndexRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/login'
+  fullPaths:
+    | '/'
+    | '/chat'
+    | '/home'
+    | '/login'
+    | '/mypage'
+    | '/notification'
+    | '/signup'
+    | '/chat/$chatRoomId'
+    | '/mypage/account'
+    | '/mypage/profile'
+    | '/mypage/votes'
+    | '/mypage/withdrawal'
+    | '/votes/$voteId'
+    | '/chat/'
+    | '/immersive-votes/'
+    | '/mypage/'
   fileRoutesByTo: FileRoutesByTo
-  to: '/login'
-  id: '__root__' | '/login'
+  to:
+    | '/'
+    | '/home'
+    | '/login'
+    | '/notification'
+    | '/signup'
+    | '/chat/$chatRoomId'
+    | '/mypage/account'
+    | '/mypage/profile'
+    | '/mypage/votes'
+    | '/mypage/withdrawal'
+    | '/votes/$voteId'
+    | '/chat'
+    | '/immersive-votes'
+    | '/mypage'
+  id:
+    | '__root__'
+    | '/'
+    | '/chat'
+    | '/home'
+    | '/login'
+    | '/mypage'
+    | '/notification'
+    | '/signup'
+    | '/chat/$chatRoomId'
+    | '/mypage/account'
+    | '/mypage/profile'
+    | '/mypage/votes'
+    | '/mypage/withdrawal'
+    | '/votes/$voteId'
+    | '/chat/'
+    | '/immersive-votes/'
+    | '/mypage/'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
+  IndexRoute: typeof IndexRoute
+  ChatRoute: typeof ChatRouteWithChildren
+  HomeRoute: typeof HomeRoute
   LoginRoute: typeof LoginRoute
+  MypageRoute: typeof MypageRouteWithChildren
+  NotificationRoute: typeof NotificationRoute
+  SignupRoute: typeof SignupRoute
+  VotesVoteIdRoute: typeof VotesVoteIdRoute
+  ImmersiveVotesIndexRoute: typeof ImmersiveVotesIndexRoute
 }
 
 declare module '@tanstack/react-router' {
   interface FileRoutesByPath {
+    '/signup': {
+      id: '/signup'
+      path: '/signup'
+      fullPath: '/signup'
+      preLoaderRoute: typeof SignupRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/notification': {
+      id: '/notification'
+      path: '/notification'
+      fullPath: '/notification'
+      preLoaderRoute: typeof NotificationRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/mypage': {
+      id: '/mypage'
+      path: '/mypage'
+      fullPath: '/mypage'
+      preLoaderRoute: typeof MypageRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/login': {
       id: '/login'
       path: '/login'
@@ -48,11 +257,134 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof LoginRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/home': {
+      id: '/home'
+      path: '/home'
+      fullPath: '/home'
+      preLoaderRoute: typeof HomeRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/chat': {
+      id: '/chat'
+      path: '/chat'
+      fullPath: '/chat'
+      preLoaderRoute: typeof ChatRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/': {
+      id: '/'
+      path: '/'
+      fullPath: '/'
+      preLoaderRoute: typeof IndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/mypage/': {
+      id: '/mypage/'
+      path: '/'
+      fullPath: '/mypage/'
+      preLoaderRoute: typeof MypageIndexRouteImport
+      parentRoute: typeof MypageRoute
+    }
+    '/immersive-votes/': {
+      id: '/immersive-votes/'
+      path: '/immersive-votes'
+      fullPath: '/immersive-votes/'
+      preLoaderRoute: typeof ImmersiveVotesIndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/chat/': {
+      id: '/chat/'
+      path: '/'
+      fullPath: '/chat/'
+      preLoaderRoute: typeof ChatIndexRouteImport
+      parentRoute: typeof ChatRoute
+    }
+    '/votes/$voteId': {
+      id: '/votes/$voteId'
+      path: '/votes/$voteId'
+      fullPath: '/votes/$voteId'
+      preLoaderRoute: typeof VotesVoteIdRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/mypage/withdrawal': {
+      id: '/mypage/withdrawal'
+      path: '/withdrawal'
+      fullPath: '/mypage/withdrawal'
+      preLoaderRoute: typeof MypageWithdrawalRouteImport
+      parentRoute: typeof MypageRoute
+    }
+    '/mypage/votes': {
+      id: '/mypage/votes'
+      path: '/votes'
+      fullPath: '/mypage/votes'
+      preLoaderRoute: typeof MypageVotesRouteImport
+      parentRoute: typeof MypageRoute
+    }
+    '/mypage/profile': {
+      id: '/mypage/profile'
+      path: '/profile'
+      fullPath: '/mypage/profile'
+      preLoaderRoute: typeof MypageProfileRouteImport
+      parentRoute: typeof MypageRoute
+    }
+    '/mypage/account': {
+      id: '/mypage/account'
+      path: '/account'
+      fullPath: '/mypage/account'
+      preLoaderRoute: typeof MypageAccountRouteImport
+      parentRoute: typeof MypageRoute
+    }
+    '/chat/$chatRoomId': {
+      id: '/chat/$chatRoomId'
+      path: '/$chatRoomId'
+      fullPath: '/chat/$chatRoomId'
+      preLoaderRoute: typeof ChatChatRoomIdRouteImport
+      parentRoute: typeof ChatRoute
+    }
   }
 }
 
+interface ChatRouteChildren {
+  ChatChatRoomIdRoute: typeof ChatChatRoomIdRoute
+  ChatIndexRoute: typeof ChatIndexRoute
+}
+
+const ChatRouteChildren: ChatRouteChildren = {
+  ChatChatRoomIdRoute: ChatChatRoomIdRoute,
+  ChatIndexRoute: ChatIndexRoute,
+}
+
+const ChatRouteWithChildren = ChatRoute._addFileChildren(ChatRouteChildren)
+
+interface MypageRouteChildren {
+  MypageAccountRoute: typeof MypageAccountRoute
+  MypageProfileRoute: typeof MypageProfileRoute
+  MypageVotesRoute: typeof MypageVotesRoute
+  MypageWithdrawalRoute: typeof MypageWithdrawalRoute
+  MypageIndexRoute: typeof MypageIndexRoute
+}
+
+const MypageRouteChildren: MypageRouteChildren = {
+  MypageAccountRoute: MypageAccountRoute,
+  MypageProfileRoute: MypageProfileRoute,
+  MypageVotesRoute: MypageVotesRoute,
+  MypageWithdrawalRoute: MypageWithdrawalRoute,
+  MypageIndexRoute: MypageIndexRoute,
+}
+
+const MypageRouteWithChildren =
+  MypageRoute._addFileChildren(MypageRouteChildren)
+
 const rootRouteChildren: RootRouteChildren = {
+  IndexRoute: IndexRoute,
+  ChatRoute: ChatRouteWithChildren,
+  HomeRoute: HomeRoute,
   LoginRoute: LoginRoute,
+  MypageRoute: MypageRouteWithChildren,
+  NotificationRoute: NotificationRoute,
+  SignupRoute: SignupRoute,
+  VotesVoteIdRoute: VotesVoteIdRoute,
+  ImmersiveVotesIndexRoute: ImmersiveVotesIndexRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
