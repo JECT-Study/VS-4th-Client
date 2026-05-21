@@ -46,7 +46,7 @@ export function useImmersiveFeed(startVoteId?: number) {
   const currentIndex = feedLength === 0 ? 0 : ((trackIndex % feedLength) + feedLength) % feedLength;
 
   // 3. 방어 코드: votes가 빈 배열일 경우 undefined를 안전하게 반환
-  const currentVote = (votes && votes[currentIndex]) ?? (votes && votes[0]);
+  const currentVote = votes?.[currentIndex] ?? votes?.[0];
   const displayedVotes = votes ? [...votes, ...votes] : [];
 
   useEffect(() => {
@@ -56,29 +56,29 @@ export function useImmersiveFeed(startVoteId?: number) {
     isFetchingMore.current = true;
     const cursor = nextCursorRef.current;
     queryClient
-        .fetchQuery(immersiveFeedQueryOptions(cursor))
-        .then((result) => {
-          // 4. 추가 로드 시에도 방어 코드 적용
-          setVotes((prev) => [...prev, ...(result.votes ?? [])]);
-          nextCursorRef.current = result.nextCursor ?? null;
-        })
-        .catch(() => {})
-        .finally(() => {
-          isFetchingMore.current = false;
-        });
+      .fetchQuery(immersiveFeedQueryOptions(cursor))
+      .then((result) => {
+        // 4. 추가 로드 시에도 방어 코드 적용
+        setVotes((prev) => [...prev, ...(result.votes ?? [])]);
+        nextCursorRef.current = result.nextCursor ?? null;
+      })
+      .catch(() => {})
+      .finally(() => {
+        isFetchingMore.current = false;
+      });
   }, [currentIndex, feedLength, queryClient]);
 
   const updateVote = useCallback(
-      (voteId: number, updater: (vote: ImmersiveFeedItem) => ImmersiveFeedItem) => {
-        const updateVotes = (votesList: ImmersiveFeedItem[]) =>
-            (votesList ?? []).map((vote) => (vote.voteId === voteId ? updater(vote) : vote));
+    (voteId: number, updater: (vote: ImmersiveFeedItem) => ImmersiveFeedItem) => {
+      const updateVotes = (votesList: ImmersiveFeedItem[]) =>
+        (votesList ?? []).map((vote) => (vote.voteId === voteId ? updater(vote) : vote));
 
-        setVotes(updateVotes);
-        queryClient.setQueriesData<ImmersiveFeedResponse>({ queryKey: immersiveFeedQueryKey }, (old) =>
-            old ? { ...old, votes: updateVotes(old.votes) } : old,
-        );
-      },
-      [queryClient],
+      setVotes(updateVotes);
+      queryClient.setQueriesData<ImmersiveFeedResponse>({ queryKey: immersiveFeedQueryKey }, (old) =>
+        old ? { ...old, votes: updateVotes(old.votes) } : old,
+      );
+    },
+    [queryClient],
   );
 
   const goToNextVote = useCallback(() => {
@@ -96,18 +96,18 @@ export function useImmersiveFeed(startVoteId?: number) {
   }, []);
 
   const handleTouchEnd = useCallback(
-      (event: TouchEvent) => {
-        if (touchStartY.current === null) return;
-        const touchEndY = event.changedTouches[0]?.clientY;
-        if (touchEndY === undefined) return;
+    (event: TouchEvent) => {
+      if (touchStartY.current === null) return;
+      const touchEndY = event.changedTouches[0]?.clientY;
+      if (touchEndY === undefined) return;
 
-        const deltaY = touchEndY - touchStartY.current;
-        if (deltaY < -SWIPE_UP_THRESHOLD) {
-          goToNextVote();
-        }
-        touchStartY.current = null;
-      },
-      [goToNextVote],
+      const deltaY = touchEndY - touchStartY.current;
+      if (deltaY < -SWIPE_UP_THRESHOLD) {
+        goToNextVote();
+      }
+      touchStartY.current = null;
+    },
+    [goToNextVote],
   );
 
   useEffect(() => {
