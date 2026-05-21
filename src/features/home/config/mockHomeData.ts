@@ -1,4 +1,4 @@
-import type { BottomTabItem, VoteItem } from "../types/home";
+import type { BottomTabItem, VoteItem } from "../model/home.ts";
 
 export const todayRecommendations: VoteItem[] = [
   {

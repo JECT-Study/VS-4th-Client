@@ -1,5 +1,5 @@
 import { Link, useRouterState } from "@tanstack/react-router";
-import { bottomTabs } from "@/features/home/data/mockHomeData";
+import { bottomTabs } from "@features/home/config/mockHomeData.ts";
 
 export function BottomTabBar() {
   // 현재 접속 중인 URL 경로를 가져옵니다.

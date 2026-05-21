@@ -1,5 +1,5 @@
 import { useMemo, useState } from "react";
-import type { VoteItem, VoteSortType } from "../types/home";
+import type { VoteItem, VoteSortType } from "./home.ts";
 
 export function useVoteFilter(votes: VoteItem[]) {
   const [sortType, setSortType] = useState<VoteSortType>("latest");

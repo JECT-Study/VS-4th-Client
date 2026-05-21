@@ -1,4 +1,4 @@
-import { HomePage } from "@features/home/HomePage";
+import { HomePage } from "@features/home/ui/HomePage.tsx";
 import { createFileRoute } from "@tanstack/react-router";
 
 export const Route = createFileRoute("/home")({
