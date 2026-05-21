@@ -7,9 +7,11 @@ import { VoteFilterBar } from "./components/VoteFilterBar";
 import { allVotes, hotTopicVotes, todayRecommendations } from "./data/mockHomeData";
 import { useScrollTopButton } from "./hooks/useScrollTopButton";
 import { useVoteFilter } from "./hooks/useVoteFilter";
+import {useNavigate} from "@tanstack/react-router";
 
 export function HomePage() {
   const { isVisible, scrollToTop } = useScrollTopButton();
+  const navigate = useNavigate();
   const { sortType, setSortType, excludeEnded, setExcludeEnded, filteredVotes } = useVoteFilter(allVotes);
 
   const handleClickVote = (voteId: number) => {
