@@ -7,9 +7,11 @@ import { VoteFilterBar } from "./components/VoteFilterBar";
 import { allVotes, hotTopicVotes, todayRecommendations } from "./data/mockHomeData";
 import { useScrollTopButton } from "./hooks/useScrollTopButton";
 import { useVoteFilter } from "./hooks/useVoteFilter";
+import {useNavigate} from "@tanstack/react-router";
 
 export function HomePage() {
   const { isVisible, scrollToTop } = useScrollTopButton();
+  const navigate = useNavigate();
   const { sortType, setSortType, excludeEnded, setExcludeEnded, filteredVotes } = useVoteFilter(allVotes);
 
   const handleClickVote = (voteId: number) => {
@@ -19,9 +21,7 @@ export function HomePage() {
   };
 
   const handleClickNotification = () => {
-    console.log("notification");
-    // TODO: 회원/비회원 및 읽음 여부에 따라 알림 페이지 분기
-    // navigate({ to: "/notifications" });
+    navigate({ to: "/notification" });
   };
 
   return (

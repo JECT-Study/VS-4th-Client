@@ -10,6 +10,7 @@
 
 import { Route as rootRouteImport } from './../../pages/routes/__root'
 import { Route as SignupRouteImport } from './../../pages/routes/signup'
+import { Route as NotificationRouteImport } from './../../pages/routes/notification'
 import { Route as MypageRouteImport } from './../../pages/routes/mypage'
 import { Route as LoginRouteImport } from './../../pages/routes/login'
 import { Route as HomeRouteImport } from './../../pages/routes/home'
@@ -28,6 +29,11 @@ import { Route as ChatChatRoomIdRouteImport } from './../../pages/routes/chat.$c
 const SignupRoute = SignupRouteImport.update({
   id: '/signup',
   path: '/signup',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const NotificationRoute = NotificationRouteImport.update({
+  id: '/notification',
+  path: '/notification',
   getParentRoute: () => rootRouteImport,
 } as any)
 const MypageRoute = MypageRouteImport.update({
@@ -107,6 +113,7 @@ export interface FileRoutesByFullPath {
   '/home': typeof HomeRoute
   '/login': typeof LoginRoute
   '/mypage': typeof MypageRouteWithChildren
+  '/notification': typeof NotificationRoute
   '/signup': typeof SignupRoute
   '/chat/$chatRoomId': typeof ChatChatRoomIdRoute
   '/mypage/account': typeof MypageAccountRoute
@@ -122,6 +129,7 @@ export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/home': typeof HomeRoute
   '/login': typeof LoginRoute
+  '/notification': typeof NotificationRoute
   '/signup': typeof SignupRoute
   '/chat/$chatRoomId': typeof ChatChatRoomIdRoute
   '/mypage/account': typeof MypageAccountRoute
@@ -140,6 +148,7 @@ export interface FileRoutesById {
   '/home': typeof HomeRoute
   '/login': typeof LoginRoute
   '/mypage': typeof MypageRouteWithChildren
+  '/notification': typeof NotificationRoute
   '/signup': typeof SignupRoute
   '/chat/$chatRoomId': typeof ChatChatRoomIdRoute
   '/mypage/account': typeof MypageAccountRoute
@@ -159,6 +168,7 @@ export interface FileRouteTypes {
     | '/home'
     | '/login'
     | '/mypage'
+    | '/notification'
     | '/signup'
     | '/chat/$chatRoomId'
     | '/mypage/account'
@@ -174,6 +184,7 @@ export interface FileRouteTypes {
     | '/'
     | '/home'
     | '/login'
+    | '/notification'
     | '/signup'
     | '/chat/$chatRoomId'
     | '/mypage/account'
@@ -191,6 +202,7 @@ export interface FileRouteTypes {
     | '/home'
     | '/login'
     | '/mypage'
+    | '/notification'
     | '/signup'
     | '/chat/$chatRoomId'
     | '/mypage/account'
@@ -209,6 +221,7 @@ export interface RootRouteChildren {
   HomeRoute: typeof HomeRoute
   LoginRoute: typeof LoginRoute
   MypageRoute: typeof MypageRouteWithChildren
+  NotificationRoute: typeof NotificationRoute
   SignupRoute: typeof SignupRoute
   VotesVoteIdRoute: typeof VotesVoteIdRoute
   ImmersiveVotesIndexRoute: typeof ImmersiveVotesIndexRoute
@@ -221,6 +234,13 @@ declare module '@tanstack/react-router' {
       path: '/signup'
       fullPath: '/signup'
       preLoaderRoute: typeof SignupRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/notification': {
+      id: '/notification'
+      path: '/notification'
+      fullPath: '/notification'
+      preLoaderRoute: typeof NotificationRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/mypage': {
@@ -361,6 +381,7 @@ const rootRouteChildren: RootRouteChildren = {
   HomeRoute: HomeRoute,
   LoginRoute: LoginRoute,
   MypageRoute: MypageRouteWithChildren,
+  NotificationRoute: NotificationRoute,
   SignupRoute: SignupRoute,
   VotesVoteIdRoute: VotesVoteIdRoute,
   ImmersiveVotesIndexRoute: ImmersiveVotesIndexRoute,
