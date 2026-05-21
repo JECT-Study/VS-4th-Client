@@ -19,9 +19,7 @@ export function HomePage() {
   };
 
   const handleClickNotification = () => {
-    console.log("notification");
-    // TODO: 회원/비회원 및 읽음 여부에 따라 알림 페이지 분기
-    // navigate({ to: "/notifications" });
+    navigate({ to: "/notification" });
   };
 
   return (
