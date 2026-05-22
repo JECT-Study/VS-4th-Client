@@ -1,7 +1,5 @@
-import { apiClient } from "@base/api/client";
+import { defaultApi } from "@base/api/defaultApi";
 import type { ImmersiveParticipateResponse } from "../model/types";
 
-export const immersiveParticipate = async (voteId: number, optionId: number): Promise<ImmersiveParticipateResponse> =>
-  apiClient
-    .post<ImmersiveParticipateResponse>(`/api/immersive-votes/${voteId}/participate`, { optionId })
-    .then((r) => r.data);
+export const immersiveParticipate = (voteId: number, optionId: number): Promise<ImmersiveParticipateResponse> =>
+  defaultApi.participateOrCancel(voteId, { optionId }).then((r) => r.data as ImmersiveParticipateResponse);
