@@ -1,4 +1,5 @@
 import { Modal } from "@base/ui/Modal";
+import { useNavigate } from "@tanstack/react-router";
 
 type ChatAuthRequiredModalProps = {
   isOpen: boolean;
@@ -6,6 +7,8 @@ type ChatAuthRequiredModalProps = {
 };
 
 const ChatAuthRequiredModal = ({ isOpen, onClose }: ChatAuthRequiredModalProps) => {
+  const navigate = useNavigate();
+
   return (
     <Modal isOpen={isOpen} onClose={onClose}>
       <div className="px-5 pt-8 pb-2">
@@ -15,7 +18,14 @@ const ChatAuthRequiredModal = ({ isOpen, onClose }: ChatAuthRequiredModalProps) 
         </p>
 
         <div className="mt-8 flex flex-col gap-[2px]">
-          <button type="button" className="w-full text-grey-divider bg-primary text-body-m py-3 rounded-lg">
+          <button
+            type="button"
+            className="w-full text-grey-divider bg-primary text-body-m py-3 rounded-lg"
+            onClick={() => {
+              onClose();
+              navigate({ to: "/login" });
+            }}
+          >
             회원가입/로그인
           </button>
           <button

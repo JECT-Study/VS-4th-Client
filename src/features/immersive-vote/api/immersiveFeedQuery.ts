@@ -1,4 +1,4 @@
-import { apiClient } from "@base/api/client";
+import { defaultApi } from "@base/api/defaultApi";
 import { queryOptions } from "@tanstack/react-query";
 import type { ImmersiveFeedItem } from "../model/types";
 
@@ -13,11 +13,6 @@ export const immersiveFeedQueryKey = ["immersive-votes", "feed"] as const;
 export const immersiveFeedQueryOptions = (cursor?: number) =>
   queryOptions<ImmersiveFeedResponse>({
     queryKey: cursor ? [...immersiveFeedQueryKey, cursor] : immersiveFeedQueryKey,
-    queryFn: () =>
-      apiClient
-        .get<ImmersiveFeedResponse>("/api/immersive-votes", {
-          params: { ...(cursor ? { cursor } : {}), size: 10 },
-        })
-        .then((r) => r.data),
+    queryFn: () => defaultApi.getFeed(cursor, 10).then((r) => r.data as ImmersiveFeedResponse),
     staleTime: 1000 * 60 * 2,
   });

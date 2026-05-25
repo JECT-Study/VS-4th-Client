@@ -99,7 +99,10 @@ export function useImmersiveFeed(startVoteId?: number) {
     (event: TouchEvent) => {
       if (touchStartY.current === null) return;
       const touchEndY = event.changedTouches[0]?.clientY;
-      if (touchEndY === undefined) return;
+      if (touchEndY === undefined) {
+        touchStartY.current = null;
+        return;
+      }
 
       const deltaY = touchEndY - touchStartY.current;
       if (deltaY < -SWIPE_UP_THRESHOLD) {

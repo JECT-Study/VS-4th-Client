@@ -19,7 +19,15 @@ function RouteComponent() {
         <h1 className="text-title-m">마이페이지</h1>
       </header>
 
-      {isPending ? <Spinner /> : user ? <MemberMyPage user={user} /> : <GuestMyPage />}
+      {isPending ? (
+        <div className="py-32 flex items-center justify-center">
+          <Spinner />
+        </div>
+      ) : user ? (
+        <MemberMyPage user={user} />
+      ) : (
+        <GuestMyPage />
+      )}
 
       <BottomTabBar />
     </div>
