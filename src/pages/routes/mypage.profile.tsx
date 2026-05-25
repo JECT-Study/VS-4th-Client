@@ -49,13 +49,13 @@ function useProfileEdit() {
     },
     onSuccess: (_data, variables) => {
       setProfileState((prev) => {
-        if (prev.nickname !== variables) return { ...prev, isCheckingNickname: false, nicknameError: null };
+        if (prev.nickname !== variables) return prev;
         return { ...prev, isCheckingNickname: false };
       });
     },
     onError: (error: unknown, variables) => {
       setProfileState((prev) => {
-        if (prev.nickname !== variables) return { ...prev, isCheckingNickname: false, nicknameError: null };
+        if (prev.nickname !== variables) return prev;
         return { ...prev, isCheckingNickname: false, nicknameError: extractNicknameCheckError(error) };
       });
     },

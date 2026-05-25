@@ -1,6 +1,7 @@
 import { Button } from "@base/ui/Button";
 import { freeVotesQueryOptions } from "@features/votes/api/freeVotesQuery";
 import { useQuery } from "@tanstack/react-query";
+import { useNavigate } from "@tanstack/react-router";
 
 function VoteIcon({ variant }: { variant: "used" | "remaining" }) {
   const bg = variant === "used" ? "bg-primary" : "bg-[#BEBEDD]";
@@ -35,6 +36,8 @@ export function GuestMyPage() {
   const remaining = data?.remainingFreeVotes ?? 0;
   const used = total - remaining;
 
+  const navigate = useNavigate();
+
   return (
     <div className="py-6 px-5">
       <h2 className="text-title-s text-grey-black">비회원으로 이용 중</h2>
@@ -43,7 +46,13 @@ export function GuestMyPage() {
         <br />
         무제한 투표를 즐길 수 있어요
       </p>
-      <Button>Google로 시작하기</Button>
+      <Button
+        onClick={() => {
+          navigate({ to: "/login" });
+        }}
+      >
+        Google로 시작하기
+      </Button>
 
       <hr className="w-full h-px bg-grey-divider my-8" />
 

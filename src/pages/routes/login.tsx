@@ -12,6 +12,10 @@ function RouteComponent() {
     navigate({ to: "/home" });
   };
 
+  const loginWithGoogle = () => {
+    window.location.href = "http://api.vs.io.kr/oauth2/authorization/google";
+  };
+
   return (
     <main className="flex flex-col items-center justify-center px-5 bg-white min-h-dvh">
       <img src="/assets/images/logo_118x118.png" alt="" className="w-[56px] h-[56px]" />
@@ -21,7 +25,7 @@ function RouteComponent() {
       </h1>
 
       <div className="flex flex-col gap-2 w-full mt-[72px]">
-        <button type="button" className="w-full text-grey-divider bg-primary text-body-m py-4 rounded-lg">
+        <button type="button" className="w-full text-grey-divider bg-primary text-body-m py-4 rounded-lg" onClick={loginWithGoogle}>
           Google로 시작하기
         </button>
         <Tooltip
