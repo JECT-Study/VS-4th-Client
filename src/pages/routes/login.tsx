@@ -13,7 +13,7 @@ function RouteComponent() {
   };
 
   const loginWithGoogle = () => {
-    window.location.href = "http://api.vs.io.kr/oauth2/authorization/google";
+    window.location.href = "https://api.vs.io.kr/oauth2/authorization/google";
   };
 
   return (
@@ -25,7 +25,11 @@ function RouteComponent() {
       </h1>
 
       <div className="flex flex-col gap-2 w-full mt-[72px]">
-        <button type="button" className="w-full text-grey-divider bg-primary text-body-m py-4 rounded-lg" onClick={loginWithGoogle}>
+        <button
+          type="button"
+          className="w-full text-grey-divider bg-primary text-body-m py-4 rounded-lg"
+          onClick={loginWithGoogle}
+        >
           Google로 시작하기
         </button>
         <Tooltip
