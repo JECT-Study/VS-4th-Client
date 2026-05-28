@@ -85,10 +85,17 @@ export function useSignupFunnel() {
     }
   };
 
+  const profileDefaults = profileStep.getDefaults();
+  const hasProfileChanges =
+    profileStep.profileState.nickname !== profileDefaults.nickname ||
+    profileStep.profileState.imageColor !== profileDefaults.imageColor;
+
   return {
     currentStep,
     goBack,
     skipProfile,
+    hasProfileChanges,
+    resetProfileToDefaults: profileStep.resetToDefaults,
 
     canProceed: computeCanProceed(),
     primaryButtonLabel: PRIMARY_BUTTON_LABELS[currentStep],
