@@ -1,6 +1,6 @@
+import { BottomTabBar } from "@/features/common/ui/BottomTabBar";
 import type { QueryClient } from "@tanstack/react-query";
 import { Outlet, createRootRouteWithContext, useRouterState } from "@tanstack/react-router";
-import { BottomTabBar } from "@/features/common/ui/BottomTabBar";
 
 export interface RouterContext {
   queryClient: QueryClient;
@@ -23,9 +23,9 @@ function RootComponent() {
   const isShowBottomTab = mainTabPaths.includes(currentPath);
 
   return (
-      <div className="relative max-w-md mx-auto min-h-dvh bg-white shadow-sm">
-        <Outlet />
-        {isShowBottomTab && <BottomTabBar />}
-      </div>
+    <div className="relative max-w-md mx-auto min-h-dvh bg-white shadow-sm">
+      <Outlet />
+      {isShowBottomTab && <BottomTabBar />}
+    </div>
   );
 }

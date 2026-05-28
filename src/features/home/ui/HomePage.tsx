@@ -1,13 +1,13 @@
+import { allVotes, hotTopicVotes, todayRecommendations } from "@features/home/config/mockHomeData.ts";
+import { useScrollTopButton } from "@features/home/model/useScrollTopButton.ts";
+import { useVoteFilter } from "@features/home/model/useVoteFilter.ts";
 import { HomeHeader } from "@features/home/ui/HomeHeader.tsx";
 import { HotTopicTop3 } from "@features/home/ui/HotTopicTop3.tsx";
 import { ScrollToTopButton } from "@features/home/ui/ScrollToTopButton.tsx";
 import { TodayRecommendationSlider } from "@features/home/ui/TodayRecommendationSlider.tsx";
 import { VoteFeedList } from "@features/home/ui/VoteFeedList.tsx";
 import { VoteFilterBar } from "@features/home/ui/VoteFilterBar.tsx";
-import { allVotes, hotTopicVotes, todayRecommendations } from "@features/home/config/mockHomeData.ts";
-import { useScrollTopButton } from "@features/home/model/useScrollTopButton.ts";
-import { useVoteFilter } from "@features/home/model/useVoteFilter.ts";
-import {useNavigate} from "@tanstack/react-router";
+import { useNavigate } from "@tanstack/react-router";
 
 export function HomePage() {
   const { isVisible, scrollToTop } = useScrollTopButton();
@@ -46,7 +46,6 @@ export function HomePage() {
       </section>
 
       <ScrollToTopButton isVisible={isVisible} onClick={scrollToTop} />
-
     </main>
   );
 }
