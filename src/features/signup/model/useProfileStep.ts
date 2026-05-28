@@ -12,12 +12,15 @@ const INITIAL_PROFILE: ProfileState = {
   isCheckingNickname: false,
 };
 
+const NICKNAME_CHECK_DEBOUNCE_MS = 500;
+
 export function useProfileStep() {
   const [profileState, setProfileState] = useState<ProfileState>(INITIAL_PROFILE);
 
   const defaultNicknameRef = useRef("");
   const defaultImageColorRef = useRef<ImageColor>("GREEN");
   const isDefaultsInitializedRef = useRef(false);
+  const debounceTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   const { data: signupDefaults, isLoading: isDefaultsLoading } = useQuery(signupDefaultsQueryOptions());
 
@@ -33,6 +36,12 @@ export function useProfileStep() {
       }));
     }
   }, [signupDefaults]);
+
+  useEffect(() => {
+    return () => {
+      if (debounceTimerRef.current) clearTimeout(debounceTimerRef.current);
+    };
+  }, []);
 
   const checkNicknameMutation = useMutation({
     mutationFn: checkNickname,
@@ -64,18 +73,16 @@ export function useProfileStep() {
 
   const setNickname = (value: string) => {
     const capped = value.slice(0, 10);
-    setProfileState((prev) => ({
-      ...prev,
-      nickname: capped,
-      nicknameError: validateNickname(capped),
-    }));
-  };
+    const localError = validateNickname(capped);
+    setProfileState((prev) => ({ ...prev, nickname: capped, nicknameError: localError }));
 
-  const handleNicknameBlur = () => {
-    const localError = validateNickname(profileState.nickname);
-    if (localError || profileState.nickname.length < 2) return;
-    if (profileState.nickname === defaultNicknameRef.current) return;
-    checkNicknameMutation.mutate(profileState.nickname);
+    if (debounceTimerRef.current) clearTimeout(debounceTimerRef.current);
+
+    if (!localError && capped.length >= 2 && capped !== defaultNicknameRef.current) {
+      debounceTimerRef.current = setTimeout(() => {
+        checkNicknameMutation.mutate(capped);
+      }, NICKNAME_CHECK_DEBOUNCE_MS);
+    }
   };
 
   const getDefaults = () => ({
@@ -98,7 +105,6 @@ export function useProfileStep() {
     isDefaultsLoading,
     setImageColor,
     setNickname,
-    handleNicknameBlur,
     getDefaults,
     resetToDefaults,
   };

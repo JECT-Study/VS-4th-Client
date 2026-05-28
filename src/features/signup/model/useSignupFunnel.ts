@@ -115,6 +115,5 @@ export function useSignupFunnel() {
     isDefaultsLoading: profileStep.isDefaultsLoading,
     setImageColor: profileStep.setImageColor,
     setNickname: profileStep.setNickname,
-    handleNicknameBlur: profileStep.handleNicknameBlur,
   };
 }

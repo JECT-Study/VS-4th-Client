@@ -51,7 +51,6 @@ export function SignupPage() {
             isDefaultsLoading={funnel.isDefaultsLoading}
             setImageColor={funnel.setImageColor}
             setNickname={funnel.setNickname}
-            handleNicknameBlur={funnel.handleNicknameBlur}
           />
         )}
         {funnel.currentStep === 4 && <CompleteStep />}
