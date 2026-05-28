@@ -7,9 +7,11 @@ type SharePageModalProps = {
 };
 
 const SharePageModal = ({ isOpen, onClose }: SharePageModalProps) => {
+  const urlToCopy = window.location.origin + window.location.pathname;
+
   const copyPageUrlToClipboard = async () => {
     try {
-      await navigator.clipboard.writeText(window.location.href);
+      await navigator.clipboard.writeText(urlToCopy);
       onClose();
       showToast.success("링크를 복사했어요.");
     } catch {
@@ -22,7 +24,7 @@ const SharePageModal = ({ isOpen, onClose }: SharePageModalProps) => {
       <div className="p-5 relative">
         <p className="text-title-s text-center">링크 복사하기</p>
         <div className="border border-grey-stroke rounded-lg flex items-center mt-7">
-          <div className="py-1 px-2 text-label-s text-grey-light flex-1 line-clamp-2 no">{window.location.href}</div>
+          <div className="py-1 px-2 text-label-s text-grey-light flex-1 line-clamp-2">{urlToCopy}</div>
           <button
             type="button"
             className="text-label-m text-grey-light p-3 shrink-0 border-l border-grey-stroke"
