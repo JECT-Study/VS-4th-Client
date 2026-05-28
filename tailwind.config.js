@@ -4,7 +4,7 @@ export default {
   theme: {
     extend: {
       fontSize: {
-        "h-l": ["28px", { lineHeight: "36px", fontWeight: "600" }],
+        "h-l": ["26px", { lineHeight: "34px", fontWeight: "600" }],
         "h-m": ["24px", { lineHeight: "32px", fontWeight: "600" }],
         "h-s": ["22px", { lineHeight: "30px", fontWeight: "600" }],
         "title-m": ["18px", { lineHeight: "24px", fontWeight: "600" }],
