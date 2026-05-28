@@ -1,19 +1,30 @@
 import { Button } from "@base/ui/Button";
+import { useState } from "react";
 import { useSignupFunnel } from "../model/useSignupFunnel";
 import { SignupHeader } from "./SignupHeader";
 import { CompleteStep } from "./components/steps/CompleteStep";
 import { GenderBirthStep } from "./components/steps/GenderBirthStep";
+import LeaveConfirmationModal from "./components/steps/LeaveConfirmationModal";
 import { ProfileStep } from "./components/steps/ProfileStep";
 import { TermsStep } from "./components/steps/TermsStep";
 
 export function SignupPage() {
   const funnel = useSignupFunnel();
+  const [isLeaveModalOpen, setIsLeaveModalOpen] = useState(false);
+
+  const handleBack = () => {
+    if (funnel.currentStep === 3 && funnel.hasProfileChanges) {
+      setIsLeaveModalOpen(true);
+    } else {
+      funnel.goBack();
+    }
+  };
 
   return (
     <main className="flex flex-col min-h-dvh bg-white text-grey-dark">
       <SignupHeader
         currentStep={funnel.currentStep}
-        onBack={funnel.goBack}
+        onBack={handleBack}
         onSkip={funnel.skipProfile}
         isSavePending={funnel.isSavePending}
       />
@@ -51,6 +62,16 @@ export function SignupPage() {
           {funnel.primaryButtonLabel}
         </Button>
       </div>
+
+      <LeaveConfirmationModal
+        isOpen={isLeaveModalOpen}
+        onClose={() => setIsLeaveModalOpen(false)}
+        onConfirm={() => {
+          funnel.resetProfileToDefaults();
+          setIsLeaveModalOpen(false);
+          funnel.goBack();
+        }}
+      />
     </main>
   );
 }

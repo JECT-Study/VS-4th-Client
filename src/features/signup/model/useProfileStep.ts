@@ -83,6 +83,16 @@ export function useProfileStep() {
     imageColor: defaultImageColorRef.current,
   });
 
+  const resetToDefaults = () => {
+    setProfileState((prev) => ({
+      ...prev,
+      nickname: defaultNicknameRef.current,
+      imageColor: defaultImageColorRef.current,
+      nicknameError: null,
+      isCheckingNickname: false,
+    }));
+  };
+
   return {
     profileState,
     isDefaultsLoading,
@@ -90,5 +100,6 @@ export function useProfileStep() {
     setNickname,
     handleNicknameBlur,
     getDefaults,
+    resetToDefaults,
   };
 }

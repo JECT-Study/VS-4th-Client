@@ -7,6 +7,7 @@ import { PROFILE_COLOR } from "@features/signup/config/profileColors";
 import { canProceedStep3, validateNickname } from "@features/signup/model/signupValidation";
 import type { ImageColor, ProfileState } from "@features/signup/model/types";
 import { NicknameInput } from "@features/signup/ui/components/NicknameInput";
+import LeaveConfirmationModal from "@features/signup/ui/components/steps/LeaveConfirmationModal";
 import { ProfileColorPicker } from "@features/signup/ui/components/steps/ProfileColorPicker";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
@@ -78,13 +79,17 @@ function useProfileEdit() {
   };
 
   const canSave = canProceedStep3(profileState, originalNicknameRef.current, originalImageColorRef.current);
+  const hasChanges =
+    profileState.nickname !== originalNicknameRef.current ||
+    profileState.imageColor !== originalImageColorRef.current;
 
-  return { profileState, setImageColor, setNickname, handleNicknameBlur, canSave };
+  return { profileState, setImageColor, setNickname, handleNicknameBlur, canSave, hasChanges };
 }
 
 function RouteComponent() {
-  const { profileState, setImageColor, setNickname, handleNicknameBlur, canSave } = useProfileEdit();
+  const { profileState, setImageColor, setNickname, handleNicknameBlur, canSave, hasChanges } = useProfileEdit();
   const [isPickerOpen, setIsPickerOpen] = useState(false);
+  const [isLeaveModalOpen, setIsLeaveModalOpen] = useState(false);
   const navigate = useNavigate();
   const queryClient = useQueryClient();
 
@@ -108,7 +113,14 @@ function RouteComponent() {
     <div>
       <header className="py-[6px] pl-1 pr-5">
         <div className="flex items-center gap-[2px]">
-          <button type="button" className="p-[10px] text-grey-dark" onClick={() => navigate({ to: "/mypage" })}>
+          <button
+            type="button"
+            className="p-[10px] text-grey-dark"
+            onClick={() => {
+              if (hasChanges) setIsLeaveModalOpen(true);
+              else navigate({ to: "/mypage" });
+            }}
+          >
             <img src="/assets/icons/arrow-left.svg" alt="뒤로가기" />
           </button>
 
@@ -159,6 +171,12 @@ function RouteComponent() {
           저장
         </Button>
       </div>
+
+      <LeaveConfirmationModal
+        isOpen={isLeaveModalOpen}
+        onClose={() => setIsLeaveModalOpen(false)}
+        onConfirm={() => navigate({ to: "/mypage" })}
+      />
     </div>
   );
 }
