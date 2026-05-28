@@ -9,8 +9,8 @@ importers:
   .:
     dependencies:
       '@ject-4-vs-team/api-client':
-        specifier: ^2026.521.2
-        version: 2026.521.2
+        specifier: ^2026.527.6
+        version: 2026.527.6
       '@sentry/react':
         specifier: ^10.46.0
         version: 10.48.0(react@18.3.1)
@@ -1228,8 +1228,8 @@ packages:
     resolution: {integrity: sha512-AokJm4tuBHillT+FpMtxQ60n8ObyXBatq7jD2/JA9dxbDDokKQm8KMht5ibGzLVU9IJDIKK4TPKgMHEYMn3lMg==}
     engines: {node: '>=18'}
 
-  '@ject-4-vs-team/api-client@2026.521.2':
-    resolution: {integrity: sha512-sVPrxPGEyPfFRUByBqK+iSohKzuNSyRZseTAcqjbrJ9d6p9p+CM5EEr/G1KGMHSjfeT5rG3kwqSPbetYoZRpIw==}
+  '@ject-4-vs-team/api-client@2026.527.6':
+    resolution: {integrity: sha512-a4CxE3s68I5BlWHJMczyx+k3uoSPWhkPsCRuNABKd/5pLsXLa5C4B/h0IGkC8SfTQOFgi5gUi1cKBzAt1+2FGA==}
 
   '@jridgewell/gen-mapping@0.3.13':
     resolution: {integrity: sha512-2kkt/7niJ6MgEPxF0bYdQ6etZaA+fQvDcLKckhy1yIQOzaoKjBBjSj63/aLVjYE3qhRt5dvM+uUyfCg6UKCBbA==}
@@ -4514,7 +4514,7 @@ snapshots:
 
   '@isaacs/cliui@9.0.0': {}
 
-  '@ject-4-vs-team/api-client@2026.521.2':
+  '@ject-4-vs-team/api-client@2026.527.6':
     dependencies:
       axios: 1.15.0
     transitivePeerDependencies:
