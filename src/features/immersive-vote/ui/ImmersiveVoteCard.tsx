@@ -1,8 +1,6 @@
-import { DynamicBottomSheet } from "@base/ui/DynamicBottomSheet";
-import { userQueryOptions } from "@features/auth/api/userQuery";
+import { ChatBottomSheet } from "@features/chat/ui/ChatBottomSheet";
 import ChatAuthRequiredModal from "@features/votes/ui/ChatAuthRequiredModal";
 import FreeVoteLimitModal from "@features/votes/ui/FreeVoteLimitModal";
-import { useQuery } from "@tanstack/react-query";
 import { useCallback, useRef, useState } from "react";
 import type { FloatingEmojiOrigin, ImmersiveFeedItem } from "../model/types";
 import { useImmersiveVote } from "../model/useImmersiveVote";
@@ -20,7 +18,6 @@ interface ImmersiveVoteCardProps {
 }
 
 export function ImmersiveVoteCard({ vote, updateVote }: ImmersiveVoteCardProps) {
-  const { data: user } = useQuery(userQueryOptions());
   const cardRef = useRef<HTMLElement>(null);
   const [isImageLoaded, setIsImageLoaded] = useState(true);
   const [isShareOpen, setIsShareOpen] = useState(false);
@@ -36,10 +33,10 @@ export function ImmersiveVoteCard({ vote, updateVote }: ImmersiveVoteCardProps) 
   useImmersiveVoteLive(vote, updateVote);
 
   const openChat = () => {
-    if (user === null) {
-      setIsChatAuthOpen(true);
-      return;
-    }
+    // if (user === null) {
+    //   setIsChatAuthOpen(true);
+    //   return;
+    // }
     setIsChatOpen(true);
   };
 
@@ -129,11 +126,7 @@ export function ImmersiveVoteCard({ vote, updateVote }: ImmersiveVoteCardProps) 
       <ImmersiveShareModal isOpen={isShareOpen} voteId={vote.voteId} onClose={() => setIsShareOpen(false)} />
       <ChatAuthRequiredModal isOpen={isChatAuthOpen} onClose={() => setIsChatAuthOpen(false)} />
       <FreeVoteLimitModal isOpen={isFreeVoteLimitModalOpen} onClose={() => setIsFreeVoteLimitModalOpen(false)} />
-      <DynamicBottomSheet isOpen={isChatOpen} onClose={() => setIsChatOpen(false)} defaultHeight={42}>
-        <div className="flex h-full items-center justify-center px-6 text-center text-body-s text-grey-light">
-          채팅 기능은 준비 중이에요
-        </div>
-      </DynamicBottomSheet>
+      <ChatBottomSheet isOpen={isChatOpen} onClose={() => setIsChatOpen(false)} voteId={vote.voteId} isDark />
     </article>
   );
 }
