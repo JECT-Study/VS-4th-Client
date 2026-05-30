@@ -22,7 +22,7 @@ export const Route = createFileRoute("/immersive-votes/")({
         return queryClient.prefetchQuery(immersiveFeedQueryOptions(undefined));
       }
     }
-    return queryClient.prefetchQuery(immersiveFeedQueryOptions());
+    return queryClient.prefetchQuery(immersiveFeedQueryOptions(undefined, startVoteId));
   },
   component: ImmersiveVotePage,
 });
