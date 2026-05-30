@@ -1,7 +1,7 @@
 import { SortDropdown } from "@base/ui/SortDropdown";
 import type { SortOption } from "@base/ui/SortDropdown";
-import type { VoteSortType } from "../model/home.ts";
 import clsx from "clsx";
+import type { VoteSortType } from "../model/home.ts";
 
 interface VoteFilterBarProps {
   sortType: VoteSortType;
@@ -37,7 +37,7 @@ export function VoteFilterBar({ sortType, excludeEnded, onChangeSortType, onTogg
       </button>
 
       <SortDropdown
-        options={SORT_OPTIONS.filter(({ value }) => !excludeEnded || value !== "ENDING_SOON")}
+        options={SORT_OPTIONS.filter(({ value }) => excludeEnded || value !== "ENDING_SOON")}
         value={sortType}
         onChange={onChangeSortType}
       />

@@ -33,7 +33,12 @@ export function HomePage() {
   };
 
   return (
-    <main className="min-h-dvh bg-white pt-14 pb-20">
+    <main
+      className="min-h-dvh bg-white pt-14"
+      style={{
+        paddingBottom: "calc(env(safe-area-inset-bottom, 0px) + 80px)",
+      }}
+    >
       <HomeHeader hasUnreadNotification onClickNotification={handleClickNotification} />
 
       <TodayRecommendationSlider recommendations={recommendations} onClickVote={handleClickVote} />
