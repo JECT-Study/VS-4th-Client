@@ -34,4 +34,3 @@ export interface HomeVotesResponse {
   nextCursor: string | null;
   hasNext: boolean;
 }
-
