@@ -1,22 +1,37 @@
-export type VoteStatus = "active" | "ended";
+export type VoteStatus = "ONGOING" | "ENDED";
 
-export type VoteSortType = "latest" | "popular" | "participant";
+export type VoteSortType = "LATEST" | "POPULAR" | "ENDING_SOON";
 
 export interface VoteItem {
-  id: number;
-  title: string;
-  description: string;
+  voteId: number;
   thumbnailUrl: string;
-  remainingTime: string;
-  participantCount: number;
-  viewCount?: number;
   status: VoteStatus;
+  title: string;
+  content: string;
+  endAt: string;
 }
 
-export interface BottomTabItem {
-  key: "home" | "vote" | "chat" | "my";
-  label: string;
-  path: string;
-  icon: string;
-  activeIcon: string;
+export interface RecommendationItem {
+  voteId: number;
+  thumbnailUrl: string;
+  title: string;
+  content: string;
+  endAt: string;
 }
+
+export interface HotTopicItem {
+  rank: number;
+  voteId: number;
+  thumbnailUrl: string;
+  title: string;
+  content: string;
+  participantCount: number;
+  endAt: string;
+}
+
+export interface HomeVotesResponse {
+  votes: VoteItem[];
+  nextCursor: string | null;
+  hasNext: boolean;
+}
+

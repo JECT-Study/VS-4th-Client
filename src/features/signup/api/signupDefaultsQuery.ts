@@ -2,14 +2,16 @@ import { apiClient } from "@base/api/client";
 import { queryOptions } from "@tanstack/react-query";
 import type { ImageColor } from "../model/types";
 
-export interface SignupDefaults {
-  nickname: string;
-  imageColor: ImageColor;
-}
+export const nicknameSuggestQueryOptions = () =>
+  queryOptions<{ nickname: string }>({
+    queryKey: ["signup", "nickname", "suggest"],
+    queryFn: () => apiClient.get<{ nickname: string }>("/api/users/nickname/suggest").then((r) => r.data),
+    staleTime: 1000 * 60 * 5,
+  });
 
-export const signupDefaultsQueryOptions = () =>
-  queryOptions<SignupDefaults>({
-    queryKey: ["signup", "defaults"],
-    queryFn: () => apiClient.get<SignupDefaults>("/api/users/info").then((r) => r.data),
+export const imageColorSuggestQueryOptions = () =>
+  queryOptions<{ imageColor: ImageColor }>({
+    queryKey: ["signup", "imagecolor", "suggest"],
+    queryFn: () => apiClient.get<{ imageColor: ImageColor }>("/api/users/imagecolor/suggest").then((r) => r.data),
     staleTime: 1000 * 60 * 5,
   });

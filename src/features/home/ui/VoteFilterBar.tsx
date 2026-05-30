@@ -1,3 +1,5 @@
+import { SortDropdown } from "@base/ui/SortDropdown";
+import type { SortOption } from "@base/ui/SortDropdown";
 import type { VoteSortType } from "../model/home.ts";
 
 interface VoteFilterBarProps {
@@ -7,11 +9,11 @@ interface VoteFilterBarProps {
   onToggleExcludeEnded: () => void;
 }
 
-const sortLabels: Record<VoteSortType, string> = {
-  latest: "최신순",
-  popular: "인기순",
-  participant: "참여순",
-};
+const SORT_OPTIONS: SortOption<VoteSortType>[] = [
+  { label: "최신순", value: "LATEST" },
+  { label: "인기순", value: "POPULAR" },
+  { label: "종료임박순", value: "ENDING_SOON" },
+];
 
 export function VoteFilterBar({ sortType, excludeEnded, onChangeSortType, onToggleExcludeEnded }: VoteFilterBarProps) {
   return (
@@ -25,17 +27,7 @@ export function VoteFilterBar({ sortType, excludeEnded, onChangeSortType, onTogg
         <span>종료된 투표 제외</span>
       </button>
 
-      <select
-        value={sortType}
-        onChange={(event) => onChangeSortType(event.target.value as VoteSortType)}
-        className="px-4 py-2 bg-white border rounded-full shadow-sm outline-none border-grey-stroke text-label-s text-grey-dark"
-      >
-        {Object.entries(sortLabels).map(([value, label]) => (
-          <option key={value} value={value}>
-            {label}
-          </option>
-        ))}
-      </select>
+      <SortDropdown options={SORT_OPTIONS} value={sortType} onChange={onChangeSortType} />
     </div>
   );
 }

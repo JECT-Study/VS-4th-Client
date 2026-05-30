@@ -1,31 +1,32 @@
-import type { VoteItem } from "../model/home.ts";
+import type { RecommendationItem } from "../model/home.ts";
+import { VoteTimeCountdown } from "./VoteTimeCountdown.tsx";
 
 interface TodayRecommendationSliderProps {
-  votes: VoteItem[];
+  recommendations: RecommendationItem[];
   onClickVote?: (voteId: number) => void;
 }
 
-export function TodayRecommendationSlider({ votes, onClickVote }: TodayRecommendationSliderProps) {
-  if (votes.length === 0) {
+export function TodayRecommendationSlider({ recommendations, onClickVote }: TodayRecommendationSliderProps) {
+  if (recommendations.length === 0) {
     return null;
   }
 
   return (
-    <section className="px-5 pt-2">
-      <h2 className="mb-3 text-title-m text-grey-black">오늘의 추천</h2>
+    <section className="px-5 pt-4">
+      <h2 className="mb-4 text-h-s text-grey-black">오늘의 추천</h2>
 
-      <div className="flex gap-3 pb-2 overflow-x-auto scrollbar-hide">
-        {votes.map((vote) => (
+      <div className="flex gap-4 overflow-x-auto scrollbar-hide">
+        {recommendations.map((item) => (
           <button
             type="button"
-            key={vote.id}
-            onClick={() => onClickVote?.(vote.id)}
-            className="w-[178px] shrink-0 text-left"
+            key={item.voteId}
+            onClick={() => onClickVote?.(item.voteId)}
+            className="w-[256px] shrink-0 text-left"
           >
-            <div className="mb-2 aspect-[1.35/1] overflow-hidden rounded-xl bg-grey-divider">
+            <div className="mb-4 aspect-[1.256/144] overflow-hidden rounded-xl bg-grey-divider">
               <img
-                src={vote.thumbnailUrl}
-                alt={vote.title}
+                src={item.thumbnailUrl}
+                alt={item.title}
                 className="object-cover w-full h-full"
                 onError={(event) => {
                   event.currentTarget.style.display = "none";
@@ -33,11 +34,18 @@ export function TodayRecommendationSlider({ votes, onClickVote }: TodayRecommend
               />
             </div>
 
-            <p className="line-clamp-1 text-label-l text-grey-black">{vote.title}</p>
+            <p className="line-clamp-1 text-body-m text-grey-black">{item.title}</p>
 
-            <p className="mt-1 line-clamp-1 text-label-m text-grey-light">{vote.description}</p>
+            <p className="line-clamp-1 text-label-m text-grey-dark">{item.content}</p>
 
-            <p className="mt-1 text-label-s text-grey-light">◷ {vote.remainingTime}</p>
+            <div className="flex items-center gap-1 text-grey-light mt-2">
+              <svg width="16" height="16" viewBox="0 0 16 16" fill="none" className="shrink-0">
+                <title>남은 시간</title>
+                <circle cx="8" cy="8" r="5.4" stroke="currentColor" strokeWidth="1.2" />
+                <path d="M8 5V8L10.2 10.2" stroke="currentColor" strokeWidth="1.2" strokeLinecap="round" />
+              </svg>
+              <VoteTimeCountdown endAt={item.endAt} />
+            </div>
           </button>
         ))}
       </div>

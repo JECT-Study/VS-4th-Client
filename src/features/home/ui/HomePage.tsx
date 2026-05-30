@@ -1,4 +1,6 @@
-import { allVotes, hotTopicVotes, todayRecommendations } from "@features/home/config/mockHomeData.ts";
+import { useHomeHotTopicsQuery } from "@features/home/api/homeHotTopicsQuery.ts";
+import { useHomeRecommendationsQuery } from "@features/home/api/homeRecommendationsQuery.ts";
+import { useHomeVotesQuery } from "@features/home/api/homeVotesQuery.ts";
 import { useScrollTopButton } from "@features/home/model/useScrollTopButton.ts";
 import { useVoteFilter } from "@features/home/model/useVoteFilter.ts";
 import { HomeHeader } from "@features/home/ui/HomeHeader.tsx";
@@ -12,7 +14,15 @@ import { useNavigate } from "@tanstack/react-router";
 export function HomePage() {
   const { isVisible, scrollToTop } = useScrollTopButton();
   const navigate = useNavigate();
-  const { sortType, setSortType, excludeEnded, setExcludeEnded, filteredVotes } = useVoteFilter(allVotes);
+  const { sortType, setSortType, excludeEnded, toggleExcludeEnded } = useVoteFilter();
+
+  const { data: votesData, hasNextPage, fetchNextPage } = useHomeVotesQuery(sortType, excludeEnded);
+  const { data: recommendationsData } = useHomeRecommendationsQuery();
+  const { data: hotTopicsData } = useHomeHotTopicsQuery();
+
+  const allVotes = votesData?.pages.flatMap((page) => page.votes) ?? [];
+  const recommendations = recommendationsData?.recommendations ?? [];
+  const hotTopics = hotTopicsData?.hotTopics ?? [];
 
   const handleClickVote = (voteId: number) => {
     console.log("vote detail", voteId);
@@ -28,9 +38,9 @@ export function HomePage() {
     <main className="min-h-dvh bg-white pt-14 pb-20">
       <HomeHeader hasUnreadNotification onClickNotification={handleClickNotification} />
 
-      <TodayRecommendationSlider votes={todayRecommendations} onClickVote={handleClickVote} />
+      <TodayRecommendationSlider recommendations={recommendations} onClickVote={handleClickVote} />
 
-      <HotTopicTop3 votes={hotTopicVotes} onClickVote={handleClickVote} />
+      <HotTopicTop3 hotTopics={hotTopics} onClickVote={handleClickVote} />
 
       <section className="px-5 pt-8">
         <h2 className="mb-3 text-title-m text-grey-black">모든 투표</h2>
@@ -39,10 +49,15 @@ export function HomePage() {
           sortType={sortType}
           excludeEnded={excludeEnded}
           onChangeSortType={setSortType}
-          onToggleExcludeEnded={() => setExcludeEnded((previous) => !previous)}
+          onToggleExcludeEnded={toggleExcludeEnded}
         />
 
-        <VoteFeedList votes={filteredVotes} onClickVote={handleClickVote} />
+        <VoteFeedList
+          votes={allVotes}
+          hasNextPage={hasNextPage}
+          onClickVote={handleClickVote}
+          onLoadMore={fetchNextPage}
+        />
       </section>
 
       <ScrollToTopButton isVisible={isVisible} onClick={scrollToTop} />

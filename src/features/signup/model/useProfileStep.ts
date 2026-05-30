@@ -1,7 +1,7 @@
 import { useMutation, useQuery } from "@tanstack/react-query";
 import { useEffect, useRef, useState } from "react";
 import { checkNickname, extractNicknameCheckError } from "../api/nicknameCheck";
-import { signupDefaultsQueryOptions } from "../api/signupDefaultsQuery";
+import { imageColorSuggestQueryOptions, nicknameSuggestQueryOptions } from "../api/signupDefaultsQuery";
 import { validateNickname } from "./signupValidation";
 import type { ImageColor, ProfileState } from "./types";
 
@@ -22,20 +22,22 @@ export function useProfileStep() {
   const isDefaultsInitializedRef = useRef(false);
   const debounceTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
-  const { data: signupDefaults, isLoading: isDefaultsLoading } = useQuery(signupDefaultsQueryOptions());
+  const { data: nicknameSuggest, isLoading: isNicknameLoading } = useQuery(nicknameSuggestQueryOptions());
+  const { data: imageColorSuggest, isLoading: isColorLoading } = useQuery(imageColorSuggestQueryOptions());
+  const isDefaultsLoading = isNicknameLoading || isColorLoading;
 
   useEffect(() => {
-    if (signupDefaults && !isDefaultsInitializedRef.current) {
+    if (nicknameSuggest && imageColorSuggest && !isDefaultsInitializedRef.current) {
       isDefaultsInitializedRef.current = true;
-      defaultNicknameRef.current = signupDefaults.nickname;
-      defaultImageColorRef.current = signupDefaults.imageColor;
+      defaultNicknameRef.current = nicknameSuggest.nickname;
+      defaultImageColorRef.current = imageColorSuggest.imageColor;
       setProfileState((prev) => ({
         ...prev,
-        nickname: signupDefaults.nickname,
-        imageColor: signupDefaults.imageColor,
+        nickname: nicknameSuggest.nickname,
+        imageColor: imageColorSuggest.imageColor,
       }));
     }
-  }, [signupDefaults]);
+  }, [nicknameSuggest, imageColorSuggest]);
 
   useEffect(() => {
     return () => {

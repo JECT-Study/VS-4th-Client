@@ -11,7 +11,7 @@ import { useState } from "react";
 const sortingOptions: Array<{ value: ActiveVoteSortType; label: string }> = [
   { value: "END_AT", label: "종료 임박순" },
   { value: "LATEST", label: "최신순" },
-  { value: "POP", label: "인기순" },
+  { value: "POPULAR", label: "인기순" },
 ];
 
 export function ActiveParticipatedVoteList() {

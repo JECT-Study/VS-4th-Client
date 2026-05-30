@@ -1,4 +1,4 @@
-import { bottomTabs } from "@features/home/config/mockHomeData.ts";
+import { bottomTabs } from "@features/common/config/bottomTabs.ts";
 import { Link, useRouterState } from "@tanstack/react-router";
 
 export function BottomTabBar() {
