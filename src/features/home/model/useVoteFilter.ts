@@ -9,6 +9,9 @@ export function useVoteFilter() {
     sortType,
     setSortType,
     excludeEnded,
-    toggleExcludeEnded: () => setExcludeEnded((v) => !v),
+    toggleExcludeEnded: () => {
+      setSortType("LATEST");
+      setExcludeEnded((v) => !v);
+    },
   };
 }
