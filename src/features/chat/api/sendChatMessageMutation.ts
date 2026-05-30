@@ -1,7 +1,9 @@
 import { apiClient } from "@base/api/client";
+import type { InfiniteData } from "@tanstack/react-query";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
-import type { ChatMessageResponse } from "../model/types";
-import { chatMessagesQueryKey } from "./chatMessagesQuery";
+import type { ChatMessageResponse, ChatMessagesResponse } from "../model/types";
+import { addPending, consumePending } from "../model/pendingOutgoingMessages";
+import { chatInfiniteMessagesQueryKey } from "./chatMessagesQuery";
 
 // 1. API 호출 함수 (전송)
 export const sendChatMessageMutation = async (voteId: number, content: string) => {
@@ -20,18 +22,87 @@ export const useSendChatMessageMutation = (voteId: number) => {
 
   return useMutation({
     mutationFn: (content: string) => sendChatMessageMutation(voteId, content),
-    onSuccess: () => {
-      // ❗️주의: 웹소켓을 연결하면 어차피 서버에서 새 메시지를 쏴주기 때문에,
-      // 여기서 전체 메시지를 다시 가져오도록 무효화(invalidate)할지,
-      // 아니면 웹소켓으로 받은 데이터를 캐시에 직접 넣을지(setQueryData) 결정해야 합니다.
-      // (현재는 기존 로직을 유지했습니다.)
-      queryClient.invalidateQueries({
-        queryKey: chatMessagesQueryKey(voteId),
-      });
 
-      queryClient.invalidateQueries({
-        queryKey: ["chats"],
-      });
+    onMutate: async (content) => {
+      addPending(voteId, content);
+
+      await queryClient.cancelQueries({ queryKey: chatInfiniteMessagesQueryKey(voteId) });
+
+      const snapshot = queryClient.getQueryData<InfiniteData<ChatMessagesResponse, number | undefined>>(
+        chatInfiniteMessagesQueryKey(voteId),
+      );
+      if (!snapshot) return { tempId: null };
+
+      // 캐시에 있는 내 이전 메시지에서 닉네임/아이콘/투표옵션을 가져옵니다.
+      const allMessages = snapshot.pages.flatMap((p) => p.messages);
+      const myPrevious = [...allMessages].reverse().find((m) => m.isMine);
+
+      const tempId = -Date.now();
+      const tempMessage: ChatMessageResponse = {
+        messageId: tempId,
+        content,
+        sentAt: new Date().toISOString(),
+        senderNickname: myPrevious?.senderNickname ?? "",
+        senderProfileIcon: myPrevious?.senderProfileIcon ?? "",
+        senderVoteOption: myPrevious?.senderVoteOption ?? "A",
+        isMine: true,
+      };
+
+      queryClient.setQueryData<InfiniteData<ChatMessagesResponse, number | undefined>>(
+        chatInfiniteMessagesQueryKey(voteId),
+        (oldData) => {
+          if (!oldData) return oldData;
+          const latestPage = oldData.pages[0];
+          if (!latestPage) return oldData;
+          return {
+            ...oldData,
+            pages: [{ ...latestPage, messages: [...latestPage.messages, tempMessage] }, ...oldData.pages.slice(1)],
+          };
+        },
+      );
+
+      return { tempId };
+    },
+
+    onSuccess: (data, _content, context) => {
+      // 임시 메시지를 서버에서 받은 실제 메시지(isMine: true)로 교체합니다.
+      queryClient.setQueryData<InfiniteData<ChatMessagesResponse, number | undefined>>(
+        chatInfiniteMessagesQueryKey(voteId),
+        (oldData) => {
+          if (!oldData || !context?.tempId) return oldData;
+          return {
+            ...oldData,
+            pages: oldData.pages.map((page) => ({
+              ...page,
+              messages: page.messages.map((m) => (m.messageId === context.tempId ? data : m)),
+            })),
+          };
+        },
+      );
+
+      queryClient.invalidateQueries({ queryKey: ["chats"] });
+    },
+
+    onError: (_error, _content, context) => {
+      // 전송 실패 시 낙관적 메시지를 롤백합니다.
+      queryClient.setQueryData<InfiniteData<ChatMessagesResponse, number | undefined>>(
+        chatInfiniteMessagesQueryKey(voteId),
+        (oldData) => {
+          if (!oldData || !context?.tempId) return oldData;
+          return {
+            ...oldData,
+            pages: oldData.pages.map((page) => ({
+              ...page,
+              messages: page.messages.filter((m) => m.messageId !== context.tempId),
+            })),
+          };
+        },
+      );
+    },
+
+    onSettled: (_data, _error, content) => {
+      // WebSocket이 아직 소비하지 않은 pending 항목을 정리합니다.
+      consumePending(voteId, content);
     },
   });
 };

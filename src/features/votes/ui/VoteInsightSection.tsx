@@ -11,6 +11,7 @@ interface VoteInsightSectionProps {
   genderChartProps: GenderChartProps;
   ageGroups: AgeGroup[];
   aiInsight: { available: boolean; headline: string | null; body: string | null };
+  participantCount: number;
 }
 
 export function VoteInsightSection({
@@ -20,6 +21,7 @@ export function VoteInsightSection({
   genderChartProps,
   ageGroups,
   aiInsight,
+  participantCount,
 }: VoteInsightSectionProps) {
   const isGuest = voteUserType === "guest";
 
@@ -50,7 +52,7 @@ export function VoteInsightSection({
             </div>
 
             <p className="text-label-m mt-3">
-              총 <span className="text-primary">365</span>명이 선택했어요
+              총 <span className="text-primary">{participantCount}</span>명이 선택했어요
             </p>
           </div>
 

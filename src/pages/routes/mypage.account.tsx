@@ -1,3 +1,4 @@
+import { AccountPage } from "@features/mypage/ui/AccountPage";
 import { createFileRoute } from "@tanstack/react-router";
 
 export const Route = createFileRoute("/mypage/account")({
@@ -5,5 +6,5 @@ export const Route = createFileRoute("/mypage/account")({
 });
 
 function RouteComponent() {
-  return <div>Hello "/mypage/account"!</div>;
+  return <AccountPage />;
 }

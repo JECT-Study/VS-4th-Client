@@ -64,12 +64,14 @@ export function VoteOptionsSection({
                 buttonRefs.current[index] = el;
               }}
               type="button"
-              className={`text-body-s px-4 py-3 rounded-lg bg-grey-stroke w-full text-left relative overflow-hidden flex items-center ${hasVoted && isSelected ? "text-grey-divider" : "text-grey-black"}`}
+              className={`text-body-s px-4 py-3 rounded-lg w-full text-left relative overflow-hidden flex items-center ${isEnded ? (index === 0 ? "bg-grey-stroke text-grey-light" : "bg-grey-purple text-grey-divider") : (hasVoted && isSelected) ? "text-grey-divider bg-grey-stroke" : "text-grey-black bg-grey-stroke"}`}
               onClick={() => onOptionClick(option.optionId)}
-              disabled={isParticipatePending}
+              disabled={isParticipatePending || isEnded}
             >
               {hasVoted && option.ratio !== null && <VoteBar ratio={option.ratio} isSelected={isSelected} />}
-              <span className="relative z-10 line-clamp-2">{option.label}</span>
+              <span className="relative z-10 line-clamp-2">
+                {option.label} {hasVoted && option.ratio !== null && `(${option.ratio}%)`}
+              </span>
             </button>
           );
         })}

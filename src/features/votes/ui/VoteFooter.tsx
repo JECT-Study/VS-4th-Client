@@ -1,8 +1,14 @@
 import { useState } from "react";
 import SharePageModal from "./SharePageModal";
+import { ChatBottomSheet } from "@features/chat/ui/ChatBottomSheet";
 
-const VoteFooter = () => {
+interface VoteFooterProps {
+  voteId: string;
+}
+
+const VoteFooter = ({ voteId }: VoteFooterProps) => {
   const [isOpen, setIsOpen] = useState(false);
+  const [isChatOpen, setIsChatOpen] = useState(false);
 
   return (
     <footer
@@ -12,7 +18,11 @@ const VoteFooter = () => {
         boxShadow: "0px -1px 4px 0px rgba(0, 0, 0, 0.05)",
       }}
     >
-      <button type="button" className="flex-[1.5] py-4 text-center text-body-m text-white bg-primary rounded-lg">
+      <button
+        type="button"
+        onClick={() => setIsChatOpen(true)}
+        className="flex-[1.5] py-4 text-center text-body-m text-white bg-primary rounded-lg"
+      >
         채팅 바로가기
       </button>
       <button
@@ -24,6 +34,7 @@ const VoteFooter = () => {
       </button>
 
       <SharePageModal isOpen={isOpen} onClose={() => setIsOpen(false)} />
+      <ChatBottomSheet isOpen={isChatOpen} onClose={() => setIsChatOpen(false)} voteId={Number(voteId)} />
     </footer>
   );
 };

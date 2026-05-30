@@ -14,9 +14,10 @@ import {
 } from "../config/constants";
 import type { ImmersiveFeedItem } from "./types";
 
-export function useImmersiveFeed(startVoteId?: number) {
+// _startVoteId: 특정 투표부터 피드를 시작하는 스펙이 결정되면 활용 예정
+export function useImmersiveFeed(_startVoteId?: number) {
   const queryClient = useQueryClient();
-  const { data: initialData, isError } = useQuery(immersiveFeedQueryOptions(startVoteId));
+  const { data: initialData, isError } = useQuery(immersiveFeedQueryOptions());
 
   const [votes, setVotes] = useState<ImmersiveFeedItem[]>([]);
   const [trackIndex, setTrackIndex] = useState(0);
