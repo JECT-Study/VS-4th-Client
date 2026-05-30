@@ -16,7 +16,7 @@ const sortingOptions: Array<{ value: ActiveVoteSortType; label: string }> = [
 
 export function ActiveParticipatedVoteList() {
   const [sortingOption, setSortingOption] = useState<ActiveVoteSortType>(sortingOptions[0]!.value);
-  const { data } = useQuery(activeParticipatedVotesQueryOptions(sortingOption));
+  const { data, isLoading } = useQuery(activeParticipatedVotesQueryOptions(sortingOption));
 
   const voteList = data?.voteList ?? [];
 
@@ -28,7 +28,7 @@ export function ActiveParticipatedVoteList() {
         <SortDropdown options={sortingOptions} value={sortingOption} onChange={(value) => setSortingOption(value)} />
       </div>
 
-      {voteList.length === 0 ? (
+      {!isLoading && voteList.length === 0 ? (
         <div className="flex-1 flex items-center flex-col justify-center">
           <h2 className="text-h-s">아직 참여한 투표가 없어요!</h2>
           <p className="text-title-s text-grey-light mt-4 text-center">
@@ -62,7 +62,7 @@ export function ActiveParticipatedVoteList() {
               className="flex items-center gap-7 justify-between"
             >
               <div className="overflow-hidden">
-                <span className="text-body-m">{item.title}</span>
+                <span className="text-body-m line-clamp-1">{item.title}</span>
                 <p className="text-label-m w-full truncate text-grey-dark mt-[2px]">{item.content}</p>
                 <div className="flex items-center gap-1 text-grey-light mt-3">
                   <svg width="16" height="16" viewBox="0 0 16 16" fill="none" className="shrink-0">
