@@ -25,9 +25,7 @@ export function HomePage() {
   const hotTopics = hotTopicsData?.hotTopics ?? [];
 
   const handleClickVote = (voteId: number) => {
-    console.log("vote detail", voteId);
-    // TODO: 투표 상세 페이지 라우트 확정 후 연결
-    // navigate({ to: `/votes/${voteId}` });
+    navigate({ to: `/votes/${voteId}` });
   };
 
   const handleClickNotification = () => {
@@ -42,8 +40,8 @@ export function HomePage() {
 
       <HotTopicTop3 hotTopics={hotTopics} onClickVote={handleClickVote} />
 
-      <section className="px-5 pt-8">
-        <h2 className="mb-3 text-title-m text-grey-black">모든 투표</h2>
+      <section className="px-5 pt-14">
+        <h2 className="mb-3 text-h-s text-grey-black">모든 투표</h2>
 
         <VoteFilterBar
           sortType={sortType}
