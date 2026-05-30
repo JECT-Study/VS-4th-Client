@@ -4,8 +4,10 @@ import { useState } from "react";
 import type { EmojiType } from "../model/types";
 import type { EmojiItem, VoteUserType } from "../model/useVoteDetail";
 import ChatAuthRequiredModal from "./ChatAuthRequiredModal";
+import { ChatBottomSheet } from "@features/chat/ui/ChatBottomSheet";
 
 interface VoteReactionBarProps {
+  voteId: string;
   emojiList: EmojiItem[];
   commentCount: number | undefined;
   onEmojiClick: (type: EmojiType) => void;
@@ -14,6 +16,7 @@ interface VoteReactionBarProps {
 }
 
 export function VoteReactionBar({
+  voteId,
   emojiList,
   commentCount,
   onEmojiClick,
@@ -21,6 +24,7 @@ export function VoteReactionBar({
   voteUserType,
 }: VoteReactionBarProps) {
   const [isOpen, setIsOpen] = useState(false);
+  const [isChatOpen, setIsChatOpen] = useState(false);
 
   const openChat = () => {
     if (voteUserType === "guest") {
@@ -33,7 +37,7 @@ export function VoteReactionBar({
       return;
     }
 
-    // TODO: open chat bottom sheet
+    setIsChatOpen(true);
   };
 
   const totalEmojiCount = emojiList.reduce((sum, item) => sum + (item.count ?? 0), 0);
@@ -71,6 +75,7 @@ export function VoteReactionBar({
       </button>
 
       <ChatAuthRequiredModal isOpen={isOpen} onClose={() => setIsOpen(false)} />
+      <ChatBottomSheet isOpen={isChatOpen} onClose={() => setIsChatOpen(false)} voteId={Number(voteId)} />
     </div>
   );
 }
