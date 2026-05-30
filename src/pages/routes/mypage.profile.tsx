@@ -24,12 +24,15 @@ const INITIAL_PROFILE: ProfileState = {
   isCheckingNickname: false,
 };
 
+const NICKNAME_CHECK_DEBOUNCE_MS = 500;
+
 function useProfileEdit() {
   const [profileState, setProfileState] = useState<ProfileState>(INITIAL_PROFILE);
 
   const originalNicknameRef = useRef("");
   const originalImageColorRef = useRef<ImageColor>("GREEN");
   const isInitializedRef = useRef(false);
+  const debounceTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   const { data: user } = useQuery(userQueryOptions());
 
@@ -42,6 +45,12 @@ function useProfileEdit() {
     originalImageColorRef.current = imageColor;
     setProfileState((prev) => ({ ...prev, nickname, imageColor }));
   }, [user]);
+
+  useEffect(() => {
+    return () => {
+      if (debounceTimerRef.current) clearTimeout(debounceTimerRef.current);
+    };
+  }, []);
 
   const checkNicknameMutation = useMutation({
     mutationFn: checkNickname,
@@ -68,26 +77,27 @@ function useProfileEdit() {
 
   const setNickname = (value: string) => {
     const capped = value.slice(0, 10);
-    setProfileState((prev) => ({ ...prev, nickname: capped, nicknameError: validateNickname(capped) }));
-  };
+    const localError = validateNickname(capped);
+    setProfileState((prev) => ({ ...prev, nickname: capped, nicknameError: localError }));
 
-  const handleNicknameBlur = () => {
-    const localError = validateNickname(profileState.nickname);
-    if (localError || profileState.nickname.length < 2) return;
-    if (profileState.nickname === originalNicknameRef.current) return;
-    checkNicknameMutation.mutate(profileState.nickname);
+    if (debounceTimerRef.current) clearTimeout(debounceTimerRef.current);
+
+    if (!localError && capped.length >= 2 && capped !== originalNicknameRef.current) {
+      debounceTimerRef.current = setTimeout(() => {
+        checkNicknameMutation.mutate(capped);
+      }, NICKNAME_CHECK_DEBOUNCE_MS);
+    }
   };
 
   const canSave = canProceedStep3(profileState, originalNicknameRef.current, originalImageColorRef.current);
   const hasChanges =
-    profileState.nickname !== originalNicknameRef.current ||
-    profileState.imageColor !== originalImageColorRef.current;
+    profileState.nickname !== originalNicknameRef.current || profileState.imageColor !== originalImageColorRef.current;
 
-  return { profileState, setImageColor, setNickname, handleNicknameBlur, canSave, hasChanges };
+  return { profileState, setImageColor, setNickname, canSave, hasChanges };
 }
 
 function RouteComponent() {
-  const { profileState, setImageColor, setNickname, handleNicknameBlur, canSave, hasChanges } = useProfileEdit();
+  const { profileState, setImageColor, setNickname, canSave, hasChanges } = useProfileEdit();
   const [isPickerOpen, setIsPickerOpen] = useState(false);
   const [isLeaveModalOpen, setIsLeaveModalOpen] = useState(false);
   const navigate = useNavigate();
@@ -147,12 +157,7 @@ function RouteComponent() {
             </button>
           </div>
 
-          <NicknameInput
-            value={profileState.nickname}
-            onChange={setNickname}
-            onBlur={handleNicknameBlur}
-            error={profileState.nicknameError}
-          />
+          <NicknameInput value={profileState.nickname} onChange={setNickname} error={profileState.nicknameError} />
         </div>
 
         <ProfileColorPicker

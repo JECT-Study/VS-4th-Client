@@ -1,10 +1,10 @@
+import { showToast } from "@base/ui/Toast";
 import type { User } from "@features/auth/model/types";
 import { logout } from "@features/mypage/api/logout";
+import { NotificationSettingToggle } from "@features/notification/ui/NotificationSettingToggle";
 import { PROFILE_COLOR } from "@features/signup/config/profileColors";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { Link, useNavigate } from "@tanstack/react-router";
-import { NotificationSettingToggle } from "@features/notification/ui/NotificationSettingToggle";
-import { showToast } from "@base/ui/Toast";
 
 interface MemberMyPageProps {
   user: User;

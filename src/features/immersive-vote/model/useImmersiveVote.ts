@@ -95,8 +95,14 @@ export function useImmersiveVote(
           participantCount: snapshot.participantCount,
         }));
       }
-      if (isAxiosError(err) && err.response?.data?.code === "VOTE_FREE_LIMIT_EXCEEDED") {
-        onFreeVoteLimitExceeded();
+      if (isAxiosError(err)) {
+        if (err.response?.data?.code === "VOTE_FREE_LIMIT_EXCEEDED") {
+          onFreeVoteLimitExceeded();
+        } else if (err.response?.data?.code === "VOTE_ENDED") {
+          showToast.warning("이미 종료된 투표에요");
+        } else {
+          showToast.warning("투표에 실패했어요");
+        }
       } else {
         showToast.warning("투표에 실패했어요");
       }

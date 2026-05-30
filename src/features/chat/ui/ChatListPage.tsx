@@ -16,7 +16,7 @@ export function ChatListPage() {
 
   return (
     <main className="min-h-screen pb-20 bg-white">
-      <header className="px-5 pb-4 pt-14">
+      <header className="px-5 py-4">
         <h1 className="text-title-m text-grey-black">채팅</h1>
       </header>
 

@@ -10,16 +10,9 @@ interface ProfileStepProps {
   isDefaultsLoading: boolean;
   setImageColor: (color: ImageColor) => void;
   setNickname: (value: string) => void;
-  handleNicknameBlur: () => void;
 }
 
-export function ProfileStep({
-  profileState,
-  isDefaultsLoading,
-  setImageColor,
-  setNickname,
-  handleNicknameBlur,
-}: ProfileStepProps) {
+export function ProfileStep({ profileState, isDefaultsLoading, setImageColor, setNickname }: ProfileStepProps) {
   const [isPickerOpen, setIsPickerOpen] = useState(false);
 
   if (isDefaultsLoading) {
@@ -56,12 +49,7 @@ export function ProfileStep({
           </button>
         </div>
 
-        <NicknameInput
-          value={profileState.nickname}
-          onChange={setNickname}
-          onBlur={handleNicknameBlur}
-          error={profileState.nicknameError}
-        />
+        <NicknameInput value={profileState.nickname} onChange={setNickname} error={profileState.nicknameError} />
       </div>
 
       <ProfileColorPicker

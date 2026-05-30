@@ -1,7 +1,7 @@
 import { apiClient } from "@base/api/client";
 import { queryOptions } from "@tanstack/react-query";
 
-export type ActiveVoteSortType = "END_AT" | "LATEST" | "POP";
+export type ActiveVoteSortType = "END_AT" | "LATEST" | "POPULAR";
 export type ClosedVoteSortType = "LATEST" | "END_AT";
 
 export interface ParticipatedVoteItem {
