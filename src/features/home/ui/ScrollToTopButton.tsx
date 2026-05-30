@@ -9,11 +9,11 @@ export function ScrollToTopButton({ isVisible, onClick }: ScrollToTopButtonProps
       type="button"
       aria-label="상단으로 이동"
       onClick={onClick}
-      className={`fixed bottom-24 right-[calc(50%-188px)] z-30 flex h-12 w-12 items-center justify-center rounded-full bg-white text-title-m text-grey-dark shadow-lg transition-opacity duration-200 ${
+      className={`fixed bottom-24 right-[calc(50%-188px)] z-30 flex h-14 w-14 items-center justify-center bg-white shadow-md rounded-lg border border-grey-stroke transition-opacity duration-200 ${
         isVisible ? "opacity-100" : "pointer-events-none opacity-0"
       }`}
     >
-      ↑
+      <img src="/assets/icons/top-btn.svg" alt="" />
     </button>
   );
 }

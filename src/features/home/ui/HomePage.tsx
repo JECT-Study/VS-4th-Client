@@ -58,7 +58,7 @@ export function HomePage() {
         />
       </section>
 
-      <ScrollToTopButton isVisible={isVisible} onClick={scrollToTop} />
+      <ScrollToTopButton isVisible onClick={scrollToTop} />
     </main>
   );
 }
