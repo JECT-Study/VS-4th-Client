@@ -1,8 +1,10 @@
-import { useEffect } from "react";
-import { useQueryClient } from "@tanstack/react-query";
 import * as stompClient from "@base/api/stompClient";
-import { chatMessagesQueryKey } from "../api/chatMessagesQuery";
+import type { InfiniteData } from "@tanstack/react-query";
+import { useQueryClient } from "@tanstack/react-query";
+import { useEffect } from "react";
+import { chatInfiniteMessagesQueryKey, chatMessagesQueryKey } from "../api/chatMessagesQuery";
 import type { ChatMessageResponse, ChatMessagesResponse } from "../model/types";
+import { consumePending } from "./pendingOutgoingMessages";
 
 export function useChatWebSocket(voteId: number) {
   const queryClient = useQueryClient();
@@ -18,15 +20,33 @@ export function useChatWebSocket(voteId: number) {
         try {
           const newMessage: ChatMessageResponse = JSON.parse(message.body);
 
-          // React Query 캐시 강제 업데이트
+          // 내가 보낸 메시지는 낙관적 업데이트가 이미 처리 중이므로 건너뜁니다.
+          // (WebSocket 브로드캐스트의 isMine: false 가 캐시를 덮어쓰는 것을 방지)
+          if (consumePending(voteId, newMessage.content)) return;
+
+          // ChatRoomPage 단일 쿼리 캐시 업데이트
           queryClient.setQueryData<ChatMessagesResponse>(chatMessagesQueryKey(voteId), (oldData) => {
             if (!oldData) return oldData;
-
-            return {
-              ...oldData,
-              messages: [...oldData.messages, newMessage],
-            };
+            return { ...oldData, messages: [...oldData.messages, newMessage] };
           });
+
+          // ChatBottomSheet infinite 쿼리 캐시 업데이트 (pages[0]이 최신 페이지)
+          queryClient.setQueryData<InfiniteData<ChatMessagesResponse, number | undefined>>(
+            chatInfiniteMessagesQueryKey(voteId),
+            (oldData): InfiniteData<ChatMessagesResponse, number | undefined> | undefined => {
+              const latestPage = oldData?.pages[0];
+              if (!oldData || !latestPage) return oldData;
+              const alreadyExists = oldData.pages.some((page) =>
+                page.messages.some((m) => m.messageId === newMessage.messageId),
+              );
+              if (alreadyExists) return oldData;
+              const updatedPages: ChatMessagesResponse[] = [
+                { ...latestPage, messages: [...latestPage.messages, newMessage] },
+                ...oldData.pages.slice(1),
+              ];
+              return { ...oldData, pages: updatedPages };
+            },
+          );
         } catch (error) {
           // 데이터 파싱 실패 시 런타임 에러가 전파되지 않도록 방어하고 개발 환경에서만 에러를 출력합니다.
           if (import.meta.env.DEV) {

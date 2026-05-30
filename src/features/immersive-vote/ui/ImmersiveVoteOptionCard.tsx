@@ -26,7 +26,7 @@ export function ImmersiveVoteOptionCard({ option, isVoted, isSelected, onClick }
     return (
       <button
         type="button"
-        className="flex min-h-[130px] flex-1 flex-col items-center justify-center rounded-lg bg-gradient-to-b from-[#E5E1F0] to-[#DBD3F2] p-4 pb-6 text-center shadow-[0px_1px_6px_0px_rgba(0,_0,_0,_0.25)]"
+        className="flex min-h-[130px] flex-1 flex-col items-center justify-center rounded-lg bg-gradient-to-b from-[#E5E1F0] to-[#DBD3F2] pt-4 px-3 pb-6 text-center shadow-[0px_1px_6px_0px_rgba(0,_0,_0,_0.25)]"
         onClick={onClick}
       >
         <span className="min-h-[60px] text-body-m text-grey-black flex justify-center items-center whitespace-pre-wrap">

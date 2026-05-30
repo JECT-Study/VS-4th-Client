@@ -4,7 +4,7 @@ import { useId } from "react";
 interface NicknameInputProps {
   value: string;
   onChange: (value: string) => void;
-  onBlur: () => void;
+  onBlur?: () => void;
   error: string | null;
 }
 

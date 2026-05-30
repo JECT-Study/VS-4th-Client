@@ -7,6 +7,7 @@ import { PROFILE_COLOR } from "@features/signup/config/profileColors";
 import { canProceedStep3, validateNickname } from "@features/signup/model/signupValidation";
 import type { ImageColor, ProfileState } from "@features/signup/model/types";
 import { NicknameInput } from "@features/signup/ui/components/NicknameInput";
+import LeaveConfirmationModal from "@features/signup/ui/components/steps/LeaveConfirmationModal";
 import { ProfileColorPicker } from "@features/signup/ui/components/steps/ProfileColorPicker";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
@@ -23,12 +24,15 @@ const INITIAL_PROFILE: ProfileState = {
   isCheckingNickname: false,
 };
 
+const NICKNAME_CHECK_DEBOUNCE_MS = 500;
+
 function useProfileEdit() {
   const [profileState, setProfileState] = useState<ProfileState>(INITIAL_PROFILE);
 
   const originalNicknameRef = useRef("");
   const originalImageColorRef = useRef<ImageColor>("GREEN");
   const isInitializedRef = useRef(false);
+  const debounceTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   const { data: user } = useQuery(userQueryOptions());
 
@@ -41,6 +45,12 @@ function useProfileEdit() {
     originalImageColorRef.current = imageColor;
     setProfileState((prev) => ({ ...prev, nickname, imageColor }));
   }, [user]);
+
+  useEffect(() => {
+    return () => {
+      if (debounceTimerRef.current) clearTimeout(debounceTimerRef.current);
+    };
+  }, []);
 
   const checkNicknameMutation = useMutation({
     mutationFn: checkNickname,
@@ -67,24 +77,29 @@ function useProfileEdit() {
 
   const setNickname = (value: string) => {
     const capped = value.slice(0, 10);
-    setProfileState((prev) => ({ ...prev, nickname: capped, nicknameError: validateNickname(capped) }));
-  };
+    const localError = validateNickname(capped);
+    setProfileState((prev) => ({ ...prev, nickname: capped, nicknameError: localError }));
 
-  const handleNicknameBlur = () => {
-    const localError = validateNickname(profileState.nickname);
-    if (localError || profileState.nickname.length < 2) return;
-    if (profileState.nickname === originalNicknameRef.current) return;
-    checkNicknameMutation.mutate(profileState.nickname);
+    if (debounceTimerRef.current) clearTimeout(debounceTimerRef.current);
+
+    if (!localError && capped.length >= 2 && capped !== originalNicknameRef.current) {
+      debounceTimerRef.current = setTimeout(() => {
+        checkNicknameMutation.mutate(capped);
+      }, NICKNAME_CHECK_DEBOUNCE_MS);
+    }
   };
 
   const canSave = canProceedStep3(profileState, originalNicknameRef.current, originalImageColorRef.current);
+  const hasChanges =
+    profileState.nickname !== originalNicknameRef.current || profileState.imageColor !== originalImageColorRef.current;
 
-  return { profileState, setImageColor, setNickname, handleNicknameBlur, canSave };
+  return { profileState, setImageColor, setNickname, canSave, hasChanges };
 }
 
 function RouteComponent() {
-  const { profileState, setImageColor, setNickname, handleNicknameBlur, canSave } = useProfileEdit();
+  const { profileState, setImageColor, setNickname, canSave, hasChanges } = useProfileEdit();
   const [isPickerOpen, setIsPickerOpen] = useState(false);
+  const [isLeaveModalOpen, setIsLeaveModalOpen] = useState(false);
   const navigate = useNavigate();
   const queryClient = useQueryClient();
 
@@ -108,7 +123,14 @@ function RouteComponent() {
     <div>
       <header className="py-[6px] pl-1 pr-5">
         <div className="flex items-center gap-[2px]">
-          <button type="button" className="p-[10px] text-grey-dark" onClick={() => navigate({ to: "/mypage" })}>
+          <button
+            type="button"
+            className="p-[10px] text-grey-dark"
+            onClick={() => {
+              if (hasChanges) setIsLeaveModalOpen(true);
+              else navigate({ to: "/mypage" });
+            }}
+          >
             <img src="/assets/icons/arrow-left.svg" alt="뒤로가기" />
           </button>
 
@@ -135,12 +157,7 @@ function RouteComponent() {
             </button>
           </div>
 
-          <NicknameInput
-            value={profileState.nickname}
-            onChange={setNickname}
-            onBlur={handleNicknameBlur}
-            error={profileState.nicknameError}
-          />
+          <NicknameInput value={profileState.nickname} onChange={setNickname} error={profileState.nicknameError} />
         </div>
 
         <ProfileColorPicker
@@ -159,6 +176,12 @@ function RouteComponent() {
           저장
         </Button>
       </div>
+
+      <LeaveConfirmationModal
+        isOpen={isLeaveModalOpen}
+        onClose={() => setIsLeaveModalOpen(false)}
+        onConfirm={() => navigate({ to: "/mypage" })}
+      />
     </div>
   );
 }

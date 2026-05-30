@@ -1,45 +1,71 @@
-import { Header } from "./MypageHeader";
-import { Link } from "@tanstack/react-router";
-import type { User } from "@features/auth/model/types";
+import { Spinner } from "@base/ui/Spinner";
+import { userQueryOptions } from "@features/auth/api/userQuery";
+import { useQuery } from "@tanstack/react-query";
+import { Link, useNavigate } from "@tanstack/react-router";
 
-interface AccountPageProps {
-    user: User;
-}
+export function AccountPage() {
+  const navigate = useNavigate();
+  const { data: user, isLoading: isUserLoading } = useQuery(userQueryOptions());
 
-export function AccountPage({ user }: AccountPageProps) {
-    // birthDate가 "1990-01-01" 형태라고 가정하고 앞의 4자리(연도)만 추출합니다.
-    const displayBirthYear = user.birthDate ? user.birthDate.substring(0, 4) : "정보 없음";
+  return (
+    <div className="flex flex-col min-h-screen bg-white">
+      <div>
+        <header className="py-[6px] pl-1 pr-5">
+          <div className="flex items-center gap-[2px]">
+            <button
+              type="button"
+              className="p-[10px] text-grey-dark"
+              onClick={() => {
+                navigate({ to: "/mypage" });
+              }}
+            >
+              <img src="/assets/icons/arrow-left.svg" alt="뒤로가기" />
+            </button>
 
-    const infoItems = [
-        { label: "성별", value: user.gender === "FEMALE" ? "여성" : "남성" },
-        { label: "출생 연도", value: displayBirthYear },
-        { label: "이메일", value: user.email },
-        // provider 정보가 없으므로, 필요하다면 백엔드에 추가 요청을 하거나 해당 항목을 숨겨야 합니다.
-        // 일단 기획안을 유지하기 위해 임시 텍스트로 처리해 두었습니다.
-        { label: "소셜 연동", value: "연동 정보 없음" },
-    ];
+            <h1 className="text-title-m">계정</h1>
+          </div>
+        </header>
 
-    return (
-        <div className="flex flex-col min-h-screen bg-white">
-            <Header title="계정" />
+        {isUserLoading ? (
+          <div className="flex items-center justify-center pt-48">
+            <Spinner />
+          </div>
+        ) : (
+          <div className="mt-4 px-5">
+            <div className="flex flex-col gap-[2px]">
+              <span className="text-label-m">성별</span>
+              <span className="text-title-s">{user?.gender === "MALE" ? "남성" : "여성"}</span>
+            </div>
 
-            <main className="flex-1 px-5 py-4">
-                <div className="flex flex-col gap-6">
-                    {infoItems.map((item) => (
-                        <div key={item.label} className="flex flex-col gap-2 border-b border-grey-divider pb-4">
-                            <span className="text-label-s text-grey-light">{item.label}</span>
-                            <span className="text-body-m">{item.value}</span>
-                        </div>
-                    ))}
+            <hr className="w-full h-px bg-grey-divider my-4" />
 
-                    <Link
-                        to="/mypage/withdrawal"
-                        className="text-body-s text-grey-light mt-4 inline-block w-fit"
-                    >
-                        회원 탈퇴
-                    </Link>
-                </div>
-            </main>
-        </div>
-    );
+            <div className="flex flex-col gap-[2px]">
+              <span className="text-label-m">출생 연도</span>
+              <span className="text-title-s">{user?.birthDate}</span>
+            </div>
+
+            <hr className="w-full h-px bg-grey-divider my-4" />
+
+            <div className="flex flex-col gap-[2px]">
+              <span className="text-label-m">이메일</span>
+              <span className="text-title-s">{user?.email}</span>
+            </div>
+
+            <hr className="w-full h-px bg-grey-divider my-4" />
+
+            <div className="flex flex-col gap-[2px]">
+              <span className="text-label-m">소셜 연동</span>
+              <span className="text-title-s">Google 연동됨</span>
+            </div>
+
+            <hr className="w-full h-px bg-grey-divider my-4" />
+
+            <Link to="/mypage/withdrawal" className="text-body-s text-grey-light">
+              회원 탈퇴
+            </Link>
+          </div>
+        )}
+      </div>
+    </div>
+  );
 }

@@ -1,3 +1,4 @@
+import { useLayoutEffect, useRef } from "react";
 import type { VoteOption } from "../model/types";
 import { VoteBar } from "./VoteBar";
 import { VoteTimeRemaining } from "./VoteTimeRemaining";
@@ -25,6 +26,17 @@ export function VoteOptionsSection({
   isCancelPending,
   isParticipatePending,
 }: VoteOptionsSectionProps) {
+  const buttonRefs = useRef<(HTMLButtonElement | null)[]>([]);
+
+  // biome-ignore lint/correctness/useExhaustiveDependencies: options change triggers button re-renders which need re-measurement
+  useLayoutEffect(() => {
+    const btns = buttonRefs.current.filter((b): b is HTMLButtonElement => b !== null);
+    if (btns.length === 0) return;
+    for (const btn of btns) btn.style.minHeight = "";
+    const maxH = Math.max(...btns.map((btn) => btn.offsetHeight));
+    for (const btn of btns) btn.style.minHeight = `${maxH}px`;
+  }, [options]);
+
   return (
     <div className="px-4 py-5 rounded-[20px] border border-grey-stroke mt-5">
       <div className="flex items-center gap-2">
@@ -42,19 +54,24 @@ export function VoteOptionsSection({
           다시 투표하기
         </button>
 
-        {options?.map((option) => {
+        {options?.map((option, index) => {
           const isSelected = myVote?.selectedOptionId === option.optionId;
           const hasVoted = myVote?.voted ?? false;
           return (
             <button
               key={option.optionId}
+              ref={(el) => {
+                buttonRefs.current[index] = el;
+              }}
               type="button"
-              className={`text-body-s p-4 rounded-lg bg-grey-stroke w-full text-left relative overflow-hidden ${hasVoted && isSelected ? "text-grey-divider" : "text-grey-black"}`}
+              className={`text-body-s px-4 py-3 rounded-lg w-full text-left relative overflow-hidden flex items-center ${isEnded ? (index === 0 ? "bg-grey-stroke text-grey-light" : "bg-grey-purple text-grey-divider") : (hasVoted && isSelected) ? "text-grey-divider bg-grey-stroke" : "text-grey-black bg-grey-stroke"}`}
               onClick={() => onOptionClick(option.optionId)}
-              disabled={isParticipatePending}
+              disabled={isParticipatePending || isEnded}
             >
               {hasVoted && option.ratio !== null && <VoteBar ratio={option.ratio} isSelected={isSelected} />}
-              <span className="relative z-10">{option.label}</span>
+              <span className="relative z-10 line-clamp-2">
+                {option.label} {hasVoted && option.ratio !== null && `(${option.ratio}%)`}
+              </span>
             </button>
           );
         })}

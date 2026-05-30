@@ -222,7 +222,7 @@ export function DynamicBottomSheet({
     <div
       ref={containerRef}
       className={cn(
-        "fixed inset-0 z-overlay",
+        "fixed inset-0 z-50",
         "transition-opacity duration-300",
         isOpen ? "opacity-100" : "opacity-0 pointer-events-none",
       )}
@@ -259,6 +259,8 @@ export function DynamicBottomSheet({
           height: topOffset > 0 ? `min(${currentHeight}dvh, calc(100dvh - ${topOffset}px))` : `${currentHeight}dvh`,
           maxHeight: topOffset > 0 ? `min(${maxHeight}dvh, calc(100dvh - ${topOffset}px))` : `${maxHeight}dvh`,
         }}
+        onTouchStart={(e) => e.stopPropagation()}
+        onTouchEnd={(e) => e.stopPropagation()}
       >
         <div
           className="flex-shrink-0 cursor-grab touch-none active:cursor-grabbing"

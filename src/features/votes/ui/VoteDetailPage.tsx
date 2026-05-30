@@ -60,13 +60,16 @@ export function VoteDetailPage({ voteId }: { voteId: string }) {
             isCancelPending={cancelMutation.isPending}
             isParticipatePending={participateMutation.isPending}
           />
-          <VoteReactionBar
-            emojiList={emojiList}
-            commentCount={data?.commentCount}
-            onEmojiClick={(type) => emojiMutation.mutate(type)}
-            isEmojiPending={emojiMutation.isPending}
-            voteUserType={voteUserType}
-          />
+          {!isEnded && (
+            <VoteReactionBar
+              voteId={voteId}
+              emojiList={emojiList}
+              commentCount={data?.commentCount}
+              onEmojiClick={(type) => emojiMutation.mutate(type)}
+              isEmojiPending={emojiMutation.isPending}
+              voteUserType={voteUserType}
+            />
+          )}
         </div>
 
         {isEnded && result && (
@@ -77,11 +80,12 @@ export function VoteDetailPage({ voteId }: { voteId: string }) {
             genderChartProps={genderChartProps}
             ageGroups={ageGroups}
             aiInsight={result.aiInsight}
+            participantCount={result.participantCount}
           />
         )}
       </main>
 
-      {hasFooter && <VoteFooter />}
+      {hasFooter && <VoteFooter voteId={voteId} />}
 
       <FreeVoteLimitModal isOpen={isFreeVoteLimitModalOpen} onClose={() => setIsFreeVoteLimitModalOpen(false)} />
     </div>
