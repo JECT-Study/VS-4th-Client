@@ -55,15 +55,13 @@ function ChatRoomContent() {
     return `${messages.length}-${lastMessage.messageId}`;
   }, [messagesData?.messages]);
 
-  const bottomRef = useRef<HTMLDivElement>(null);
   const isAtBottomRef = useRef(true);
   const hasScrolledOnEnterRef = useRef(false);
 
   useEffect(() => {
     const updateIsAtBottom = () => {
-      const scrollElement = document.documentElement;
-      const distanceFromBottom = scrollElement.scrollHeight - window.scrollY - window.innerHeight;
-      isAtBottomRef.current = distanceFromBottom <= 120;
+      const distanceFromBottom = document.documentElement.scrollHeight - window.scrollY - window.innerHeight;
+      isAtBottomRef.current = distanceFromBottom <= 140;
     };
 
     updateIsAtBottom();
@@ -79,21 +77,22 @@ function ChatRoomContent() {
   useEffect(() => {
     if (scrollTrigger == null) return;
 
+    const scrollToBottom = () => {
+      window.scrollTo({ top: document.documentElement.scrollHeight, behavior: "auto" });
+      isAtBottomRef.current = true;
+    };
+
     if (!hasScrolledOnEnterRef.current) {
       hasScrolledOnEnterRef.current = true;
       requestAnimationFrame(() => {
-        bottomRef.current?.scrollIntoView({ block: "end" });
-        isAtBottomRef.current = true;
+        requestAnimationFrame(scrollToBottom);
       });
       return;
     }
 
     if (!isAtBottomRef.current) return;
 
-    requestAnimationFrame(() => {
-      bottomRef.current?.scrollIntoView({ block: "end", behavior: "smooth" });
-      isAtBottomRef.current = true;
-    });
+    requestAnimationFrame(scrollToBottom);
   }, [scrollTrigger]);
 
   const lastMarkedReadRef = useRef<{ voteId: number; messageId: number } | null>(null);
@@ -138,13 +137,12 @@ function ChatRoomContent() {
   };
 
   return (
-    <main className="min-h-screen pb-20 bg-white">
+    <main className="min-h-screen bg-white pb-[calc(112px+env(safe-area-inset-bottom))]">
       <ChatRoomHeader title={header.title} participantCount={gauge.participantCount} />
 
       <VoteSummaryCard header={header} gauge={gauge} />
 
       <ChatMessageList messages={messagesData.messages} optionA={header.optionA} optionB={header.optionB} />
-      <div ref={bottomRef} aria-hidden="true" />
 
       {isEnded ? (
         <div className="fixed left-0 right-0 text-center bottom-8 text-label-m text-grey-light">
