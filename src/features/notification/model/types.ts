@@ -1,8 +1,19 @@
 export interface NotificationItem {
   id: number;
+  notificationId: number;
+  voteId: number;
+  type: "VOTE_ENDED";
   title: string;
   message: string;
-  thumbnailUrl?: string; // 투표 결과 썸네일 등
+  body: string;
+  thumbnailUrl?: string;
   timeAgo: string;
+  createdAt: string;
   isRead: boolean;
+}
+
+export interface NotificationListResponse {
+  notifications: NotificationItem[];
+  nextCursor: number | null;
+  hasNext: boolean;
 }
