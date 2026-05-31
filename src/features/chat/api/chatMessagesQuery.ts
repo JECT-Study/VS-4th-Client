@@ -12,7 +12,11 @@ export const getChatMessages = async ({ voteId, cursor, size = 30 }: GetChatMess
   const { data } = await apiClient.get<ChatMessagesResponse>(`/api/chats/${voteId}/messages`, {
     params: { cursor, size },
   });
-  return data;
+
+  return {
+    ...data,
+    messages: [...data.messages].sort((a, b) => a.messageId - b.messageId),
+  };
 };
 
 // 2. Query Keys
