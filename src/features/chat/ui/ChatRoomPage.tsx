@@ -7,7 +7,7 @@ import { ChatRoomHeader } from "./ChatRoomHeader";
 import { VoteSummaryCard } from "./VoteSummaryCard";
 
 import { useChatGaugeQuery } from "../api/chatGaugeQuery";
-import { useChatMessagesQuery } from "../api/chatMessagesQuery";
+import { useInfiniteChatMessagesQuery } from "../api/chatMessagesQuery";
 import { useChatRoomHeaderQuery } from "../api/chatRoomHeaderQuery";
 import { useMarkChatAsReadMutation } from "../api/markChatAsRead";
 import { useSendChatMessageMutation } from "../api/sendChatMessageMutation";
@@ -35,44 +35,74 @@ function ChatRoomContent() {
     status: header?.status,
   });
 
-  const { data: messagesData, isLoading: isMessagesLoading, isError: isMessagesError } = useChatMessagesQuery(voteId);
+  const {
+    data: messagesData,
+    isLoading: isMessagesLoading,
+    isError: isMessagesError,
+    hasNextPage,
+    isFetchingNextPage,
+    fetchNextPage,
+  } = useInfiniteChatMessagesQuery(voteId);
 
   const sendMessageMutation = useSendChatMessageMutation(voteId);
   const markAsReadMutation = useMarkChatAsReadMutation();
 
+  const messages = useMemo(() => {
+    const pages = messagesData?.pages ?? [];
+    return [...pages].reverse().flatMap((page) => page.messages);
+  }, [messagesData?.pages]);
+
   const latestMessageId = useMemo(() => {
-    const messageIds =
-      messagesData?.messages.map((message) => message.messageId).filter((messageId) => messageId > 0) ?? [];
+    const messageIds = messages.map((message) => message.messageId).filter((messageId) => messageId > 0);
 
     return messageIds.length > 0 ? Math.max(...messageIds) : null;
-  }, [messagesData?.messages]);
+  }, [messages]);
 
   const scrollTrigger = useMemo(() => {
-    const messages = messagesData?.messages;
-    if (!messages || messages.length === 0) return null;
-
-    const lastMessage = messages[messages.length - 1]!;
-    return `${messages.length}-${lastMessage.messageId}`;
-  }, [messagesData?.messages]);
+    const lastMessage = messages[messages.length - 1];
+    return lastMessage ? `${messages.length}-${lastMessage.messageId}` : null;
+  }, [messages]);
 
   const isAtBottomRef = useRef(true);
   const hasScrolledOnEnterRef = useRef(false);
+  const isFetchingOlderMessagesRef = useRef(false);
 
   useEffect(() => {
-    const updateIsAtBottom = () => {
+    const updateScrollState = () => {
       const distanceFromBottom = document.documentElement.scrollHeight - window.scrollY - window.innerHeight;
       isAtBottomRef.current = distanceFromBottom <= 140;
+
+      if (
+        !hasScrolledOnEnterRef.current ||
+        window.scrollY > 600 ||
+        !hasNextPage ||
+        isFetchingNextPage ||
+        isFetchingOlderMessagesRef.current
+      ) {
+        return;
+      }
+
+      const previousScrollHeight = document.documentElement.scrollHeight;
+      isFetchingOlderMessagesRef.current = true;
+
+      fetchNextPage().finally(() => {
+        requestAnimationFrame(() => {
+          const nextScrollHeight = document.documentElement.scrollHeight;
+          window.scrollTo({ top: window.scrollY + nextScrollHeight - previousScrollHeight, behavior: "auto" });
+          isFetchingOlderMessagesRef.current = false;
+        });
+      });
     };
 
-    updateIsAtBottom();
-    window.addEventListener("scroll", updateIsAtBottom, { passive: true });
-    window.addEventListener("resize", updateIsAtBottom);
+    updateScrollState();
+    window.addEventListener("scroll", updateScrollState, { passive: true });
+    window.addEventListener("resize", updateScrollState);
 
     return () => {
-      window.removeEventListener("scroll", updateIsAtBottom);
-      window.removeEventListener("resize", updateIsAtBottom);
+      window.removeEventListener("scroll", updateScrollState);
+      window.removeEventListener("resize", updateScrollState);
     };
-  }, []);
+  }, [fetchNextPage, hasNextPage, isFetchingNextPage]);
 
   useEffect(() => {
     if (scrollTrigger == null) return;
@@ -142,7 +172,7 @@ function ChatRoomContent() {
 
       <VoteSummaryCard header={header} gauge={gauge} />
 
-      <ChatMessageList messages={messagesData.messages} optionA={header.optionA} optionB={header.optionB} />
+      <ChatMessageList messages={messages} optionA={header.optionA} optionB={header.optionB} />
 
       {isEnded ? (
         <div className="fixed left-0 right-0 text-center bottom-8 text-label-m text-grey-light">
