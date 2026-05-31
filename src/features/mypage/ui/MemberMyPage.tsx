@@ -17,8 +17,8 @@ export function MemberMyPage({ user }: MemberMyPageProps) {
   const logoutMutation = useMutation({
     mutationFn: logout,
     onSuccess: () => {
-      queryClient.removeQueries({ queryKey: ["user"] });
-      queryClient.invalidateQueries({ refetchType: "all" });
+      queryClient.clear();
+      queryClient.setQueryData(["user", "me"], null);
       showToast.success("로그아웃 되었어요.");
       navigate({ to: "/home" });
     },

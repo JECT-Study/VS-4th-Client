@@ -2,8 +2,10 @@ import { API_BASE_URL } from "@base/api/client";
 import { showToast } from "@base/ui/Toast";
 import { Tooltip } from "@base/ui/Tooltip";
 import { userQueryOptions } from "@features/auth/api/userQuery";
-import { useQueryClient } from "@tanstack/react-query";
+import { logout } from "@features/mypage/api/logout";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
+import { useState } from "react";
 
 const OAUTH_BASE_URL = import.meta.env.VITE_OAUTH_BASE_URL ?? API_BASE_URL;
 const GOOGLE_LOGIN_URL = `${OAUTH_BASE_URL}/oauth2/authorization/google`;
@@ -16,9 +18,28 @@ export const Route = createFileRoute("/login")({
 function RouteComponent() {
   const navigate = useNavigate();
   const queryClient = useQueryClient();
+  const { data: user, isPending: isUserPending } = useQuery(userQueryOptions());
+  const [isBrowsingAsGuest, setIsBrowsingAsGuest] = useState(false);
 
-  const browseAsGuest = () => {
-    navigate({ to: "/home" });
+  const browseAsGuest = async () => {
+    try {
+      setIsBrowsingAsGuest(true);
+      const currentUser =
+        user ??
+        (isUserPending
+          ? await queryClient.fetchQuery({ ...userQueryOptions(), staleTime: 0 }).catch(() => null)
+          : null);
+
+      if (currentUser) await logout();
+
+      queryClient.clear();
+      queryClient.setQueryData(["user", "me"], null);
+      navigate({ to: "/home" });
+    } catch {
+      showToast.warning("비회원으로 전환하지 못했어요. 다시 시도해 주세요.");
+    } finally {
+      setIsBrowsingAsGuest(false);
+    }
   };
 
   const loginWithGoogle = () => {
@@ -77,8 +98,9 @@ function RouteComponent() {
               type="button"
               className="w-full text-grey-light bg-transparent border border-grey-stroke text-body-m py-4 rounded-lg"
               onClick={browseAsGuest}
+              disabled={isBrowsingAsGuest || isUserPending}
             >
-              비회원으로 둘러보기
+              {isBrowsingAsGuest || isUserPending ? "전환 중..." : "비회원으로 둘러보기"}
             </button>
           }
           offset={20}
