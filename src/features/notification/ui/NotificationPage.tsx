@@ -36,6 +36,15 @@ export function NotificationPage() {
   // 실제 구현 시 useQuery 등을 통해 데이터를 가져오고 상태를 관리합니다.
   const [notifications, setNotifications] = useState(MOCK_NOTIFICATIONS);
 
+  const handleGoBack = () => {
+    if (window.history.length > 1) {
+      window.history.back();
+      return;
+    }
+
+    navigate({ to: "/home" });
+  };
+
   const handleReadAll = () => {
     setNotifications((prev) => prev.map((n) => ({ ...n, isRead: true })));
   };
@@ -51,8 +60,8 @@ export function NotificationPage() {
     <main className="min-h-dvh bg-white flex flex-col">
       {/* 마이페이지 등에서 사용한 공통 Header 컴포넌트가 있다면 재사용하는 것이 좋습니다. */}
       <header className="sticky top-0 z-20 flex items-center px-5 h-14 bg-white border-b border-grey-stroke">
-        <button onClick={() => navigate({ to: "/" })} className="p-2 -ml-2">
-          <img src="/assets/icons/chevron-left.svg" alt="뒤로가기" className="w-6 h-6" />
+        <button type="button" onClick={handleGoBack} className="p-2 -ml-2">
+          <img src="/assets/icons/arrow-left.svg" alt="뒤로가기" className="w-6 h-6" />
         </button>
         <h1 className="text-title-m font-bold ml-2">알림</h1>
       </header>

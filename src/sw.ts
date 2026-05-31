@@ -79,8 +79,9 @@ interface PushPayload {
   badge?: string;
 }
 
-const DEFAULT_ICON = "/assets/images/app/pwa-192x192.png";
-const DEFAULT_BADGE = "/assets/images/app/pwa-192x192.png";
+const DEFAULT_ICON = "/assets/images/logo_118x118.png";
+const DEFAULT_BADGE = "/assets/images/logo_118x118.png";
+const DEFAULT_NOTIFICATION_URL = "/home";
 
 self.addEventListener("push", (event) => {
   if (!event.data) return;
@@ -95,7 +96,7 @@ self.addEventListener("push", (event) => {
     };
   }
 
-  const redirectUrl = payload.redirect_url ?? "/";
+  const redirectUrl = payload.redirect_url ?? DEFAULT_NOTIFICATION_URL;
 
   event.waitUntil(
     self.registration.showNotification(payload.title, {
@@ -113,7 +114,7 @@ self.addEventListener("push", (event) => {
 self.addEventListener("notificationclick", (event) => {
   event.notification.close();
 
-  const redirectUrl: string = event.notification.data?.redirect_url ?? "/";
+  const redirectUrl: string = event.notification.data?.redirect_url ?? DEFAULT_NOTIFICATION_URL;
 
   event.waitUntil(
     self.clients.matchAll({ type: "window", includeUncontrolled: true }).then((windowClients) => {

@@ -1,5 +1,13 @@
+import { API_BASE_URL } from "@base/api/client";
+import { showToast } from "@base/ui/Toast";
 import { Tooltip } from "@base/ui/Tooltip";
+import { userQueryOptions } from "@features/auth/api/userQuery";
+import { useQueryClient } from "@tanstack/react-query";
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
+
+const OAUTH_BASE_URL = import.meta.env.VITE_OAUTH_BASE_URL ?? API_BASE_URL;
+const GOOGLE_LOGIN_URL = `${OAUTH_BASE_URL}/oauth2/authorization/google`;
+const USE_OAUTH_POPUP = import.meta.env.DEV;
 
 export const Route = createFileRoute("/login")({
   component: RouteComponent,
@@ -7,13 +15,44 @@ export const Route = createFileRoute("/login")({
 
 function RouteComponent() {
   const navigate = useNavigate();
+  const queryClient = useQueryClient();
 
   const browseAsGuest = () => {
     navigate({ to: "/home" });
   };
 
   const loginWithGoogle = () => {
-    window.location.href = "https://api.vs.io.kr/oauth2/authorization/google";
+    if (!USE_OAUTH_POPUP) {
+      window.location.href = GOOGLE_LOGIN_URL;
+      return;
+    }
+
+    const popup = window.open(GOOGLE_LOGIN_URL, "google-login", "width=480,height=720");
+
+    if (!popup) {
+      showToast.warning("팝업 차단을 해제한 뒤 다시 시도해 주세요.");
+      return;
+    }
+
+    queryClient.removeQueries({ queryKey: ["user", "me"] });
+
+    const intervalId = window.setInterval(async () => {
+      try {
+        const user = await queryClient.fetchQuery({ ...userQueryOptions(), staleTime: 0 });
+
+        if (user) {
+          window.clearInterval(intervalId);
+          popup.close();
+          navigate({ to: "/home" });
+        }
+      } catch {
+        // 로그인 완료 전에는 프로필 조회가 실패할 수 있습니다.
+      }
+
+      if (popup.closed) {
+        window.clearInterval(intervalId);
+      }
+    }, 1000);
   };
 
   return (

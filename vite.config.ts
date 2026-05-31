@@ -30,17 +30,7 @@ export default defineConfig({
         display: "standalone",
         background_color: "#FAFAFA",
         theme_color: "#FAFAFA",
-        icons: [
-          { src: "assets/images/app/pwa-64x64.png", sizes: "64x64", type: "image/png" },
-          { src: "assets/images/app/pwa-192x192.png", sizes: "192x192", type: "image/png" },
-          { src: "assets/images/app/pwa-512x512.png", sizes: "512x512", type: "image/png" },
-          {
-            src: "assets/images/app/maskable-icon-512x512.png",
-            sizes: "512x512",
-            type: "image/png",
-            purpose: "maskable",
-          },
-        ],
+        icons: [{ src: "assets/images/logo_118x118.png", sizes: "118x118", type: "image/png" }],
       },
       injectManifest: {
         globPatterns: ["**/*.{js,css,html,ico,png,svg,woff2,webp,avif}"],
