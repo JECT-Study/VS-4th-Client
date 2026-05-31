@@ -1,4 +1,5 @@
 import { useParams } from "@tanstack/react-router";
+import { ChatAccessGate } from "./ChatAccessRequiredPage";
 import { ChatInputBar } from "./ChatInputBar";
 import { ChatMessageList } from "./ChatMessageList";
 import { ChatRoomHeader } from "./ChatRoomHeader";
@@ -11,6 +12,14 @@ import { useSendChatMessageMutation } from "../api/sendChatMessageMutation";
 import { useChatWebSocket } from "../model/useChatWebSocket";
 
 export function ChatRoomPage() {
+  return (
+    <ChatAccessGate>
+      <ChatRoomContent />
+    </ChatAccessGate>
+  );
+}
+
+function ChatRoomContent() {
   const params = useParams({ strict: false });
   const voteId = Number(params.chatRoomId);
   const { data: header, isLoading: isHeaderLoading, isError: isHeaderError } = useChatRoomHeaderQuery(voteId);
