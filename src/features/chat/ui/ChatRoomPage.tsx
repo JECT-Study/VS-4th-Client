@@ -74,7 +74,7 @@ function ChatRoomContent() {
 
       if (
         !hasScrolledOnEnterRef.current ||
-        window.scrollY > 160 ||
+        window.scrollY > 600 ||
         !hasNextPage ||
         isFetchingNextPage ||
         isFetchingOlderMessagesRef.current
