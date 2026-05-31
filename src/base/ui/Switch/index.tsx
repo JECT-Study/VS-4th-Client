@@ -16,8 +16,8 @@ export function Switch({ checked, onChange, disabled = false, className }: Switc
       disabled={disabled}
       onClick={() => onChange(!checked)}
       className={clsx(
-        "relative inline-flex h-[32px] w-[52px] shrink-0 cursor-pointer items-center rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none focus-visible:ring-2 focus-visible:ring-primary-purple focus-visible:ring-offset-2",
-        checked ? "bg-primary-purple" : "bg-grey-divider",
+        "relative inline-flex h-6 w-[38px] shrink-0 cursor-pointer items-center rounded-full transition-colors duration-200 ease-in-out focus:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2",
+        checked ? "bg-primary" : "bg-grey-disabled",
         disabled && "opacity-50 cursor-not-allowed",
         className,
       )}
@@ -26,8 +26,8 @@ export function Switch({ checked, onChange, disabled = false, className }: Switc
       <span
         aria-hidden="true"
         className={clsx(
-          "pointer-events-none inline-block h-[28px] w-[28px] transform rounded-full bg-white shadow ring-0 transition duration-200 ease-in-out",
-          checked ? "translate-x-[20px]" : "translate-x-0",
+          "pointer-events-none inline-block h-[18px] w-[18px] transform rounded-full bg-white ring-0 transition duration-200 ease-in-out",
+          checked ? "translate-x-[17px]" : "translate-x-[3px]",
         )}
       />
     </button>
