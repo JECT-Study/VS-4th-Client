@@ -2,11 +2,20 @@ import { useNavigate } from "@tanstack/react-router";
 import { useState } from "react";
 import { useChatListQuery } from "../api/chatListQuery";
 import type { ChatTabType } from "../model/types";
+import { ChatAccessGate } from "./ChatAccessRequiredPage";
 import { ChatEmptyState } from "./ChatEmptyState";
 import { ChatList } from "./ChatList";
 import { ChatTabs } from "./ChatTabs";
 
 export function ChatListPage() {
+  return (
+    <ChatAccessGate>
+      <ChatListContent />
+    </ChatAccessGate>
+  );
+}
+
+function ChatListContent() {
   const navigate = useNavigate();
   const [activeTab, setActiveTab] = useState<ChatTabType>("ONGOING");
 
