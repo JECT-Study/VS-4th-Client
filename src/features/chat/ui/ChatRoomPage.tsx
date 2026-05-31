@@ -1,4 +1,5 @@
 import { useParams } from "@tanstack/react-router";
+import { useEffect, useMemo, useRef } from "react";
 import { ChatAccessGate } from "./ChatAccessRequiredPage";
 import { ChatInputBar } from "./ChatInputBar";
 import { ChatMessageList } from "./ChatMessageList";
@@ -8,6 +9,7 @@ import { VoteSummaryCard } from "./VoteSummaryCard";
 import { useChatGaugeQuery } from "../api/chatGaugeQuery";
 import { useChatMessagesQuery } from "../api/chatMessagesQuery";
 import { useChatRoomHeaderQuery } from "../api/chatRoomHeaderQuery";
+import { useMarkChatAsReadMutation } from "../api/markChatAsRead";
 import { useSendChatMessageMutation } from "../api/sendChatMessageMutation";
 import { useChatWebSocket } from "../model/useChatWebSocket";
 
@@ -36,6 +38,75 @@ function ChatRoomContent() {
   const { data: messagesData, isLoading: isMessagesLoading, isError: isMessagesError } = useChatMessagesQuery(voteId);
 
   const sendMessageMutation = useSendChatMessageMutation(voteId);
+  const markAsReadMutation = useMarkChatAsReadMutation();
+
+  const latestMessageId = useMemo(() => {
+    const messageIds =
+      messagesData?.messages.map((message) => message.messageId).filter((messageId) => messageId > 0) ?? [];
+
+    return messageIds.length > 0 ? Math.max(...messageIds) : null;
+  }, [messagesData?.messages]);
+
+  const scrollTrigger = useMemo(() => {
+    const messages = messagesData?.messages;
+    if (!messages || messages.length === 0) return null;
+
+    const lastMessage = messages[messages.length - 1]!;
+    return `${messages.length}-${lastMessage.messageId}`;
+  }, [messagesData?.messages]);
+
+  const isAtBottomRef = useRef(true);
+  const hasScrolledOnEnterRef = useRef(false);
+
+  useEffect(() => {
+    const updateIsAtBottom = () => {
+      const distanceFromBottom = document.documentElement.scrollHeight - window.scrollY - window.innerHeight;
+      isAtBottomRef.current = distanceFromBottom <= 140;
+    };
+
+    updateIsAtBottom();
+    window.addEventListener("scroll", updateIsAtBottom, { passive: true });
+    window.addEventListener("resize", updateIsAtBottom);
+
+    return () => {
+      window.removeEventListener("scroll", updateIsAtBottom);
+      window.removeEventListener("resize", updateIsAtBottom);
+    };
+  }, []);
+
+  useEffect(() => {
+    if (scrollTrigger == null) return;
+
+    const scrollToBottom = () => {
+      window.scrollTo({ top: document.documentElement.scrollHeight, behavior: "auto" });
+      isAtBottomRef.current = true;
+    };
+
+    if (!hasScrolledOnEnterRef.current) {
+      hasScrolledOnEnterRef.current = true;
+      requestAnimationFrame(() => {
+        requestAnimationFrame(scrollToBottom);
+      });
+      return;
+    }
+
+    if (!isAtBottomRef.current) return;
+
+    requestAnimationFrame(scrollToBottom);
+  }, [scrollTrigger]);
+
+  const lastMarkedReadRef = useRef<{ voteId: number; messageId: number } | null>(null);
+  useEffect(() => {
+    const alreadyMarkedRead =
+      lastMarkedReadRef.current?.voteId === voteId && lastMarkedReadRef.current.messageId === latestMessageId;
+
+    if (!Number.isFinite(voteId) || latestMessageId == null || alreadyMarkedRead) {
+      return;
+    }
+
+    lastMarkedReadRef.current = { voteId, messageId: latestMessageId };
+    markAsReadMutation.mutate({ voteId, lastReadMessageId: latestMessageId });
+  }, [voteId, latestMessageId, markAsReadMutation.mutate]);
 
   // 실시간 웹소켓 구독 시작
   useChatWebSocket(voteId);
@@ -66,7 +137,7 @@ function ChatRoomContent() {
   };
 
   return (
-    <main className="min-h-screen pb-20 bg-white">
+    <main className="min-h-screen bg-white pb-[calc(112px+env(safe-area-inset-bottom))]">
       <ChatRoomHeader title={header.title} participantCount={gauge.participantCount} />
 
       <VoteSummaryCard header={header} gauge={gauge} />
