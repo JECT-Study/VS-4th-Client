@@ -86,6 +86,7 @@ export function useVoteDetail(voteId: string) {
           old ? { ...old, remainingFreeVotes: response.remainingFreeVotes! } : old,
         );
       }
+      queryClient.invalidateQueries({ queryKey: ["me", "participated-votes"] });
     },
     onError: (_err, _optionId, context) => {
       if (context?.previous) queryClient.setQueryData(queryKey, context.previous);
@@ -97,7 +98,10 @@ export function useVoteDetail(voteId: string) {
 
   const cancelMutation = useMutation({
     mutationFn: () => cancelVote(voteId),
-    onSuccess: () => queryClient.invalidateQueries({ queryKey }),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey });
+      queryClient.invalidateQueries({ queryKey: ["me", "participated-votes"] });
+    },
   });
 
   const emojiMutation = useMutation({
