@@ -1,4 +1,4 @@
-import { apiClient } from "@base/api/client";
+import { defaultApi } from "@base/api/defaultApi";
 
 interface WithdrawParams {
   category: string;
@@ -6,8 +6,6 @@ interface WithdrawParams {
 }
 
 export async function withdraw({ category, reason }: WithdrawParams): Promise<void> {
-  // 서버 스펙상 body 필드명이 `reasone`(오타)이므로 그대로 맞춰 전송합니다.
-  await apiClient.delete("/api/users/profile/delete", {
-    data: { category, reasone: reason },
-  });
+  // UserDeleteReq의 body 필드명이 `reasone`(서버 스펙상 오타)이므로 그대로 맞춰 전달합니다.
+  await defaultApi.deleteAccount({ category, reasone: reason });
 }
