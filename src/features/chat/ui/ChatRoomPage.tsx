@@ -1,5 +1,5 @@
 import { useParams } from "@tanstack/react-router";
-import { useEffect, useMemo, useRef } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { ChatAccessGate } from "./ChatAccessRequiredPage";
 import { ChatInputBar } from "./ChatInputBar";
 import { ChatMessageList } from "./ChatMessageList";
@@ -11,7 +11,11 @@ import { useInfiniteChatMessagesQuery } from "../api/chatMessagesQuery";
 import { useChatRoomHeaderQuery } from "../api/chatRoomHeaderQuery";
 import { useMarkChatAsReadMutation } from "../api/markChatAsRead";
 import { useSendChatMessageMutation } from "../api/sendChatMessageMutation";
+import { sortChatMessagesAscending } from "../lib/sortChatMessages";
 import { useChatWebSocket } from "../model/useChatWebSocket";
+
+const LOAD_MORE_THRESHOLD_PX = 120;
+const SCROLL_BUTTON_THRESHOLD_PX = 180;
 
 export function ChatRoomPage() {
   return (
@@ -49,7 +53,7 @@ function ChatRoomContent() {
 
   const messages = useMemo(() => {
     const pages = messagesData?.pages ?? [];
-    return [...pages].reverse().flatMap((page) => page.messages);
+    return sortChatMessagesAscending(pages.flatMap((page) => page.messages));
   }, [messagesData?.pages]);
 
   const latestMessageId = useMemo(() => {
@@ -66,15 +70,19 @@ function ChatRoomContent() {
   const isAtBottomRef = useRef(true);
   const hasScrolledOnEnterRef = useRef(false);
   const isFetchingOlderMessagesRef = useRef(false);
+  const bottomRef = useRef<HTMLDivElement>(null);
+  const [showScrollButton, setShowScrollButton] = useState(false);
 
   useEffect(() => {
     const updateScrollState = () => {
       const distanceFromBottom = document.documentElement.scrollHeight - window.scrollY - window.innerHeight;
-      isAtBottomRef.current = distanceFromBottom <= 140;
+      const isAtBottom = distanceFromBottom <= SCROLL_BUTTON_THRESHOLD_PX;
+      isAtBottomRef.current = isAtBottom;
+      setShowScrollButton(!isAtBottom);
 
       if (
         !hasScrolledOnEnterRef.current ||
-        window.scrollY > 600 ||
+        window.scrollY > LOAD_MORE_THRESHOLD_PX ||
         !hasNextPage ||
         isFetchingNextPage ||
         isFetchingOlderMessagesRef.current
@@ -108,8 +116,9 @@ function ChatRoomContent() {
     if (scrollTrigger == null) return;
 
     const scrollToBottom = () => {
-      window.scrollTo({ top: document.documentElement.scrollHeight, behavior: "auto" });
+      bottomRef.current?.scrollIntoView({ block: "end" });
       isAtBottomRef.current = true;
+      setShowScrollButton(false);
     };
 
     if (!hasScrolledOnEnterRef.current) {
@@ -124,6 +133,12 @@ function ChatRoomContent() {
 
     requestAnimationFrame(scrollToBottom);
   }, [scrollTrigger]);
+
+  const handleScrollToBottom = () => {
+    bottomRef.current?.scrollIntoView({ behavior: "smooth", block: "end" });
+    isAtBottomRef.current = true;
+    setShowScrollButton(false);
+  };
 
   const lastMarkedReadRef = useRef<{ voteId: number; messageId: number } | null>(null);
   useEffect(() => {
@@ -173,6 +188,18 @@ function ChatRoomContent() {
       <VoteSummaryCard header={header} gauge={gauge} />
 
       <ChatMessageList messages={messages} optionA={header.optionA} optionB={header.optionB} />
+      <div ref={bottomRef} />
+
+      {showScrollButton && (
+        <button
+          type="button"
+          className="fixed z-20 flex items-center justify-center w-12 h-12 text-grey-black -translate-x-1/2 bg-white border rounded-full shadow-[0_6px_20px_rgba(19,19,19,0.12)] bottom-[calc(88px+env(safe-area-inset-bottom))] left-[calc(50%+144px)] border-grey-stroke"
+          onClick={handleScrollToBottom}
+          aria-label="최신 메시지로 이동"
+        >
+          <img src="/assets/icons/arrow-bottom.svg" alt="" className="h-5 w-5" />
+        </button>
+      )}
 
       {isEnded ? (
         <div className="fixed left-0 right-0 text-center bottom-8 text-label-m text-grey-light">
