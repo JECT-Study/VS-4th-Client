@@ -26,13 +26,14 @@ export function useNotificationSetup() {
     }
 
     // 2. PWA(홈 화면) 설치 여부 감지
-    const checkIsStandalone = () => {
-      return (
-        window.matchMedia("(display-mode: standalone)").matches ||
-        ("standalone" in window.navigator && (window.navigator as any).standalone === true)
-      );
+    const checkIsStandalone = () =>
+      window.matchMedia("(display-mode: standalone)").matches ||
+      ("standalone" in window.navigator && (window.navigator as any).standalone === true);
+
+    const syncInstallState = () => {
+      setIsPwaInstalled(checkIsStandalone());
     };
-    setIsPwaInstalled(checkIsStandalone());
+    syncInstallState();
 
     // 3. 기존 알림 권한 상태 동기화
     if ("Notification" in window) {
@@ -50,10 +51,14 @@ export function useNotificationSetup() {
     // 사용자가 독립된 앱(Standalone) 모드로 진입하는 것을 감지
     const handleAppInstalled = () => setIsPwaInstalled(true);
     window.addEventListener("appinstalled", handleAppInstalled);
+    window.addEventListener("focus", syncInstallState);
+    document.addEventListener("visibilitychange", syncInstallState);
 
     return () => {
       window.removeEventListener("beforeinstallprompt", handleBeforeInstallPrompt);
       window.removeEventListener("appinstalled", handleAppInstalled);
+      window.removeEventListener("focus", syncInstallState);
+      document.removeEventListener("visibilitychange", syncInstallState);
     };
   }, []);
 

@@ -25,25 +25,22 @@ export function NotificationSettingToggle() {
       return;
     }
 
-    // 2. 알림을 켜려는 경우
-    if (!isPwaInstalled) {
-      // 설치가 안 되어 있으면 설치 유도 모달 먼저 띄움 (기획 1번)
+    if (osType === "ios-outdated" || ((osType === "android" || osType === "ios") && !isPwaInstalled)) {
       setActiveModal("a2hs");
-    } else {
-      // 이미 설치되어 있으면 바로 권한 요청 모달 띄움 (기획 2번)
-      setActiveModal("push");
+      return;
     }
+
+    setActiveModal("push");
   };
 
   const handleA2HSConfirm = async () => {
-    if (osType === "android") {
-      const accepted = await promptInstall();
-      // 안드로이드 유저가 설치를 완료했다면 이어서 푸시 권한 모달 띄우기
-      if (accepted) setActiveModal("push");
-    } else {
-      // iOS는 수동으로 '홈 화면에 추가'를 해야 하므로 모달을 닫음
+    if (osType !== "android") {
       setActiveModal("none");
+      return;
     }
+
+    const isInstalled = await promptInstall();
+    setActiveModal(isInstalled ? "push" : "none");
   };
 
   const handlePushAllow = async () => {
