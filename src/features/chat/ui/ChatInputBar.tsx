@@ -42,7 +42,7 @@ export function ChatInputBar({ disabled = false, placeholder = "메시지를 입
         className="flex items-center justify-center text-white rounded-full h-11 w-11 shrink-0 bg-primary disabled:bg-grey-disabled"
         aria-label="메시지 전송"
       >
-        ✈
+        <img src="/assets/icons/send.svg" alt="" className="h-5 w-5" />
       </button>
     </div>
   );

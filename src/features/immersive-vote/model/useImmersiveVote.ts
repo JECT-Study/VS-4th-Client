@@ -85,6 +85,7 @@ export function useImmersiveVote(
           old ? { ...old, remainingFreeVotes: remaining } : old,
         );
       }
+      queryClient.invalidateQueries({ queryKey: ["me", "participated-votes"] });
     },
     onError: (err, _optionId, snapshot) => {
       if (snapshot) {
@@ -197,5 +198,6 @@ export function useImmersiveVote(
     handleOptionClick,
     handleEmojiClick,
     removeFloatingEmoji,
+    isGuest,
   };
 }

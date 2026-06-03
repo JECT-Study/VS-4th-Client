@@ -4,7 +4,7 @@ import { NotificationListItem } from "./NotificationListItem";
 interface NotificationListProps {
   notifications: NotificationItem[];
   onReadAll: () => void;
-  onClickItem: (id: number) => void;
+  onClickItem: (item: NotificationItem) => void;
 }
 
 export function NotificationList({ notifications, onReadAll, onClickItem }: NotificationListProps) {
@@ -45,11 +45,7 @@ export function NotificationList({ notifications, onReadAll, onClickItem }: Noti
 
       <ul>
         {notifications.map((notification) => (
-          <NotificationListItem
-            key={notification.id}
-            item={notification}
-            onClick={() => onClickItem(notification.id)}
-          />
+          <NotificationListItem key={notification.id} item={notification} onClick={() => onClickItem(notification)} />
         ))}
       </ul>
     </div>

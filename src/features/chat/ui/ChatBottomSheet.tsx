@@ -92,12 +92,12 @@ function ChatContent({ voteId, t }: ChatContentProps) {
   const prevScrollHeightRef = useRef(0);
   const [showScrollButton, setShowScrollButton] = useState(false);
 
-  // pages[0] = 최신 페이지, pages[n] = 오래된 페이지 / 각 페이지 내 messages도 최신순 → 양쪽 모두 역순으로 시간순 정렬
+  // pages[0] = 최신 페이지, pages[n] = 오래된 페이지 / 각 페이지 내 messages는 getChatMessages에서 이미 오름차순 정렬됨
   const allMessages =
     data?.pages
       .slice()
       .reverse()
-      .flatMap((p) => [...p.messages].reverse()) ?? [];
+      .flatMap((p) => p.messages) ?? [];
   const messagesCount = allMessages.length;
 
   // 새 메시지 수신 시 하단 자동 스크롤 (하단에 있을 때만)

@@ -1,3 +1,4 @@
+import { Link } from "@tanstack/react-router";
 import { formatRemainingTime } from "../lib/formatChatTime";
 import type { ChatGaugeResponse, ChatRoomHeaderResponse } from "../model/types";
 
@@ -32,9 +33,9 @@ export function VoteSummaryCard({ header, gauge }: VoteSummaryCardProps) {
             <span>{isEnded ? "투표 종료" : formatRemainingTime(header.endAt)}</span>
           </div>
 
-          <button type="button" className="text-grey-light">
+          <Link to="/votes/$voteId" params={{ voteId: String(header.voteId) }} className="text-grey-light">
             상세보기 ›
-          </button>
+          </Link>
         </div>
       </div>
     </section>
