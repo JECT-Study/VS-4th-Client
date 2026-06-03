@@ -9,10 +9,10 @@ import { VoteSummaryCard } from "./VoteSummaryCard";
 import { useChatGaugeQuery } from "../api/chatGaugeQuery";
 import { useInfiniteChatMessagesQuery } from "../api/chatMessagesQuery";
 import { useChatRoomHeaderQuery } from "../api/chatRoomHeaderQuery";
-import { useMarkChatAsReadMutation } from "../api/markChatAsRead";
 import { useSendChatMessageMutation } from "../api/sendChatMessageMutation";
 import { sortChatMessagesAscending } from "../lib/sortChatMessages";
 import { useChatWebSocket } from "../model/useChatWebSocket";
+import { useMarkLatestChatAsRead } from "../model/useMarkLatestChatAsRead";
 
 const LOAD_MORE_THRESHOLD_PX = 120;
 const SCROLL_BUTTON_THRESHOLD_PX = 180;
@@ -49,7 +49,7 @@ function ChatRoomContent() {
   } = useInfiniteChatMessagesQuery(voteId);
 
   const sendMessageMutation = useSendChatMessageMutation(voteId);
-  const markAsReadMutation = useMarkChatAsReadMutation();
+  const markAsRead = useMarkLatestChatAsRead(voteId);
 
   const messages = useMemo(() => {
     const pages = messagesData?.pages ?? [];
@@ -140,20 +140,11 @@ function ChatRoomContent() {
     setShowScrollButton(false);
   };
 
-  const lastMarkedReadRef = useRef<{ voteId: number; messageId: number } | null>(null);
   useEffect(() => {
-    const alreadyMarkedRead =
-      lastMarkedReadRef.current?.voteId === voteId && lastMarkedReadRef.current.messageId === latestMessageId;
+    if (latestMessageId == null) return;
+    markAsRead(latestMessageId);
+  }, [latestMessageId, markAsRead]);
 
-    if (!Number.isFinite(voteId) || latestMessageId == null || alreadyMarkedRead) {
-      return;
-    }
-
-    lastMarkedReadRef.current = { voteId, messageId: latestMessageId };
-    markAsReadMutation.mutate({ voteId, lastReadMessageId: latestMessageId });
-  }, [voteId, latestMessageId, markAsReadMutation.mutate]);
-
-  // 실시간 웹소켓 구독 시작
   useChatWebSocket(voteId);
 
   const isLoading = isHeaderLoading || isGaugeLoading || isMessagesLoading;
