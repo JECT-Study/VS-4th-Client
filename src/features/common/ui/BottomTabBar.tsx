@@ -23,7 +23,7 @@ export function BottomTabBar() {
             key={tab.key}
             to={tab.path}
             className={`flex flex-col items-center justify-center gap-1 text-label-s transition-colors ${
-              isImmersiveVotePath ? "text-grey-divider" : isActive ? "text-grey-black" : "text-grey-light"
+              isImmersiveVotePath ? "text-grey-divider" : "text-grey-black"
             }`}
           >
             <img
