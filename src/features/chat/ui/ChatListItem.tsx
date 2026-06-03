@@ -1,4 +1,5 @@
-import { formatRemainingTime, formatTimeLabel } from "../lib/formatChatTime";
+import { VoteTimeCountdown } from "@features/home/ui/VoteTimeCountdown";
+import { formatTimeLabel } from "../lib/formatChatTime";
 import type { ChatListItemResponse, ChatTabType } from "../model/types";
 
 interface ChatListItemProps {
@@ -42,8 +43,12 @@ export function ChatListItem({ item, status, onClick }: ChatListItemProps) {
 
         {isOngoing && (
           <div className="flex items-center gap-1 mt-2 text-label-s text-grey-light">
-            <span>◷</span>
-            <span>{formatRemainingTime(item.endAt)}</span>
+            <svg width="16" height="16" viewBox="0 0 16 16" fill="none" className="shrink-0">
+              <title>남은 시간</title>
+              <circle cx="8" cy="8" r="5.4" stroke="currentColor" strokeWidth="1.2" />
+              <path d="M8 5V8L10.2 10.2" stroke="currentColor" strokeWidth="1.2" strokeLinecap="round" />
+            </svg>
+            <VoteTimeCountdown endAt={item.endAt} />
           </div>
         )}
       </div>
