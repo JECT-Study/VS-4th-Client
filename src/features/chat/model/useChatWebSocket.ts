@@ -51,7 +51,7 @@ export function useChatWebSocket(voteId: number) {
               );
               if (alreadyExists) return oldData;
               const updatedPages: ChatMessagesResponse[] = [
-                { ...latestPage, messages: [newMessage, ...latestPage.messages] },
+                { ...latestPage, messages: [...latestPage.messages, newMessage] },
                 ...oldData.pages.slice(1),
               ];
               return { ...oldData, pages: updatedPages };

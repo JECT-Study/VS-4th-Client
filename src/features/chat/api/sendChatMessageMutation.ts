@@ -68,7 +68,7 @@ export const useSendChatMessageMutation = (voteId: number) => {
           if (!latestPage) return oldData;
           return {
             ...oldData,
-            pages: [{ ...latestPage, messages: [tempMessage, ...latestPage.messages] }, ...oldData.pages.slice(1)],
+            pages: [{ ...latestPage, messages: [...latestPage.messages, tempMessage] }, ...oldData.pages.slice(1)],
           };
         },
       );
