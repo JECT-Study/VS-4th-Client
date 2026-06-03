@@ -1,6 +1,9 @@
+import { showToast } from "@base/ui/Toast";
+import { userQueryOptions } from "@features/auth/api/userQuery";
 import { ChatBottomSheet } from "@features/chat/ui/ChatBottomSheet";
 import ChatAuthRequiredModal from "@features/votes/ui/ChatAuthRequiredModal";
 import FreeVoteLimitModal from "@features/votes/ui/FreeVoteLimitModal";
+import { useQuery } from "@tanstack/react-query";
 import { useCallback, useRef, useState } from "react";
 import type { FloatingEmojiOrigin, ImmersiveFeedItem } from "../model/types";
 import { useImmersiveVote } from "../model/useImmersiveVote";
@@ -32,11 +35,19 @@ export function ImmersiveVoteCard({ vote, updateVote }: ImmersiveVoteCardProps) 
   );
   useImmersiveVoteLive(vote, updateVote);
 
+  const { data: user } = useQuery(userQueryOptions());
+
   const openChat = () => {
-    // if (user === null) {
-    //   setIsChatAuthOpen(true);
-    //   return;
-    // }
+    if (user === null) {
+      setIsChatAuthOpen(true);
+      return;
+    }
+
+    if (!vote.myVote.voted) {
+      showToast.warning("투표해야 채팅에 참여할 수 있어요");
+      return;
+    }
+
     setIsChatOpen(true);
   };
 
@@ -84,7 +95,7 @@ export function ImmersiveVoteCard({ vote, updateVote }: ImmersiveVoteCardProps) 
         )}
       </div>
 
-      <div className="absolute right-3 top-[47%] z-30 flex -translate-y-1/2 flex-col items-center gap-5">
+      <div className="absolute right-3 top-[50%] z-30 flex -translate-y-1/2 flex-col items-center gap-5">
         <EmojiReactionButton
           emojiList={emojiList}
           totalCount={vote.emojiSummary.total}
@@ -98,9 +109,9 @@ export function ImmersiveVoteCard({ vote, updateVote }: ImmersiveVoteCardProps) 
           onClick={openChat}
         >
           <span className="flex h-9 w-9 items-center justify-center">
-            <img src="/assets/icons/chat.svg" alt="채팅 보기" className="h-7 w-7 invert" />
+            <img src="/assets/icons/chat-reels-big.svg" alt="채팅 보기" className="h-7 w-7" />
           </span>
-          <span className="text-label-s">{vote.commentCount}</span>
+          <span className="text-label-s text-[#F7F6F9]">{vote.commentCount}</span>
         </button>
 
         <button
@@ -109,7 +120,7 @@ export function ImmersiveVoteCard({ vote, updateVote }: ImmersiveVoteCardProps) 
           onClick={() => setIsShareOpen(true)}
           aria-label="공유하기"
         >
-          <img src="/assets/icons/share.svg" alt="" className="h-7 w-7 invert" />
+          <img src="/assets/icons/share-big.svg" alt="" className="h-7 w-7" />
         </button>
       </div>
 
