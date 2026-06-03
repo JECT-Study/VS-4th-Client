@@ -1,6 +1,6 @@
+import { ChatBottomSheet } from "@features/chat/ui/ChatBottomSheet";
 import { useState } from "react";
 import SharePageModal from "./SharePageModal";
-import { ChatBottomSheet } from "@features/chat/ui/ChatBottomSheet";
 
 interface VoteFooterProps {
   voteId: string;
@@ -12,7 +12,7 @@ const VoteFooter = ({ voteId }: VoteFooterProps) => {
 
   return (
     <footer
-      className="fixed bottom-0 left-1/2 -translate-x-1/2 w-full max-w-md px-5 pt-[6px] flex gap-2 bg-white"
+      className="fixed bottom-0 left-1/2 -translate-x-1/2 w-full max-w-md px-5 pt-[6px] flex gap-2 bg-white z-10"
       style={{
         paddingBottom: "calc(env(safe-area-inset-bottom, 0px) + 6px)",
         boxShadow: "0px -1px 4px 0px rgba(0, 0, 0, 0.05)",

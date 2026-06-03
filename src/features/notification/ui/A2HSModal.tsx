@@ -19,6 +19,7 @@ export function A2HSModal({ isOpen, os, onClose, onConfirm }: A2HSModalProps) {
               이용해 주세요
             </p>
             <button
+              type="button"
               onClick={onClose}
               className="w-full bg-primary-purple text-white py-3.5 rounded-[12px] font-bold text-body-m"
             >
@@ -50,13 +51,18 @@ export function A2HSModal({ isOpen, os, onClose, onConfirm }: A2HSModalProps) {
 
             <div className="w-full flex flex-col gap-2">
               <button
+                type="button"
                 onClick={os === "android" ? onConfirm : onClose}
                 className="w-full bg-primary-purple text-white py-3.5 rounded-[12px] font-bold text-body-m"
               >
                 {os === "ios" ? "확인했어요" : "홈 화면에 추가하기"}
               </button>
               {os === "android" && (
-                <button onClick={onClose} className="w-full text-grey-light py-2 text-body-s mt-1 font-medium">
+                <button
+                  type="button"
+                  onClick={onClose}
+                  className="w-full text-grey-light py-2 text-body-s mt-1 font-medium"
+                >
                   나중에 할게요
                 </button>
               )}

@@ -24,11 +24,7 @@ export function PushPermissionModal({ isOpen, onClose, onAllow }: PushPermission
           >
             알림 받기
           </button>
-          <button
-            type="button"
-            onClick={onClose}
-            className="mt-1 w-full py-2 text-body-s font-medium text-grey-light"
-          >
+          <button type="button" onClick={onClose} className="mt-1 w-full py-2 text-body-s font-medium text-grey-light">
             나중에 할게요
           </button>
         </div>

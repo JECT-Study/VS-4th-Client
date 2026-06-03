@@ -1,10 +1,10 @@
 import { Dropdown } from "@base/ui/Dropdown";
 import { showToast } from "@base/ui/Toast";
+import { ChatBottomSheet } from "@features/chat/ui/ChatBottomSheet";
 import { useState } from "react";
 import type { EmojiType } from "../model/types";
 import type { EmojiItem, VoteUserType } from "../model/useVoteDetail";
 import ChatAuthRequiredModal from "./ChatAuthRequiredModal";
-import { ChatBottomSheet } from "@features/chat/ui/ChatBottomSheet";
 
 interface VoteReactionBarProps {
   voteId: string;

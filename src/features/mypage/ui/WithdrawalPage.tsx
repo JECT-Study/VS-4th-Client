@@ -47,8 +47,8 @@ export function WithdrawalPage() {
               "동일 이메일로 30일 내 재가입이 제한돼요",
               "참여하신 투표의 결과와 채팅 내용을 다시 볼 수 없어요",
               "참여하신 투표와 채팅 데이터는 커뮤니티 통계를 위해 익명으로 유지돼요",
-            ].map((text, idx) => (
-              <li key={idx} className="flex gap-2 text-body-s text-grey-dark">
+            ].map((text) => (
+              <li key={text} className="flex gap-2 text-body-s text-grey-dark">
                 <span className="shrink-0">•</span>
                 <span>{text}</span>
               </li>
@@ -58,9 +58,13 @@ export function WithdrawalPage() {
 
         <section className="flex flex-col gap-6">
           <div className="flex flex-col gap-2">
-            <label className="text-label-m font-bold">서비스 이용에 불편함이 있으셨나요? *</label>
+            <label htmlFor="withdrawal-reason-btn" className="text-label-m font-bold">
+              서비스 이용에 불편함이 있으셨나요? *
+            </label>
             <div className="relative">
               <button
+                id="withdrawal-reason-btn"
+                type="button"
                 onClick={() => setIsSelectOpen(!isSelectOpen)}
                 className="w-full h-12 px-4 flex items-center justify-between border border-grey-divider rounded-lg text-body-m bg-white"
               >
@@ -79,6 +83,7 @@ export function WithdrawalPage() {
                   {WITHDRAWAL_REASONS.map((r: string) => (
                     <li key={r}>
                       <button
+                        type="button"
                         onClick={() => {
                           setReason(r);
                           setIsSelectOpen(false);
@@ -97,9 +102,12 @@ export function WithdrawalPage() {
           {/* '기타' 사유 선택 시에만 노출되는 텍스트 에어리어 */}
           {reason === "기타" && (
             <div className="flex flex-col gap-2">
-              <label className="text-label-m font-bold">소중한 의견을 반영해 더 나은 VS가 될게요</label>
+              <label htmlFor="withdrawal-feedback" className="text-label-m font-bold">
+                소중한 의견을 반영해 더 나은 VS가 될게요
+              </label>
               <div className="relative">
                 <textarea
+                  id="withdrawal-feedback"
                   value={feedback}
                   onChange={(e) => setFeedback(e.target.value.slice(0, 500))}
                   placeholder="10자 이상 입력해 주세요. (선택)"

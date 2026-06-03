@@ -2,13 +2,18 @@ import { useCallback, useEffect, useState } from "react";
 
 export type OSType = "android" | "ios" | "ios-outdated" | "other";
 
+interface BeforeInstallPromptEvent extends Event {
+  prompt(): void;
+  userChoice: Promise<{ outcome: "accepted" | "dismissed" }>;
+}
+
 export function useNotificationSetup() {
   const [osType, setOsType] = useState<OSType>("other");
   const [isPwaInstalled, setIsPwaInstalled] = useState(false);
   const [pushPermission, setPushPermission] = useState<NotificationPermission>("default");
 
   // 안드로이드 설치 팝업 제어를 위한 이벤트 객체 저장
-  const [deferredPrompt, setDeferredPrompt] = useState<any>(null);
+  const [deferredPrompt, setDeferredPrompt] = useState<BeforeInstallPromptEvent | null>(null);
 
   useEffect(() => {
     // 1. 기기 OS 및 iOS 버전(웹 푸시 지원 여부) 감지
@@ -43,7 +48,7 @@ export function useNotificationSetup() {
     // 4. 안드로이드 전용: 설치 가능 상태일 때 이벤트 가로채기
     const handleBeforeInstallPrompt = (e: Event) => {
       e.preventDefault(); // 크롬의 기본 하단 설치 배너 방지
-      setDeferredPrompt(e);
+      setDeferredPrompt(e as BeforeInstallPromptEvent);
     };
 
     window.addEventListener("beforeinstallprompt", handleBeforeInstallPrompt);

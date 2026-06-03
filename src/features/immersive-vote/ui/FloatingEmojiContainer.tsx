@@ -1,3 +1,4 @@
+import { FLOATING_EMOJI_DURATION_MS, FLOATING_EMOJI_TRAVEL_PX } from "../config/constants";
 import { EMOJI_IMGS } from "../config/emojiAssets";
 import type { FloatingEmoji } from "../model/types";
 
@@ -15,7 +16,14 @@ export function FloatingEmojiContainer({ floatingEmojis, onAnimationEnd }: Float
           src={EMOJI_IMGS[item.emoji]}
           alt=""
           className="absolute animate-float-emoji w-6 h-6"
-          style={{ left: item.x, top: item.y }}
+          style={
+            {
+              left: item.x,
+              top: item.y,
+              "--float-travel-px": `${FLOATING_EMOJI_TRAVEL_PX}px`,
+              "--float-duration-ms": `${FLOATING_EMOJI_DURATION_MS}ms`,
+            } as React.CSSProperties
+          }
           onAnimationEnd={() => onAnimationEnd(item.id)}
         />
       ))}
