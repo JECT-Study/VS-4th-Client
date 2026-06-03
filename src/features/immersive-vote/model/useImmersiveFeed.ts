@@ -8,6 +8,7 @@ import {
 } from "../api/immersiveFeedQuery";
 import {
   PREFETCH_THRESHOLD,
+  SWIPE_DOWN_THRESHOLD,
   SWIPE_UP_THRESHOLD,
   WHEEL_NAVIGATION_COOLDOWN_MS,
   WHEEL_NAVIGATION_THRESHOLD,
@@ -22,6 +23,7 @@ export function useImmersiveFeed(startVoteId?: number) {
   const [trackIndex, setTrackIndex] = useState(0);
   const [isTransitionEnabled, setIsTransitionEnabled] = useState(true);
   const touchStartY = useRef<number | null>(null);
+  const trackIndexRef = useRef(0);
   const lastNavigationTime = useRef(0);
   const nextCursorRef = useRef<number | null>(null);
   const isFetchingMore = useRef(false);
@@ -48,6 +50,10 @@ export function useImmersiveFeed(startVoteId?: number) {
   // 3. 방어 코드: votes가 빈 배열일 경우 undefined를 안전하게 반환
   const currentVote = votes?.[currentIndex] ?? votes?.[0];
   const displayedVotes = votes ? [...votes, ...votes] : [];
+
+  useEffect(() => {
+    trackIndexRef.current = trackIndex;
+  }, [trackIndex]);
 
   useEffect(() => {
     if (isFetchingMore.current || !nextCursorRef.current) return;
@@ -91,6 +97,31 @@ export function useImmersiveFeed(startVoteId?: number) {
     setTrackIndex((index) => index + 1);
   }, [feedLength]);
 
+  const goToPreviousVote = useCallback(() => {
+    if (feedLength === 0) return;
+    const now = Date.now();
+    if (now - lastNavigationTime.current < WHEEL_NAVIGATION_COOLDOWN_MS) return;
+
+    lastNavigationTime.current = now;
+    const index = trackIndexRef.current;
+
+    if (index > 0) {
+      setIsTransitionEnabled(true);
+      setTrackIndex(index - 1);
+      return;
+    }
+
+    // 첫 카드에서 이전으로: 복제 구간으로 점프한 뒤 마지막 투표로 애니메이션
+    setIsTransitionEnabled(false);
+    setTrackIndex(feedLength);
+    window.requestAnimationFrame(() => {
+      window.requestAnimationFrame(() => {
+        setIsTransitionEnabled(true);
+        setTrackIndex(feedLength - 1);
+      });
+    });
+  }, [feedLength]);
+
   const handleTouchStart = useCallback((event: TouchEvent) => {
     touchStartY.current = event.touches[0]?.clientY ?? null;
   }, []);
@@ -107,23 +138,29 @@ export function useImmersiveFeed(startVoteId?: number) {
       const deltaY = touchEndY - touchStartY.current;
       if (deltaY < -SWIPE_UP_THRESHOLD) {
         goToNextVote();
+      } else if (deltaY > SWIPE_DOWN_THRESHOLD) {
+        goToPreviousVote();
       }
       touchStartY.current = null;
     },
-    [goToNextVote],
+    [goToNextVote, goToPreviousVote],
   );
 
   useEffect(() => {
     const el = containerRef.current;
     if (!el || feedLength === 0) return;
     const handler = (e: globalThis.WheelEvent) => {
-      if (e.deltaY < WHEEL_NAVIGATION_THRESHOLD) return;
+      if (Math.abs(e.deltaY) < WHEEL_NAVIGATION_THRESHOLD) return;
       e.preventDefault();
-      goToNextVote();
+      if (e.deltaY > 0) {
+        goToNextVote();
+      } else {
+        goToPreviousVote();
+      }
     };
     el.addEventListener("wheel", handler, { passive: false });
     return () => el.removeEventListener("wheel", handler);
-  }, [goToNextVote, feedLength]);
+  }, [goToNextVote, goToPreviousVote, feedLength]);
 
   const handleTrackTransitionEnd = useCallback(() => {
     if (feedLength === 0) return;

@@ -25,18 +25,15 @@ export function ImmersiveVoteCard({ vote, updateVote }: ImmersiveVoteCardProps) 
   const [isChatOpen, setIsChatOpen] = useState(false);
   const [isFreeVoteLimitModalOpen, setIsFreeVoteLimitModalOpen] = useState(false);
 
-  const { emojiList, floatingEmojis, handleOptionClick, handleEmojiClick, removeFloatingEmoji } = useImmersiveVote(
-    vote,
-    updateVote,
-    () => setIsFreeVoteLimitModalOpen(true),
-  );
+  const { emojiList, floatingEmojis, handleOptionClick, handleEmojiClick, removeFloatingEmoji, isGuest } =
+    useImmersiveVote(vote, updateVote, () => setIsFreeVoteLimitModalOpen(true));
   useImmersiveVoteLive(vote, updateVote);
 
   const openChat = () => {
-    // if (user === null) {
-    //   setIsChatAuthOpen(true);
-    //   return;
-    // }
+    if (isGuest) {
+      setIsChatAuthOpen(true);
+      return;
+    }
     setIsChatOpen(true);
   };
 

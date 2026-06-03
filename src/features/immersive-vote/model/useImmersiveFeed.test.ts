@@ -57,6 +57,44 @@ describe("useImmersiveFeed", () => {
     vi.clearAllMocks();
   });
 
+  describe("이전/다음 투표 이동", () => {
+    it("아래로 스와이프하면 trackIndex가 감소한다", async () => {
+      const votes = [makeVote(1), makeVote(2), makeVote(3)];
+      mockQueryFn.mockResolvedValue({ votes, nextCursor: null, hasNext: false });
+
+      let now = 0;
+      vi.spyOn(Date, "now").mockImplementation(() => {
+        now += 1000;
+        return now;
+      });
+
+      const queryClient = createTestQueryClient();
+      const { result } = renderHook(() => useImmersiveFeed(), {
+        wrapper: createWrapper(queryClient),
+      });
+
+      await waitFor(() => expect(result.current.votes).toHaveLength(3));
+
+      act(() => {
+        result.current.handleTouchStart({ touches: [{ clientY: 200 }] } as never);
+      });
+      act(() => {
+        result.current.handleTouchEnd({ changedTouches: [{ clientY: 0 }] } as never);
+      });
+      await waitFor(() => expect(result.current.trackStyle.transform).toBe("translate3d(0, -100dvh, 0)"));
+
+      act(() => {
+        result.current.handleTouchStart({ touches: [{ clientY: 0 }] } as never);
+      });
+      act(() => {
+        result.current.handleTouchEnd({ changedTouches: [{ clientY: 200 }] } as never);
+      });
+      await waitFor(() => expect(result.current.trackStyle.transform).toBe("translate3d(0, -0dvh, 0)"));
+
+      vi.spyOn(Date, "now").mockRestore();
+    });
+  });
+
   describe("handleTrackTransitionEnd — 루프 리셋", () => {
     it("trackIndex가 feedLength 이상일 때 currentIndex로 리셋하고 transition을 재활성화한다", async () => {
       const votes = [makeVote(1), makeVote(2), makeVote(3)];
