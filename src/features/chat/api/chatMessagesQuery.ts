@@ -1,5 +1,6 @@
 import { apiClient } from "@base/api/client";
 import { queryOptions, useInfiniteQuery, useQuery } from "@tanstack/react-query";
+import { sortChatMessagesAscending } from "../lib/sortChatMessages";
 import type { ChatMessagesResponse } from "../model/types";
 
 // 1. API 호출 함수
@@ -12,7 +13,11 @@ export const getChatMessages = async ({ voteId, cursor, size = 30 }: GetChatMess
   const { data } = await apiClient.get<ChatMessagesResponse>(`/api/chats/${voteId}/messages`, {
     params: { cursor, size },
   });
-  return data;
+
+  return {
+    ...data,
+    messages: sortChatMessagesAscending(data.messages),
+  };
 };
 
 // 2. Query Keys

@@ -3,7 +3,8 @@ import type { InfiniteData } from "@tanstack/react-query";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { addPending, consumePending } from "../model/pendingOutgoingMessages";
 import type { ChatMessageResponse, ChatMessagesResponse } from "../model/types";
-import { chatInfiniteMessagesQueryKey } from "./chatMessagesQuery";
+import { markLatestChatAsRead } from "../model/useMarkLatestChatAsRead";
+import { chatInfiniteMessagesQueryKey, chatMessagesQueryKey } from "./chatMessagesQuery";
 
 // 1. API 호출 함수 (전송)
 export const sendChatMessageMutation = async (voteId: number, content: string) => {
@@ -26,15 +27,21 @@ export const useSendChatMessageMutation = (voteId: number) => {
     onMutate: async (content) => {
       addPending(voteId, content);
 
-      await queryClient.cancelQueries({ queryKey: chatInfiniteMessagesQueryKey(voteId) });
+      await Promise.all([
+        queryClient.cancelQueries({ queryKey: chatMessagesQueryKey(voteId) }),
+        queryClient.cancelQueries({ queryKey: chatInfiniteMessagesQueryKey(voteId) }),
+      ]);
 
-      const snapshot = queryClient.getQueryData<InfiniteData<ChatMessagesResponse, number | undefined>>(
+      const singleSnapshot = queryClient.getQueryData<ChatMessagesResponse>(chatMessagesQueryKey(voteId));
+      const infiniteSnapshot = queryClient.getQueryData<InfiniteData<ChatMessagesResponse, number | undefined>>(
         chatInfiniteMessagesQueryKey(voteId),
       );
-      if (!snapshot) return { tempId: null };
 
       // 캐시에 있는 내 이전 메시지에서 닉네임/아이콘/투표옵션을 가져옵니다.
-      const allMessages = snapshot.pages.flatMap((p) => p.messages);
+      const allMessages = [
+        ...(singleSnapshot?.messages ?? []),
+        ...(infiniteSnapshot?.pages.flatMap((p) => p.messages) ?? []),
+      ];
       const myPrevious = [...allMessages].reverse().find((m) => m.isMine);
 
       const tempId = -Date.now();
@@ -47,6 +54,11 @@ export const useSendChatMessageMutation = (voteId: number) => {
         senderVoteOption: myPrevious?.senderVoteOption ?? "A",
         isMine: true,
       };
+
+      queryClient.setQueryData<ChatMessagesResponse>(chatMessagesQueryKey(voteId), (oldData) => {
+        if (!oldData) return oldData;
+        return { ...oldData, messages: [...oldData.messages, tempMessage] };
+      });
 
       queryClient.setQueryData<InfiniteData<ChatMessagesResponse, number | undefined>>(
         chatInfiniteMessagesQueryKey(voteId),
@@ -66,25 +78,68 @@ export const useSendChatMessageMutation = (voteId: number) => {
 
     onSuccess: (data, _content, context) => {
       // 임시 메시지를 서버에서 받은 실제 메시지(isMine: true)로 교체합니다.
+      queryClient.setQueryData<ChatMessagesResponse>(chatMessagesQueryKey(voteId), (oldData) => {
+        if (!oldData) return oldData;
+        const hasTempMessage = context?.tempId != null && oldData.messages.some((m) => m.messageId === context.tempId);
+        const alreadyExists = oldData.messages.some((m) => m.messageId === data.messageId);
+
+        if (hasTempMessage) {
+          return {
+            ...oldData,
+            messages: oldData.messages.map((m) => (m.messageId === context.tempId ? data : m)),
+          };
+        }
+
+        if (alreadyExists) return oldData;
+
+        return { ...oldData, messages: [...oldData.messages, data] };
+      });
+
       queryClient.setQueryData<InfiniteData<ChatMessagesResponse, number | undefined>>(
         chatInfiniteMessagesQueryKey(voteId),
         (oldData) => {
-          if (!oldData || !context?.tempId) return oldData;
+          if (!oldData) return oldData;
+          const hasTempMessage =
+            context?.tempId != null &&
+            oldData.pages.some((page) => page.messages.some((m) => m.messageId === context.tempId));
+          const alreadyExists = oldData.pages.some((page) => page.messages.some((m) => m.messageId === data.messageId));
+
+          if (hasTempMessage) {
+            return {
+              ...oldData,
+              pages: oldData.pages.map((page) => ({
+                ...page,
+                messages: page.messages.map((m) => (m.messageId === context.tempId ? data : m)),
+              })),
+            };
+          }
+
+          if (alreadyExists) return oldData;
+
+          const latestPage = oldData.pages[0];
+          if (!latestPage) return oldData;
+
           return {
             ...oldData,
-            pages: oldData.pages.map((page) => ({
-              ...page,
-              messages: page.messages.map((m) => (m.messageId === context.tempId ? data : m)),
-            })),
+            pages: [{ ...latestPage, messages: [...latestPage.messages, data] }, ...oldData.pages.slice(1)],
           };
         },
       );
+
+      if (data.messageId > 0) {
+        markLatestChatAsRead(voteId, data.messageId).catch(() => {});
+      }
 
       queryClient.invalidateQueries({ queryKey: ["chats"] });
     },
 
     onError: (_error, _content, context) => {
       // 전송 실패 시 낙관적 메시지를 롤백합니다.
+      queryClient.setQueryData<ChatMessagesResponse>(chatMessagesQueryKey(voteId), (oldData) => {
+        if (!oldData || !context?.tempId) return oldData;
+        return { ...oldData, messages: oldData.messages.filter((m) => m.messageId !== context.tempId) };
+      });
+
       queryClient.setQueryData<InfiniteData<ChatMessagesResponse, number | undefined>>(
         chatInfiniteMessagesQueryKey(voteId),
         (oldData) => {

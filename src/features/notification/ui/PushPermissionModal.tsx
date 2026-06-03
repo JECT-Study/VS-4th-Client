@@ -10,21 +10,21 @@ export function PushPermissionModal({ isOpen, onClose, onAllow }: PushPermission
   return (
     <Modal isOpen={isOpen} onClose={onClose} className="p-6">
       <div className="flex flex-col items-center">
-        <h3 className="text-title-m font-bold mb-2">알림을 받아보시겠어요?</h3>
-        <p className="text-body-m text-grey-light mb-6 text-center leading-relaxed">
+        <h3 className="mb-2 text-title-m font-bold text-grey-black">알림을 받아보시겠어요?</h3>
+        <p className="mb-6 text-center text-body-m leading-relaxed text-grey-light">
           참여하신 투표의 결과를
           <br />
           푸시 알림으로 알려드려요
         </p>
-        <div className="w-full flex flex-col gap-2">
+        <div className="flex w-full flex-col gap-2">
           <button
             type="button"
             onClick={onAllow}
-            className="w-full bg-primary-purple text-white py-3.5 rounded-[12px] font-bold text-body-m"
+            className="w-full rounded-[12px] bg-primary py-3.5 text-body-m font-bold text-white"
           >
             알림 받기
           </button>
-          <button type="button" onClick={onClose} className="w-full text-grey-light py-2 text-body-s mt-1 font-medium">
+          <button type="button" onClick={onClose} className="mt-1 w-full py-2 text-body-s font-medium text-grey-light">
             나중에 할게요
           </button>
         </div>

@@ -1,9 +1,11 @@
 import { Client, type IMessage, type StompSubscription } from "@stomp/stompjs";
 import SockJS from "sockjs-client";
 
+const WS_BASE_URL = import.meta.env.VITE_WS_BASE_URL ?? import.meta.env.VITE_API_BASE_URL ?? "https://api.vs.io.kr";
+
 const client = new Client({
   // 불필요한 options 객체와 as any를 모두 제거합니다.
-  webSocketFactory: () => new SockJS("https://api.vs.io.kr/ws"),
+  webSocketFactory: () => new SockJS(`${WS_BASE_URL}/ws`),
 
   reconnectDelay: 5000,
 

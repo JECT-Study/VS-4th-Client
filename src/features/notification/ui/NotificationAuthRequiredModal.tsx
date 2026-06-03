@@ -1,12 +1,12 @@
 import { Modal } from "@base/ui/Modal";
 import { useNavigate } from "@tanstack/react-router";
 
-type ChatAuthRequiredModalProps = {
+type NotificationAuthRequiredModalProps = {
   isOpen: boolean;
   onClose: () => void;
 };
 
-const ChatAuthRequiredModal = ({ isOpen, onClose }: ChatAuthRequiredModalProps) => {
+export function NotificationAuthRequiredModal({ isOpen, onClose }: NotificationAuthRequiredModalProps) {
   const navigate = useNavigate();
 
   const goToLogin = () => {
@@ -17,9 +17,9 @@ const ChatAuthRequiredModal = ({ isOpen, onClose }: ChatAuthRequiredModalProps) 
   return (
     <Modal isOpen={isOpen} onClose={onClose}>
       <div className="px-5 pt-8 pb-2">
-        <p className="text-center text-title-s">채팅은 회원 전용 기능이에요</p>
+        <p className="text-center text-title-s">알림은 회원 전용 기능이에요</p>
         <p className="mt-2 whitespace-pre-wrap text-center text-body-s text-grey-light">
-          로그인하면 실시간으로 참여하며{"\n"}다양한 의견을 볼 수 있어요
+          로그인하면 투표 결과 공개 소식을{"\n"}가장 먼저 받아볼 수 있어요
         </p>
 
         <div className="mt-8 flex flex-col gap-[2px]">
@@ -41,6 +41,4 @@ const ChatAuthRequiredModal = ({ isOpen, onClose }: ChatAuthRequiredModalProps) 
       </div>
     </Modal>
   );
-};
-
-export default ChatAuthRequiredModal;
+}

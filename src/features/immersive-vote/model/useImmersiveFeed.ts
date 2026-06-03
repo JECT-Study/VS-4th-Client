@@ -24,6 +24,7 @@ export function useImmersiveFeed() {
   const [trackIndex, setTrackIndex] = useState(0);
   const [isTransitionEnabled, setIsTransitionEnabled] = useState(true);
   const touchStartY = useRef<number | null>(null);
+  const trackIndexRef = useRef(0);
   const lastNavigationTime = useRef(0);
   const seenIdsRef = useRef<Set<number>>(new Set());
   const isFetchingMore = useRef(false);
@@ -48,6 +49,10 @@ export function useImmersiveFeed() {
   const currentIndex = feedLength === 0 ? 0 : ((trackIndex % feedLength) + feedLength) % feedLength;
   const currentVote = votes?.[currentIndex] ?? votes?.[0];
   const displayedVotes = votes ? [...votes, ...votes] : [];
+
+  useEffect(() => {
+    trackIndexRef.current = trackIndex;
+  }, [trackIndex]);
 
   useEffect(() => {
     if (isFetchingMore.current || isExhaustedRef.current) return;

@@ -1,5 +1,6 @@
 import { Spinner } from "@base/ui/Spinner";
 import { userQueryOptions } from "@features/auth/api/userQuery";
+import { NotificationSettingToggle } from "@features/notification/ui/NotificationSettingToggle";
 import { useQuery } from "@tanstack/react-query";
 import { Link, useNavigate } from "@tanstack/react-router";
 
@@ -59,6 +60,13 @@ export function AccountPage() {
             </div>
 
             <hr className="w-full h-px bg-grey-[#f7f6f9] my-4" />
+
+            <div className="flex items-center justify-between">
+              <span className="text-title-s">투표 결과 푸시 알림</span>
+              <NotificationSettingToggle />
+            </div>
+
+            <hr className="w-full h-px bg-grey-divider my-4" />
 
             <Link to="/mypage/withdrawal" className="text-body-s text-grey-light">
               회원 탈퇴

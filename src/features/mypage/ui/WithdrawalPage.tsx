@@ -1,6 +1,10 @@
 import { Button } from "@base/ui/Button";
 import { Checkbox } from "@base/ui/Checkbox";
+import { showToast } from "@base/ui/Toast";
+import { withdraw } from "@features/mypage/api/withdraw";
 import { WITHDRAWAL_REASONS, useWithdrawalForm } from "@features/mypage/model/useWithdrawalForm";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { useNavigate } from "@tanstack/react-router";
 import clsx from "clsx";
 import { useState } from "react";
 import { Header } from "./MypageHeader";
@@ -8,6 +12,21 @@ import { Header } from "./MypageHeader";
 export function WithdrawalPage() {
   const { reason, setReason, feedback, setFeedback, isAgreed, setIsAgreed, isFormValid } = useWithdrawalForm();
   const [isSelectOpen, setIsSelectOpen] = useState(false);
+  const navigate = useNavigate();
+  const queryClient = useQueryClient();
+
+  const withdrawMutation = useMutation({
+    mutationFn: withdraw,
+    onSuccess: () => {
+      queryClient.removeQueries({ queryKey: ["user"] });
+      queryClient.invalidateQueries({ refetchType: "all" });
+      showToast.success("탈퇴가 완료되었어요.");
+      navigate({ to: "/home" });
+    },
+    onError: () => {
+      showToast.warning("일시적인 오류로 탈퇴하지 못했어요.");
+    },
+  });
 
   return (
     <div className="flex flex-col min-h-screen bg-white">
@@ -112,10 +131,21 @@ export function WithdrawalPage() {
       {/* 하단 고정 버튼부 */}
       <footer className="fixed bottom-0 left-0 w-full p-5 bg-white flex gap-3 border-t border-grey-divider max-w-md mx-auto right-0">
         {/* 👇 만들어두신 공통 Button 컴포넌트 적용 */}
-        <Button variant="primary" className="flex-1 h-14 font-bold">
+        <Button
+          variant="primary"
+          className="flex-1 h-14 font-bold"
+          disabled={withdrawMutation.isPending}
+          onClick={() => navigate({ to: "/mypage/account" })}
+        >
           계속 이용하기
         </Button>
-        <Button variant="ghost" disabled={!isFormValid} className="flex-1 h-14 font-bold border-none !bg-grey-bg">
+        <Button
+          variant="ghost"
+          disabled={!isFormValid || withdrawMutation.isPending}
+          isLoading={withdrawMutation.isPending}
+          className="flex-1 h-14 font-bold border-none !bg-grey-bg"
+          onClick={() => withdrawMutation.mutate({ category: reason, reason: feedback })}
+        >
           {/* Button 내부 variant에 따라 색상이 강제되므로, 탈퇴하기 버튼의 디자인을 맞추기 위해 !bg-grey-bg 등 Tailwind 강제 적용(오버라이딩)을 섞어 쓸 수 있습니다. */}
           탈퇴하기
         </Button>

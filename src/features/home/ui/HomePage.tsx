@@ -1,3 +1,4 @@
+import { userQueryOptions } from "@features/auth/api/userQuery";
 import { useHomeHotTopicsQuery } from "@features/home/api/homeHotTopicsQuery.ts";
 import { useHomeRecommendationsQuery } from "@features/home/api/homeRecommendationsQuery.ts";
 import { useHomeVotesQuery } from "@features/home/api/homeVotesQuery.ts";
@@ -9,16 +10,23 @@ import { ScrollToTopButton } from "@features/home/ui/ScrollToTopButton.tsx";
 import { TodayRecommendationSlider } from "@features/home/ui/TodayRecommendationSlider.tsx";
 import { VoteFeedList } from "@features/home/ui/VoteFeedList.tsx";
 import { VoteFilterBar } from "@features/home/ui/VoteFilterBar.tsx";
+import { useNotificationUnreadCountQuery } from "@features/notification/api/notificationQueries";
+import { NotificationAuthRequiredModal } from "@features/notification/ui/NotificationAuthRequiredModal";
+import { useQuery } from "@tanstack/react-query";
 import { useNavigate } from "@tanstack/react-router";
+import { useState } from "react";
 
 export function HomePage() {
   const { isVisible, scrollToTop } = useScrollTopButton();
+  const [isNotificationAuthModalOpen, setIsNotificationAuthModalOpen] = useState(false);
   const navigate = useNavigate();
   const { sortType, setSortType, excludeEnded, toggleExcludeEnded } = useVoteFilter();
 
   const { data: votesData, hasNextPage, fetchNextPage } = useHomeVotesQuery(sortType, excludeEnded);
   const { data: recommendationsData } = useHomeRecommendationsQuery();
   const { data: hotTopicsData } = useHomeHotTopicsQuery();
+  const { data: user, isPending: isUserPending } = useQuery(userQueryOptions());
+  const { data: unreadNotificationCount = 0 } = useNotificationUnreadCountQuery(!!user);
 
   const allVotes = votesData?.pages.flatMap((page) => page.votes) ?? [];
   const recommendations = recommendationsData?.recommendations ?? [];
@@ -29,6 +37,11 @@ export function HomePage() {
   };
 
   const handleClickNotification = () => {
+    if (!isUserPending && !user) {
+      setIsNotificationAuthModalOpen(true);
+      return;
+    }
+
     navigate({ to: "/notification" });
   };
 
@@ -39,7 +52,7 @@ export function HomePage() {
         paddingBottom: "calc(env(safe-area-inset-bottom, 0px) + 80px)",
       }}
     >
-      <HomeHeader hasUnreadNotification onClickNotification={handleClickNotification} />
+      <HomeHeader hasUnreadNotification={unreadNotificationCount > 0} onClickNotification={handleClickNotification} />
 
       <TodayRecommendationSlider recommendations={recommendations} onClickVote={handleClickVote} />
 
@@ -64,6 +77,11 @@ export function HomePage() {
       </section>
 
       <ScrollToTopButton isVisible={isVisible} onClick={scrollToTop} />
+
+      <NotificationAuthRequiredModal
+        isOpen={isNotificationAuthModalOpen}
+        onClose={() => setIsNotificationAuthModalOpen(false)}
+      />
     </main>
   );
 }

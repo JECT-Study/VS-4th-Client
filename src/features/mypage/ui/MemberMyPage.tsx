@@ -18,6 +18,7 @@ export function MemberMyPage({ user }: MemberMyPageProps) {
     mutationFn: logout,
     onSuccess: () => {
       queryClient.clear();
+      queryClient.setQueryData(["user", "me"], null);
       showToast.success("로그아웃 되었어요.");
       navigate({ to: "/home" });
     },
