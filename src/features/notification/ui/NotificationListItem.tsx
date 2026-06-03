@@ -7,7 +7,7 @@ interface NotificationListItemProps {
 
 export function NotificationListItem({ item, onClick }: NotificationListItemProps) {
   return (
-    <li className="border-b border-grey-stroke">
+    <li>
       <button
         type="button"
         onClick={onClick}
@@ -15,16 +15,16 @@ export function NotificationListItem({ item, onClick }: NotificationListItemProp
           item.isRead ? "bg-white" : "bg-primary/5" // 읽지 않은 알림 강조
         }`}
       >
-        <div className="flex flex-col gap-1 pr-4">
-          <h4 className={`text-body-l ${item.isRead ? "text-grey-dark" : "text-grey-black font-medium"}`}>
-            {item.title}
+        <div className="flex min-w-0 flex-col gap-1 pr-4">
+          <h4 className={`truncate text-body-m ${item.isRead ? "text-grey-dark" : "font-medium text-grey-black"}`}>
+            {item.message}
           </h4>
-          <p className="text-body-m text-grey-dark">{item.message}</p>
-          <span className="text-label-s text-grey-light mt-1">{item.timeAgo}</span>
+          <p className="text-body-s text-grey-dark">{item.title}</p>
+          <span className="mt-1 text-label-m text-grey-light">{item.timeAgo}</span>
         </div>
 
         {item.thumbnailUrl && (
-          <img src={item.thumbnailUrl} alt="썸네일" className="w-12 h-12 rounded-lg object-cover flex-shrink-0" />
+          <img src={item.thumbnailUrl} alt="썸네일" className="flex-shrink-0 object-cover w-12 h-12 rounded-lg" />
         )}
       </button>
     </li>
