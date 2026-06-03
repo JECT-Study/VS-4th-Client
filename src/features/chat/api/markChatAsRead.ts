@@ -1,6 +1,8 @@
 import { apiClient } from "@base/api/client";
 import { ChatApi } from "@ject-4-vs-team/api-client";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
+import type { ChatListResponse } from "../model/types";
+import { resetChatUnreadCount } from "./chatListQuery";
 
 const chatApi = new ChatApi(undefined, undefined, apiClient);
 
@@ -14,7 +16,9 @@ export const useMarkChatAsReadMutation = () => {
   return useMutation({
     mutationFn: ({ voteId, lastReadMessageId }: { voteId: number; lastReadMessageId: number }) =>
       markChatAsRead(voteId, lastReadMessageId),
-    onSuccess: () => {
+    onSuccess: (_data, { voteId }) => {
+      queryClient.setQueryData<ChatListResponse>(["chats", "ONGOING"], (data) => resetChatUnreadCount(data, voteId));
+      queryClient.setQueryData<ChatListResponse>(["chats", "ENDED"], (data) => resetChatUnreadCount(data, voteId));
       queryClient.invalidateQueries({ queryKey: ["chats"] });
     },
   });
