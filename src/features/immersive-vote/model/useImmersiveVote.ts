@@ -198,5 +198,6 @@ export function useImmersiveVote(
     handleOptionClick,
     handleEmojiClick,
     removeFloatingEmoji,
+    isGuest,
   };
 }
