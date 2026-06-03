@@ -1,6 +1,6 @@
+import { setupApiInterceptors } from "@app/config/apiInterceptors";
 import { queryClient } from "@app/config/queryClient";
 import { router } from "@app/config/router";
-import { setupApiInterceptors } from "@app/config/apiInterceptors";
 import { PushNotificationBridge } from "@base/ui/PushNotificationBridge";
 import { Toast } from "@base/ui/Toast";
 import * as Sentry from "@sentry/react";
