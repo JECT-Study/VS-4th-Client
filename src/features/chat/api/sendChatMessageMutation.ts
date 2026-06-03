@@ -76,7 +76,7 @@ export const useSendChatMessageMutation = (voteId: number) => {
       return { tempId };
     },
 
-    onSuccess: (data, _content, context) => {
+    onSuccess: async (data, _content, context) => {
       // 임시 메시지를 서버에서 받은 실제 메시지(isMine: true)로 교체합니다.
       queryClient.setQueryData<ChatMessagesResponse>(chatMessagesQueryKey(voteId), (oldData) => {
         if (!oldData) return oldData;
@@ -127,7 +127,7 @@ export const useSendChatMessageMutation = (voteId: number) => {
       );
 
       if (data.messageId > 0) {
-        markLatestChatAsRead(voteId, data.messageId).catch(() => {});
+        await markLatestChatAsRead(voteId, data.messageId).catch(() => {});
       }
 
       queryClient.invalidateQueries({ queryKey: ["chats"] });
