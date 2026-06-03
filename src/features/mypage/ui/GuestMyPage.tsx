@@ -7,7 +7,7 @@ function VoteIcon({ variant }: { variant: "used" | "remaining" }) {
   const bg = variant === "used" ? "bg-primary" : "bg-[#BEBEDD]";
   const fill = variant === "used" ? "white" : "#EBEBF5";
   return (
-    <div className={`w-10 h-10 rounded-full flex items-center justify-center ${bg}`}>
+    <div className={`w-10 h-10 rounded-full shrink-0 flex items-center justify-center ${bg}`}>
       <svg
         width="14"
         height="17"

@@ -37,28 +37,28 @@ export function AccountPage() {
               <span className="text-title-s">{user?.gender === "MALE" ? "남성" : "여성"}</span>
             </div>
 
-            <hr className="w-full h-px bg-grey-divider my-4" />
+            <hr className="w-full h-px bg-grey-[#f7f6f9] my-4" />
 
             <div className="flex flex-col gap-[2px]">
               <span className="text-label-m">출생 연도</span>
               <span className="text-title-s">{user?.birthDate}</span>
             </div>
 
-            <hr className="w-full h-px bg-grey-divider my-4" />
+            <hr className="w-full h-px bg-grey-[#f7f6f9] my-4" />
 
             <div className="flex flex-col gap-[2px]">
               <span className="text-label-m">이메일</span>
               <span className="text-title-s">{user?.email}</span>
             </div>
 
-            <hr className="w-full h-px bg-grey-divider my-4" />
+            <hr className="w-full h-px bg-grey-[#f7f6f9] my-4" />
 
             <div className="flex flex-col gap-[2px]">
               <span className="text-label-m">소셜 연동</span>
               <span className="text-title-s">Google 연동됨</span>
             </div>
 
-            <hr className="w-full h-px bg-grey-divider my-4" />
+            <hr className="w-full h-px bg-grey-[#f7f6f9] my-4" />
 
             <Link to="/mypage/withdrawal" className="text-body-s text-grey-light">
               회원 탈퇴
