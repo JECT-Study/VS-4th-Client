@@ -33,7 +33,7 @@ export interface ChatGaugeResponse {
   participantCount: number;
 }
 
-export type SenderVoteOption = "A" | "B";
+export type SenderVoteOption = "A" | "B" | null;
 
 export interface ChatMessageResponse {
   messageId: number;
