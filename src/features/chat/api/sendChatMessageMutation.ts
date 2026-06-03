@@ -1,8 +1,8 @@
 import { apiClient } from "@base/api/client";
 import type { InfiniteData } from "@tanstack/react-query";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
-import type { ChatMessageResponse, ChatMessagesResponse } from "../model/types";
 import { addPending, consumePending } from "../model/pendingOutgoingMessages";
+import type { ChatMessageResponse, ChatMessagesResponse } from "../model/types";
 import { chatInfiniteMessagesQueryKey } from "./chatMessagesQuery";
 
 // 1. API 호출 함수 (전송)
@@ -56,7 +56,7 @@ export const useSendChatMessageMutation = (voteId: number) => {
           if (!latestPage) return oldData;
           return {
             ...oldData,
-            pages: [{ ...latestPage, messages: [...latestPage.messages, tempMessage] }, ...oldData.pages.slice(1)],
+            pages: [{ ...latestPage, messages: [tempMessage, ...latestPage.messages] }, ...oldData.pages.slice(1)],
           };
         },
       );

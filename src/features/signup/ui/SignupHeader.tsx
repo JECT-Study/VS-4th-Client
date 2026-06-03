@@ -11,9 +11,11 @@ export function SignupHeader({ currentStep, onBack, onSkip, isSavePending }: Sig
   return (
     <header className="flex items-center justify-between py-[6px] pl-1 pr-5">
       <div className="flex items-center gap-[2px]">
-        <button type="button" onClick={onBack} className="p-[10px] text-grey-dark">
-          <img src="/assets/icons/arrow-left.svg" alt="뒤로가기" />
-        </button>
+        {currentStep !== 4 && (
+          <button type="button" onClick={onBack} className="p-[10px] text-grey-dark">
+            <img src="/assets/icons/arrow-left.svg" alt="뒤로가기" />
+          </button>
+        )}
 
         <h1 className="text-title-m">회원가입</h1>
       </div>

@@ -19,10 +19,9 @@ export const Route = createFileRoute("/immersive-votes/")({
         }
       } catch (e) {
         if (isRedirect(e)) throw e;
-        return queryClient.prefetchQuery(immersiveFeedQueryOptions(undefined));
       }
     }
-    return queryClient.prefetchQuery(immersiveFeedQueryOptions(undefined, startVoteId));
+    return queryClient.prefetchQuery(immersiveFeedQueryOptions());
   },
   component: ImmersiveVotePage,
 });

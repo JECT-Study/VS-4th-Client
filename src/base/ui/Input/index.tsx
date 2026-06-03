@@ -71,9 +71,15 @@ export function Input({
         {suffix && <div className="ml-2 shrink-0">{suffix}</div>}
       </div>
       {error ? (
-        <p className="text-label-m text-error">{error}</p>
+        <p className="text-error flex items-center">
+          <img src="/assets/icons/invalid.svg" alt="" className="w-4 h-4 shrink-0" />
+          <span className="text-label-m">{error}</span>
+        </p>
       ) : helpText && hasBeenFocused ? (
-        <p className="text-label-m text-[#218830]">{helpText}</p>
+        <p className="text-[#218830] flex items-center">
+          <img src="/assets/icons/valid.svg" alt="" className="w-4 h-4 shrink-0" />
+          <span className="text-label-m">{helpText}</span>
+        </p>
       ) : null}
     </div>
   );

@@ -1,10 +1,8 @@
-import { useSearch } from "@tanstack/react-router";
 import { useImmersiveFeed } from "../model/useImmersiveFeed";
 import { ImmersiveVoteCard } from "./ImmersiveVoteCard";
 import { ImmersiveVoteErrorPage } from "./ImmersiveVoteErrorPage";
 
 export function ImmersiveVotePage() {
-  const { startVoteId } = useSearch({ from: "/immersive-votes/" });
   const {
     displayedVotes,
     currentVote,
@@ -17,7 +15,7 @@ export function ImmersiveVotePage() {
     trackStyle,
     isLoading,
     isError,
-  } = useImmersiveFeed(startVoteId);
+  } = useImmersiveFeed();
 
   if (isError) {
     return <ImmersiveVoteErrorPage />;

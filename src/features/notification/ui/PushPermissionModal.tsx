@@ -18,12 +18,13 @@ export function PushPermissionModal({ isOpen, onClose, onAllow }: PushPermission
         </p>
         <div className="w-full flex flex-col gap-2">
           <button
+            type="button"
             onClick={onAllow}
             className="w-full bg-primary-purple text-white py-3.5 rounded-[12px] font-bold text-body-m"
           >
             알림 받기
           </button>
-          <button onClick={onClose} className="w-full text-grey-light py-2 text-body-s mt-1 font-medium">
+          <button type="button" onClick={onClose} className="w-full text-grey-light py-2 text-body-s mt-1 font-medium">
             나중에 할게요
           </button>
         </div>

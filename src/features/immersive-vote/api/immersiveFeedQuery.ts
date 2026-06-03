@@ -1,25 +1,24 @@
-import { defaultApi } from "@base/api/defaultApi";
+import { apiClient } from "@base/api/client";
 import { queryOptions } from "@tanstack/react-query";
 import type { ImmersiveFeedItem } from "../model/types";
 
 export interface ImmersiveFeedResponse {
-  votes: ImmersiveFeedItem[];
-  nextCursor: number | null;
-  hasNext: boolean;
+  items: ImmersiveFeedItem[];
 }
 
 export const immersiveFeedQueryKey = ["immersive-votes", "feed"] as const;
 
-export const immersiveFeedQueryOptions = (cursor?: number, startVoteId?: number) =>
+export const immersiveFeedQueryOptions = () =>
   queryOptions<ImmersiveFeedResponse>({
-    queryKey: startVoteId
-      ? [...immersiveFeedQueryKey, "start", startVoteId]
-      : cursor
-        ? [...immersiveFeedQueryKey, cursor]
-        : immersiveFeedQueryKey,
+    queryKey: immersiveFeedQueryKey,
     queryFn: () =>
-      defaultApi
-        .getFeed(cursor, 10, startVoteId ? { params: { startVoteId } } : undefined)
-        .then((r) => r.data as ImmersiveFeedResponse),
+      apiClient
+        .post<ImmersiveFeedResponse>("/api/immersive-votes/next", { excludeIds: [], size: 10 })
+        .then((r) => r.data),
     staleTime: 1000 * 60 * 2,
   });
+
+export const fetchNextImmersiveFeed = (excludeIds: number[]): Promise<ImmersiveFeedResponse> =>
+  apiClient
+    .post<ImmersiveFeedResponse>("/api/immersive-votes/next", { excludeIds, size: 10 })
+    .then((r) => r.data);

@@ -20,6 +20,11 @@ export function useChatWebSocket(voteId: number) {
         try {
           const newMessage: ChatMessageResponse = JSON.parse(message.body);
 
+          // VoteDetail 캐시의 commentCount를 +1 (자신이 보낸 메시지 포함)
+          queryClient.setQueryData(["votes", String(voteId)], (old: { commentCount: number } | undefined) =>
+            old ? { ...old, commentCount: old.commentCount + 1 } : old,
+          );
+
           // 내가 보낸 메시지는 낙관적 업데이트가 이미 처리 중이므로 건너뜁니다.
           // (WebSocket 브로드캐스트의 isMine: false 가 캐시를 덮어쓰는 것을 방지)
           if (consumePending(voteId, newMessage.content)) return;
@@ -41,7 +46,7 @@ export function useChatWebSocket(voteId: number) {
               );
               if (alreadyExists) return oldData;
               const updatedPages: ChatMessagesResponse[] = [
-                { ...latestPage, messages: [...latestPage.messages, newMessage] },
+                { ...latestPage, messages: [newMessage, ...latestPage.messages] },
                 ...oldData.pages.slice(1),
               ];
               return { ...oldData, pages: updatedPages };

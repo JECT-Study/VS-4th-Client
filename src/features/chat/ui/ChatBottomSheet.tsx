@@ -1,8 +1,9 @@
 import { DynamicBottomSheet } from "@base/ui/DynamicBottomSheet";
 import { PROFILE_COLOR } from "@features/signup/config/profileColors";
+import { useQueryClient } from "@tanstack/react-query";
 import clsx from "clsx";
 import { useEffect, useLayoutEffect, useRef, useState } from "react";
-import { useInfiniteChatMessagesQuery } from "../api/chatMessagesQuery";
+import { chatInfiniteMessagesQueryKey, useInfiniteChatMessagesQuery } from "../api/chatMessagesQuery";
 import { useChatRoomHeaderQuery } from "../api/chatRoomHeaderQuery";
 import { useSendChatMessageMutation } from "../api/sendChatMessageMutation";
 import { formatTimeLabel } from "../lib/formatChatTime";
@@ -71,8 +72,16 @@ interface ChatContentProps {
 }
 
 function ChatContent({ voteId, t }: ChatContentProps) {
+  const queryClient = useQueryClient();
   const { data: header } = useChatRoomHeaderQuery(voteId);
   const { data, fetchNextPage, hasNextPage, isFetchingNextPage } = useInfiniteChatMessagesQuery(voteId);
+
+  // 채팅을 열 때마다 최신 데이터를 보장한다.
+  // VoteDetail: commentCount 갱신 / messages: senderVoteOption 변경 반영
+  useEffect(() => {
+    queryClient.invalidateQueries({ queryKey: ["votes", String(voteId)] });
+    queryClient.invalidateQueries({ queryKey: chatInfiniteMessagesQueryKey(voteId) });
+  }, [voteId, queryClient]);
   const sendMessageMutation = useSendChatMessageMutation(voteId);
   useChatWebSocket(voteId);
 
@@ -83,12 +92,12 @@ function ChatContent({ voteId, t }: ChatContentProps) {
   const prevScrollHeightRef = useRef(0);
   const [showScrollButton, setShowScrollButton] = useState(false);
 
-  // pages[0] = 최신 페이지, pages[n] = 오래된 페이지 → 역순으로 펼쳐 시간순 정렬
+  // pages[0] = 최신 페이지, pages[n] = 오래된 페이지 / 각 페이지 내 messages도 최신순 → 양쪽 모두 역순으로 시간순 정렬
   const allMessages =
     data?.pages
       .slice()
       .reverse()
-      .flatMap((p) => p.messages) ?? [];
+      .flatMap((p) => [...p.messages].reverse()) ?? [];
   const messagesCount = allMessages.length;
 
   // 새 메시지 수신 시 하단 자동 스크롤 (하단에 있을 때만)
@@ -267,7 +276,7 @@ function MessageItem({ message, optionA, optionB, t }: MessageItemProps) {
         <div className="max-w-[75%]">
           <div className="flex justify-end gap-1 mb-2">
             <span className={clsx("text-label-m", t.senderNickname)}>{message.senderNickname}</span>
-            <span className={clsx("text-label-l", optionTextColor)}>{optionLabel}</span>
+            {message.senderVoteOption && <span className={clsx("text-label-l", optionTextColor)}>{optionLabel}</span>}
           </div>
           <div className="flex items-end gap-2 justify-end">
             <span className={`text-label-s ${t.time}`}>{formatTimeLabel(message.sentAt)}</span>
@@ -294,7 +303,7 @@ function MessageItem({ message, optionA, optionB, t }: MessageItemProps) {
       <div className="max-w-[75%]">
         <div className="flex gap-1 mb-2">
           <span className={clsx("text-label-m", t.senderNickname)}>{message.senderNickname}</span>
-          <span className={clsx("text-label-l", optionTextColor)}>{optionLabel}</span>
+          {message.senderVoteOption && <span className={clsx("text-label-l", optionTextColor)}>{optionLabel}</span>}
         </div>
         <div className="flex items-end gap-2">
           <p
@@ -319,6 +328,15 @@ interface MessageInputProps {
 
 function MessageInput({ t, disabled, onSubmit }: MessageInputProps) {
   const [message, setMessage] = useState("");
+  const textareaRef = useRef<HTMLTextAreaElement>(null);
+
+  // biome-ignore lint/correctness/useExhaustiveDependencies: message triggers DOM height recalculation
+  useEffect(() => {
+    const el = textareaRef.current;
+    if (!el) return;
+    el.style.height = "auto";
+    el.style.height = `${el.scrollHeight}px`;
+  }, [message]);
 
   const handleSubmit = () => {
     const trimmed = message.trim();
@@ -329,20 +347,23 @@ function MessageInput({ t, disabled, onSubmit }: MessageInputProps) {
 
   return (
     <div
-      className="flex items-center gap-2 px-5 pt-2"
-      style={{
-        paddingBottom: "calc(env(safe-area-inset-bottom, 0px) + 8px)",
-      }}
+      className="flex items-end gap-2 px-5 pt-2"
+      style={{ paddingBottom: "calc(env(safe-area-inset-bottom, 0px) + 8px)" }}
     >
-      <input
+      <textarea
+        ref={textareaRef}
+        rows={1}
         value={message}
         disabled={disabled}
         placeholder={t.placeholder}
         onChange={(e) => setMessage(e.target.value)}
         onKeyDown={(e) => {
-          if (e.key === "Enter" && !e.nativeEvent.isComposing) handleSubmit();
+          if (e.key === "Enter" && !e.shiftKey && !e.nativeEvent.isComposing) {
+            e.preventDefault();
+            handleSubmit();
+          }
         }}
-        className={`flex-1 min-w-0 px-4 py-2 rounded-full outline-none text-body-s disabled:text-grey-disabled ${t.input}`}
+        className={`flex-1 min-w-0 px-4 py-2 rounded-2xl outline-none text-body-s resize-none overflow-y-auto max-h-28 disabled:text-grey-disabled ${t.input}`}
       />
       <button
         type="button"

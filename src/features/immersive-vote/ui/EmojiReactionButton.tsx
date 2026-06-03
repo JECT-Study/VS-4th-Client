@@ -25,8 +25,10 @@ export function EmojiReactionButton({ emojiList, totalCount, getEmojiOrigin, onE
           className="flex flex-col items-center gap-1 text-white w-12 h-12"
           aria-label="이모지 반응"
         >
-          <img src="/assets/icons/smile.svg" alt="" className="h-7 w-7 invert" />
-          <span className="text-label-s">{totalCount}</span>
+          <img src="/assets/icons/smile-big.svg" alt="" className="h-7 w-7" />
+          <span className="text-label-s text-[#F7F6F9] shadow-s flex w-7 items-center justify-center">
+            {totalCount}
+          </span>
         </button>
       }
       placement="left"

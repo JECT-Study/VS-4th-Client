@@ -46,6 +46,7 @@ export function ProfileColorPicker({ isOpen, onClose, selectedColor, onSelect }:
               onSelect(newColor);
               onClose();
             }}
+            disabled={newColor === selectedColor}
           >
             저장
           </Button>
