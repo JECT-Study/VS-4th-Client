@@ -3,6 +3,7 @@ import type { InfiniteData } from "@tanstack/react-query";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { addPending, consumePending } from "../model/pendingOutgoingMessages";
 import type { ChatMessageResponse, ChatMessagesResponse } from "../model/types";
+import { markLatestChatAsRead } from "../model/useMarkLatestChatAsRead";
 import { chatInfiniteMessagesQueryKey, chatMessagesQueryKey } from "./chatMessagesQuery";
 
 // 1. API 호출 함수 (전송)
@@ -124,6 +125,10 @@ export const useSendChatMessageMutation = (voteId: number) => {
           };
         },
       );
+
+      if (data.messageId > 0) {
+        markLatestChatAsRead(voteId, data.messageId).catch(() => {});
+      }
 
       queryClient.invalidateQueries({ queryKey: ["chats"] });
     },

@@ -58,6 +58,27 @@ describe("useImmersiveFeed", () => {
   });
 
   describe("이전/다음 투표 이동", () => {
+    it("첫 카드에서는 위로 스와이프해도 trackIndex가 변하지 않는다", async () => {
+      const votes = [makeVote(1), makeVote(2), makeVote(3)];
+      mockQueryFn.mockResolvedValue({ votes, nextCursor: null, hasNext: false });
+
+      const queryClient = createTestQueryClient();
+      const { result } = renderHook(() => useImmersiveFeed(), {
+        wrapper: createWrapper(queryClient),
+      });
+
+      await waitFor(() => expect(result.current.votes).toHaveLength(3));
+
+      act(() => {
+        result.current.handleTouchStart({ touches: [{ clientY: 0 }] } as never);
+      });
+      act(() => {
+        result.current.handleTouchEnd({ changedTouches: [{ clientY: 200 }] } as never);
+      });
+
+      expect(result.current.trackStyle.transform).toBe("translate3d(0, -0dvh, 0)");
+    });
+
     it("아래로 스와이프하면 trackIndex가 감소한다", async () => {
       const votes = [makeVote(1), makeVote(2), makeVote(3)];
       mockQueryFn.mockResolvedValue({ votes, nextCursor: null, hasNext: false });
@@ -202,8 +223,8 @@ describe("useImmersiveFeed", () => {
     });
   });
 
-  describe("prefetch — 임계값 트리거", () => {
-    it("feedLength - currentIndex <= PREFETCH_THRESHOLD이고 nextCursor가 있으면 fetchQuery를 1회 호출한다", async () => {
+  describe("prefetch — 마지막 카드 도달 시", () => {
+    it("마지막 카드에 도달하고 nextCursor가 있으면 fetchQuery를 1회 호출한다", async () => {
       // votes 5개, nextCursor 있음
       const initialVotes = [makeVote(1), makeVote(2), makeVote(3), makeVote(4), makeVote(5)];
       const additionalVotes = [makeVote(6), makeVote(7)];
@@ -225,9 +246,8 @@ describe("useImmersiveFeed", () => {
 
       await waitFor(() => expect(result.current.votes).toHaveLength(5));
 
-      // currentIndex를 3으로 올린다 (feedLength 5 - currentIndex 3 = 2 <= PREFETCH_THRESHOLD 3)
-      // handleTouchStart → handleTouchEnd 3회로 trackIndex = 3
-      for (let i = 0; i < 3; i++) {
+      // 마지막 카드(currentIndex 4)까지 이동
+      for (let i = 0; i < 4; i++) {
         act(() => {
           result.current.handleTouchStart({ touches: [{ clientY: 200 }] } as never);
         });
@@ -273,8 +293,8 @@ describe("useImmersiveFeed", () => {
 
       await waitFor(() => expect(result.current.votes).toHaveLength(5));
 
-      // 첫 번째 이동으로 prefetch 트리거
-      for (let i = 0; i < 3; i++) {
+      // 마지막 카드까지 이동해 prefetch 트리거
+      for (let i = 0; i < 4; i++) {
         act(() => {
           result.current.handleTouchStart({ touches: [{ clientY: 200 }] } as never);
         });
@@ -306,7 +326,7 @@ describe("useImmersiveFeed", () => {
       vi.spyOn(Date, "now").mockRestore();
     });
 
-    it("nextCursor가 null이면 feedLength - currentIndex <= PREFETCH_THRESHOLD여도 fetchQuery를 호출하지 않는다", async () => {
+    it("nextCursor가 null이면 마지막 카드에 도달해도 fetchQuery를 호출하지 않는다", async () => {
       const votes = [makeVote(1), makeVote(2), makeVote(3), makeVote(4), makeVote(5)];
       mockQueryFn.mockResolvedValue({ votes, nextCursor: null, hasNext: false });
 
@@ -325,8 +345,7 @@ describe("useImmersiveFeed", () => {
 
       const callCountBefore = mockQueryFn.mock.calls.length;
 
-      // currentIndex를 3으로 올린다 (PREFETCH_THRESHOLD 임계값 진입)
-      for (let i = 0; i < 3; i++) {
+      for (let i = 0; i < 4; i++) {
         act(() => {
           result.current.handleTouchStart({ touches: [{ clientY: 200 }] } as never);
         });

@@ -7,7 +7,6 @@ import {
   immersiveFeedQueryOptions,
 } from "../api/immersiveFeedQuery";
 import {
-  PREFETCH_THRESHOLD,
   SWIPE_DOWN_THRESHOLD,
   SWIPE_UP_THRESHOLD,
   WHEEL_NAVIGATION_COOLDOWN_MS,
@@ -57,7 +56,7 @@ export function useImmersiveFeed(startVoteId?: number) {
 
   useEffect(() => {
     if (isFetchingMore.current || !nextCursorRef.current) return;
-    if (feedLength === 0 || feedLength - currentIndex > PREFETCH_THRESHOLD) return;
+    if (feedLength === 0 || currentIndex < feedLength - 1) return;
 
     isFetchingMore.current = true;
     const cursor = nextCursorRef.current;
@@ -99,27 +98,15 @@ export function useImmersiveFeed(startVoteId?: number) {
 
   const goToPreviousVote = useCallback(() => {
     if (feedLength === 0) return;
+    const index = trackIndexRef.current;
+    if (index <= 0) return;
+
     const now = Date.now();
     if (now - lastNavigationTime.current < WHEEL_NAVIGATION_COOLDOWN_MS) return;
 
     lastNavigationTime.current = now;
-    const index = trackIndexRef.current;
-
-    if (index > 0) {
-      setIsTransitionEnabled(true);
-      setTrackIndex(index - 1);
-      return;
-    }
-
-    // 첫 카드에서 이전으로: 복제 구간으로 점프한 뒤 마지막 투표로 애니메이션
-    setIsTransitionEnabled(false);
-    setTrackIndex(feedLength);
-    window.requestAnimationFrame(() => {
-      window.requestAnimationFrame(() => {
-        setIsTransitionEnabled(true);
-        setTrackIndex(feedLength - 1);
-      });
-    });
+    setIsTransitionEnabled(true);
+    setTrackIndex(index - 1);
   }, [feedLength]);
 
   const handleTouchStart = useCallback((event: TouchEvent) => {

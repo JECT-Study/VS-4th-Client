@@ -5,9 +5,11 @@ import { useEffect } from "react";
 import { chatInfiniteMessagesQueryKey, chatMessagesQueryKey } from "../api/chatMessagesQuery";
 import type { ChatMessageResponse, ChatMessagesResponse } from "../model/types";
 import { consumePending } from "./pendingOutgoingMessages";
+import { useMarkLatestChatAsRead } from "./useMarkLatestChatAsRead";
 
 export function useChatWebSocket(voteId: number) {
   const queryClient = useQueryClient();
+  const markAsRead = useMarkLatestChatAsRead(voteId);
 
   useEffect(() => {
     // 1. 소켓 클라이언트 인스턴스를 먼저 확보합니다.
@@ -20,9 +22,12 @@ export function useChatWebSocket(voteId: number) {
         try {
           const newMessage: ChatMessageResponse = JSON.parse(message.body);
 
-          // 내가 보낸 메시지는 낙관적 업데이트가 이미 처리 중이므로 건너뜁니다.
+          // 내가 보낸 메시지는 낙관적 업데이트가 이미 처리 중이므로 캐시 갱신은 건너뜁니다.
           // (WebSocket 브로드캐스트의 isMine: false 가 캐시를 덮어쓰는 것을 방지)
-          if (consumePending(voteId, newMessage.content)) return;
+          if (consumePending(voteId, newMessage.content)) {
+            markAsRead(newMessage.messageId);
+            return;
+          }
 
           // ChatRoomPage 단일 쿼리 캐시 업데이트
           queryClient.setQueryData<ChatMessagesResponse>(chatMessagesQueryKey(voteId), (oldData) => {
@@ -47,6 +52,8 @@ export function useChatWebSocket(voteId: number) {
               return { ...oldData, pages: updatedPages };
             },
           );
+
+          markAsRead(newMessage.messageId);
         } catch (error) {
           // 데이터 파싱 실패 시 런타임 에러가 전파되지 않도록 방어하고 개발 환경에서만 에러를 출력합니다.
           if (import.meta.env.DEV) {
@@ -80,5 +87,5 @@ export function useChatWebSocket(voteId: number) {
     return () => {
       stompClient.deactivate();
     };
-  }, [voteId, queryClient]);
+  }, [voteId, queryClient, markAsRead]);
 }
