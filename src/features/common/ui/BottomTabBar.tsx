@@ -2,47 +2,52 @@ import { bottomTabs } from "@features/common/config/bottomTabs.ts";
 import { Link, useRouterState } from "@tanstack/react-router";
 
 export function BottomTabBar() {
-  // 현재 접속 중인 URL 경로를 가져옵니다.
   const routerState = useRouterState();
   const currentPath = routerState.location.pathname;
   const isImmersiveVotePath = currentPath.startsWith("/immersive-votes");
 
   return (
-    <nav
-      className={`fixed bottom-0 z-20 grid h-16 w-full max-w-md -translate-x-1/2 grid-cols-4 border-t pb-1 left-1/2 ${
-        isImmersiveVotePath ? "border-grey-black bg-grey-black" : "border-grey-stroke bg-white"
-      }`}
-    >
-      {bottomTabs.map((tab) => {
-        // 현재 경로가 탭의 path로 시작하면 활성화된 것으로 간주 (예: /mypage/account 접속 시에도 마이 탭 활성화)
-        const isActive = currentPath.startsWith(tab.path);
-        const iconSrc = isImmersiveVotePath ? tab.icon : isActive ? tab.activeIcon : tab.icon;
+      <nav
+          className={`fixed bottom-0 z-20 grid h-16 w-full max-w-md -translate-x-1/2 grid-cols-4 border-t pb-1 left-1/2 ${
+              isImmersiveVotePath ? "border-grey-black bg-grey-black" : "border-grey-stroke bg-white"
+          }`}
+      >
+        {bottomTabs.map((tab) => {
+          const isActive = currentPath.startsWith(tab.path);
 
-        return (
-          <Link
-            key={tab.key}
-            to={tab.path}
-            className={`flex flex-col items-center justify-center gap-1 text-label-s transition-colors ${
-              isImmersiveVotePath ? "text-grey-divider" : "text-grey-black"
-            }`}
-          >
-            <img
-              src={iconSrc}
-              alt={`${tab.label} 아이콘`}
-              className="h-6 w-6"
-              style={
-                isImmersiveVotePath
-                  ? {
-                      filter:
-                        "brightness(0) saturate(100%) invert(99%) sepia(2%) saturate(427%) hue-rotate(209deg) brightness(100%) contrast(96%)",
+          // 1. 활성화 상태면 무조건 activeIcon, 아니면 기본 icon 렌더링
+          const iconSrc = isActive ? tab.activeIcon : tab.icon;
+
+          // 2. 몰입형 화면이면서 '비활성화된 탭'에만 필터 적용 (활성화된 탭은 원본 색상 유지)
+          const shouldApplyFilter = isImmersiveVotePath && !isActive;
+
+          return (
+              <Link
+                  key={tab.key}
+                  to={tab.path}
+                  className={`flex flex-col items-center justify-center gap-1 text-label-s transition-colors ${
+                      isImmersiveVotePath
+                          ? isActive ? "text-white" : "text-grey-divider" // 몰입형 뷰에서 활성화된 텍스트 색상 조정 (필요시 변경)
+                          : "text-grey-black"
+                  }`}
+              >
+                <img
+                    src={iconSrc}
+                    alt={`${tab.label} 아이콘`}
+                    className="h-6 w-6"
+                    style={
+                      shouldApplyFilter
+                          ? {
+                            filter:
+                                "brightness(0) saturate(100%) invert(99%) sepia(2%) saturate(427%) hue-rotate(209deg) brightness(100%) contrast(96%)",
+                          }
+                          : undefined
                     }
-                  : undefined
-              }
-            />
-            <span>{tab.label}</span>
-          </Link>
-        );
-      })}
-    </nav>
+                />
+                <span>{tab.label}</span>
+              </Link>
+          );
+        })}
+      </nav>
   );
 }
