@@ -173,12 +173,13 @@ function ChatRoomContent() {
   };
 
   return (
-    <main className="min-h-screen bg-white pb-[calc(112px+env(safe-area-inset-bottom))]">
+    <main className="min-h-screen bg-white">
       <ChatRoomHeader title={header.title} participantCount={gauge.participantCount} />
 
       <VoteSummaryCard header={header} gauge={gauge} />
 
       <ChatMessageList messages={messages} optionA={header.optionA} optionB={header.optionB} />
+      <div className="h-[calc(80px+env(safe-area-inset-bottom))]" aria-hidden="true" />
       <div ref={bottomRef} />
 
       {showScrollButton && (
