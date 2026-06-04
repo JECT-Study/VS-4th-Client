@@ -9,6 +9,7 @@ export interface ChatListItemResponse {
   participantCount: number;
   lastMessage: string;
   lastMessageAt: string;
+  createdAt?: string;
   endAt: string;
   unreadCount: number;
 }

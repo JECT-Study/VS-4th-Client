@@ -1,6 +1,5 @@
 import { Spinner } from "@base/ui/Spinner";
 import { userQueryOptions } from "@features/auth/api/userQuery";
-import { NotificationSettingToggle } from "@features/notification/ui/NotificationSettingToggle";
 import { useQuery } from "@tanstack/react-query";
 import { Link, useNavigate } from "@tanstack/react-router";
 
@@ -57,13 +56,6 @@ export function AccountPage() {
             <div className="flex flex-col gap-[2px]">
               <span className="text-label-m">소셜 연동</span>
               <span className="text-title-s">Google 연동됨</span>
-            </div>
-
-            <hr className="w-full h-px bg-grey-[#f7f6f9] my-4" />
-
-            <div className="flex items-center justify-between">
-              <span className="text-title-s">투표 결과 푸시 알림</span>
-              <NotificationSettingToggle />
             </div>
 
             <hr className="w-full h-px bg-grey-divider my-4" />

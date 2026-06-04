@@ -1,5 +1,5 @@
+import { VoteTimeCountdown } from "@features/home/ui/VoteTimeCountdown";
 import { Link } from "@tanstack/react-router";
-import { formatRemainingTime } from "../lib/formatChatTime";
 import type { ChatGaugeResponse, ChatRoomHeaderResponse } from "../model/types";
 
 interface VoteSummaryCardProps {
@@ -29,12 +29,21 @@ export function VoteSummaryCard({ header, gauge }: VoteSummaryCardProps) {
 
         <div className="flex items-center justify-between mt-3 text-label-s text-grey-light">
           <div className="flex items-center gap-1">
-            <span>◷</span>
-            <span>{isEnded ? "투표 종료" : formatRemainingTime(header.endAt)}</span>
+            <svg width="16" height="16" viewBox="0 0 16 16" fill="none" className="shrink-0">
+              <title>남은 시간</title>
+              <circle cx="8" cy="8" r="5.4" stroke="currentColor" strokeWidth="1.2" />
+              <path d="M8 5V8L10.2 10.2" stroke="currentColor" strokeWidth="1.2" strokeLinecap="round" />
+            </svg>
+            {isEnded ? <span>00:00:00</span> : <VoteTimeCountdown endAt={header.endAt} />}
           </div>
 
-          <Link to="/votes/$voteId" params={{ voteId: String(header.voteId) }} className="text-grey-light">
-            상세보기 ›
+          <Link
+            to="/votes/$voteId"
+            params={{ voteId: String(header.voteId) }}
+            className="flex items-center gap-1 text-grey-light"
+          >
+            <span>상세보기</span>
+            <img src="/assets/icons/arrow-right-s.svg" alt="" className="h-4 w-4" />
           </Link>
         </div>
       </div>

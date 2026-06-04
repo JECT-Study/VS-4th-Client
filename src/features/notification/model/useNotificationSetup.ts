@@ -7,6 +7,10 @@ interface BeforeInstallPromptEvent extends Event {
   userChoice: Promise<{ outcome: "accepted" | "dismissed" }>;
 }
 
+interface NavigatorWithStandalone extends Navigator {
+  standalone?: boolean;
+}
+
 export function useNotificationSetup() {
   const [osType, setOsType] = useState<OSType>("other");
   const [isPwaInstalled, setIsPwaInstalled] = useState(false);
@@ -33,7 +37,7 @@ export function useNotificationSetup() {
     // 2. PWA(홈 화면) 설치 여부 감지
     const checkIsStandalone = () =>
       window.matchMedia("(display-mode: standalone)").matches ||
-      ("standalone" in window.navigator && (window.navigator as any).standalone === true);
+      ("standalone" in window.navigator && (window.navigator as NavigatorWithStandalone).standalone === true);
 
     const syncInstallState = () => {
       setIsPwaInstalled(checkIsStandalone());

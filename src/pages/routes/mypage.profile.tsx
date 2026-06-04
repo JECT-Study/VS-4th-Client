@@ -26,6 +26,31 @@ const INITIAL_PROFILE: ProfileState = {
 
 const NICKNAME_CHECK_DEBOUNCE_MS = 500;
 
+function useKeyboardInset() {
+  const [keyboardInset, setKeyboardInset] = useState(0);
+
+  useEffect(() => {
+    const visualViewport = window.visualViewport;
+    if (!visualViewport) return;
+
+    const updateKeyboardInset = () => {
+      const inset = Math.max(0, window.innerHeight - visualViewport.height - visualViewport.offsetTop);
+      setKeyboardInset(inset);
+    };
+
+    updateKeyboardInset();
+    visualViewport.addEventListener("resize", updateKeyboardInset);
+    visualViewport.addEventListener("scroll", updateKeyboardInset);
+
+    return () => {
+      visualViewport.removeEventListener("resize", updateKeyboardInset);
+      visualViewport.removeEventListener("scroll", updateKeyboardInset);
+    };
+  }, []);
+
+  return keyboardInset;
+}
+
 function useProfileEdit() {
   const [profileState, setProfileState] = useState<ProfileState>(INITIAL_PROFILE);
 
@@ -100,6 +125,7 @@ function RouteComponent() {
   const { profileState, setImageColor, setNickname, canSave, hasChanges } = useProfileEdit();
   const [isPickerOpen, setIsPickerOpen] = useState(false);
   const [isLeaveModalOpen, setIsLeaveModalOpen] = useState(false);
+  const keyboardInset = useKeyboardInset();
   const navigate = useNavigate();
   const queryClient = useQueryClient();
 
@@ -170,7 +196,10 @@ function RouteComponent() {
 
       <div
         className="fixed bottom-0 left-1/2 -translate-x-1/2 w-full max-w-md bg-white pt-2 px-5"
-        style={{ paddingBottom: "calc(1rem + env(safe-area-inset-bottom, 0px))" }}
+        style={{
+          bottom: keyboardInset,
+          paddingBottom: keyboardInset > 0 ? "1rem" : "calc(1rem + env(safe-area-inset-bottom, 0px))",
+        }}
       >
         <Button disabled={!canSave || saveProfileMutation.isPending} onClick={handleSubmit}>
           저장
