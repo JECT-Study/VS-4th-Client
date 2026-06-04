@@ -60,6 +60,12 @@
   animation-timing-function: var(--vt-ease);
 }
 
+::view-transition-group(bottom-tab-bar),
+::view-transition-old(bottom-tab-bar),
+::view-transition-new(bottom-tab-bar) {
+  animation: none;
+}
+
 @keyframes app-page-out-forward {
   from {
     opacity: 1;
