@@ -13,7 +13,7 @@ export function VoteSummaryCard({ header, gauge }: VoteSummaryCardProps) {
   return (
     <section className="sticky z-10 px-5 py-3 bg-white top-14">
       <div className="rounded-xl bg-white p-4 shadow-[0_6px_20px_rgba(19,19,19,0.08)]">
-        <div className="flex items-center justify-between text-label-s">
+        <div className="flex items-center justify-between text-label-l">
           <span className="font-semibold text-secondary">
             {gauge.optionARatio}% {header.optionA}
           </span>
@@ -22,7 +22,7 @@ export function VoteSummaryCard({ header, gauge }: VoteSummaryCardProps) {
           </span>
         </div>
 
-        <div className="flex h-2 mt-2 overflow-hidden rounded-full bg-grey-stroke">
+        <div className="flex h-3 mt-2 overflow-hidden rounded-full bg-grey-stroke">
           <div className="bg-secondary" style={{ width: `${gauge.optionARatio}%` }} />
           <div className="bg-primary" style={{ width: `${gauge.optionBRatio}%` }} />
         </div>
@@ -43,7 +43,7 @@ export function VoteSummaryCard({ header, gauge }: VoteSummaryCardProps) {
             className="flex items-center gap-1 text-grey-light"
           >
             <span>상세보기</span>
-            <img src="/assets/icons/arrow-right-s.svg" alt="" className="h-4 w-4" />
+            <img src="/assets/icons/arrow-right-s.svg" alt="" className="w-4 h-4" />
           </Link>
         </div>
       </div>
