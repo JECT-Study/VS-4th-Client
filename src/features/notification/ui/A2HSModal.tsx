@@ -67,7 +67,7 @@ export function A2HSModal({ isOpen, os, onClose, onConfirm }: A2HSModalProps) {
             <div className="flex items-center justify-center w-12 h-12 mb-2" aria-label="홈 화면 추가">
               <HomeAddIcon />
             </div>
-            <h3 className="mb-6 font-bold leading-tight text-center text-title-m">
+            <h3 className="mb-6 font-medium leading-tight text-center text-title-s">
               안정적인 알림 수신을 위해
               <br />홈 화면에 앱을 추가해 주세요
             </h3>
