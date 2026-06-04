@@ -72,7 +72,7 @@ export function WithdrawalPage() {
                   {reason || "아쉬웠던 점을 선택해 주세요"}
                 </span>
                 <img
-                  src="/assets/icons/arrow-down.svg"
+                  src="/assets/icons/dropdown-arrow.svg"
                   className={clsx("w-5 h-5 transition-transform", isSelectOpen && "rotate-180")}
                   alt=""
                 />
