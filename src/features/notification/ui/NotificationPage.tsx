@@ -84,7 +84,7 @@ export function NotificationPage() {
 
   return (
     <main className="flex min-h-dvh flex-col bg-white">
-      <header className="sticky top-0 z-20 flex h-14 items-center border-b border-grey-stroke bg-white px-5">
+      <header className="sticky top-0 z-20 flex h-14 items-center bg-white px-5">
         <button type="button" onClick={handleGoBack} className="-ml-2 p-2">
           <img src="/assets/icons/arrow-left.svg" alt="뒤로가기" className="h-6 w-6" />
         </button>
