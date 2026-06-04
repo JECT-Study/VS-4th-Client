@@ -16,7 +16,7 @@ export const bottomTabs: BottomTabItem[] = [
   },
   {
     key: "vote",
-    label: "몰입형 투표",
+    label: "VOTE",
     path: "/immersive-votes",
     icon: "/assets/icons/vote.svg",
     activeIcon: "/assets/icons/vote-active.svg",
