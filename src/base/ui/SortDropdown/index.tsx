@@ -68,7 +68,7 @@ function SortDropdown<T extends string = string>({ options, value, onChange, cla
         onClick={toggle}
         aria-expanded={isOpen && !isClosing}
         aria-haspopup="true"
-        className="flex items-center gap-1 px-4 py-3 rounded-[54px] text-label-m text-grey-black border border-[#EDECEF] whitespace-nowrap active:opacity-70 transition-opacity select-none"
+        className="flex items-center gap-1 px-4 py-3 rounded-[54px] text-label-m text-grey-black border border-[#edecef] whitespace-nowrap active:opacity-70 transition-opacity select-none"
       >
         {selectedLabel}
         <img
@@ -86,7 +86,7 @@ function SortDropdown<T extends string = string>({ options, value, onChange, cla
               ? `dropdown-out ${DURATION_OUT}ms ${EASING} both`
               : `dropdown-in ${DURATION_IN}ms ${EASING} both`,
           }}
-          className="absolute right-0 top-full mt-2 bg-white rounded-xl shadow-[0px_5px_12px_2px_rgba(120,_120,_136,_0.06)] min-w-[140px] py-2 z-50"
+          className="absolute right-0 top-full mt-2 bg-white rounded-xl border border-[#edecef] shadow-[0px_5px_12px_2px_rgba(120,_120,_136,_0.06)] min-w-[140px] py-2 z-50"
         >
           {options.map((option) => (
             <button
