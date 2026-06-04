@@ -19,7 +19,7 @@ export function NotificationListItem({ item, onClick }: NotificationListItemProp
           <h4 className={`truncate text-body-m ${item.isRead ? "text-grey-dark" : "font-medium text-grey-black"}`}>
             {item.message}
           </h4>
-          <p className="text-body-s text-grey-dark">{item.title}</p>
+          <p className="truncate text-body-s text-grey-dark">{item.title}</p>
           <span className="mt-1 text-label-m text-grey-light">{item.timeAgo}</span>
         </div>
 
