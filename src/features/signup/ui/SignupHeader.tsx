@@ -17,7 +17,7 @@ export function SignupHeader({ currentStep, onBack, onSkip, isSavePending }: Sig
           </button>
         )}
 
-        <h1 className="text-title-m">회원가입</h1>
+        <h1 className="text-title-m py-[10px]">회원가입</h1>
       </div>
 
       {currentStep === 3 && (
