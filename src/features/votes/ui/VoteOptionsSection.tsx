@@ -68,7 +68,9 @@ export function VoteOptionsSection({
               onClick={() => onOptionClick(option.optionId)}
               disabled={isParticipatePending || isEnded}
             >
-              {hasVoted && option.ratio !== null && <VoteBar ratio={option.ratio} isSelected={isSelected} />}
+              {hasVoted && option.ratio !== null && !isEnded && (
+                <VoteBar ratio={option.ratio} isSelected={isSelected} />
+              )}
               <span className="relative z-10 line-clamp-2">
                 {option.label} {hasVoted && option.ratio !== null && `(${option.ratio}%)`}
               </span>
