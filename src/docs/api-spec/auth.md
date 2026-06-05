@@ -147,3 +147,35 @@ Refresh Token으로 Access Token을 재발급합니다.
 
 
 ---
+
+## POST `/api/users/nickname/slang`
+
+> 닉네임 욕설 여부 포함 확인
+
+닉네임을 설정할 때 금칙어가 포함되어 있는지 판단한다.
+
+**인증**: Bearer Token
+
+### Request Body
+
+| 필드 | 타입 | 필수 | 설명 |
+|---|---|:---:|---|
+| `nickname` | string |  | 사용 가능 여부를 확인할 닉네임 |
+
+### Responses
+
+#### `200` OK
+
+| 필드 | 타입 | 필수 | 설명 |
+|---|---|:---:|---|
+| `isAvailable` | boolean |  | 욕설포함여부 |
+
+
+#### 400 Bad Request
+
+```json
+{
+	"message": "닉네임 형식 오류"
+}
+```
+---

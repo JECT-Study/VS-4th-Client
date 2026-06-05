@@ -3,6 +3,7 @@ import { showToast } from "@base/ui/Toast";
 import { userQueryOptions } from "@features/auth/api/userQuery";
 import { extractUpdateProfileError, updateProfile } from "@features/mypage/api/updateProfile";
 import { checkNickname, extractNicknameCheckError } from "@features/signup/api/nicknameCheck";
+import { checkNicknameSlang } from "@features/signup/api/nicknameSlang";
 import { PROFILE_COLOR } from "@features/signup/config/profileColors";
 import { canProceedStep3, validateNickname } from "@features/signup/model/signupValidation";
 import type { ImageColor, ProfileState } from "@features/signup/model/types";
@@ -78,7 +79,14 @@ function useProfileEdit() {
   }, []);
 
   const checkNicknameMutation = useMutation({
-    mutationFn: checkNickname,
+    mutationFn: async (nickname: string) => {
+      const [checkResult, slangResult] = await Promise.allSettled([
+        checkNickname(nickname),
+        checkNicknameSlang(nickname),
+      ]);
+      if (checkResult.status === "rejected") throw checkResult.reason;
+      if (slangResult.status === "rejected") throw slangResult.reason;
+    },
     onMutate: () => {
       setProfileState((prev) => ({ ...prev, isCheckingNickname: true, nicknameError: null }));
     },
@@ -114,9 +122,9 @@ function useProfileEdit() {
     }
   };
 
-  const canSave = canProceedStep3(profileState, originalNicknameRef.current, originalImageColorRef.current);
   const hasChanges =
     profileState.nickname !== originalNicknameRef.current || profileState.imageColor !== originalImageColorRef.current;
+  const canSave = canProceedStep3(profileState) && hasChanges;
 
   return { profileState, setImageColor, setNickname, canSave, hasChanges };
 }

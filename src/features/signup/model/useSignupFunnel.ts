@@ -55,14 +55,13 @@ export function useSignupFunnel() {
   };
 
   function computeCanProceed(): boolean {
-    const defaults = profileStep.getDefaults();
     switch (currentStep) {
       case 1:
         return canProceedStep1(termsStep.termsState);
       case 2:
         return canProceedStep2(genderBirthStep.genderBirthState);
       case 3:
-        return canProceedStep3(profileStep.profileState, defaults.nickname, defaults.imageColor);
+        return canProceedStep3(profileStep.profileState);
       case 4:
         return true;
     }

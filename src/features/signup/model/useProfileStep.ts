@@ -1,6 +1,7 @@
 import { useMutation, useQuery } from "@tanstack/react-query";
 import { useEffect, useRef, useState } from "react";
 import { checkNickname, extractNicknameCheckError } from "../api/nicknameCheck";
+import { checkNicknameSlang } from "../api/nicknameSlang";
 import { imageColorSuggestQueryOptions, nicknameSuggestQueryOptions } from "../api/signupDefaultsQuery";
 import { validateNickname } from "./signupValidation";
 import type { ImageColor, ProfileState } from "./types";
@@ -46,7 +47,14 @@ export function useProfileStep() {
   }, []);
 
   const checkNicknameMutation = useMutation({
-    mutationFn: checkNickname,
+    mutationFn: async (nickname: string) => {
+      const [checkResult, slangResult] = await Promise.allSettled([
+        checkNickname(nickname),
+        checkNicknameSlang(nickname),
+      ]);
+      if (checkResult.status === "rejected") throw checkResult.reason;
+      if (slangResult.status === "rejected") throw slangResult.reason;
+    },
     onMutate: () => {
       setProfileState((prev) => ({ ...prev, isCheckingNickname: true, nicknameError: null }));
     },

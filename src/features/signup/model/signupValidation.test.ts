@@ -170,17 +170,17 @@ describe("canProceedStep3", () => {
   };
 
   it("닉네임을 변경하고 유효하면 true를 반환한다", () => {
-    expect(canProceedStep3(validState, defaultNickname, defaultImageColor)).toBe(true);
+    expect(canProceedStep3(validState)).toBe(true);
   });
 
-  it("imageColor만 변경하면 true를 반환한다", () => {
+  it("imageColor만 변경해도 닉네임이 유효하면 true를 반환한다", () => {
     const state: ProfileState = {
       nickname: defaultNickname,
       imageColor: "RED",
       nicknameError: null,
       isCheckingNickname: false,
     };
-    expect(canProceedStep3(state, defaultNickname, defaultImageColor)).toBe(true);
+    expect(canProceedStep3(state)).toBe(true);
   });
 
   it("닉네임과 imageColor 모두 변경하면 true를 반환한다", () => {
@@ -190,17 +190,17 @@ describe("canProceedStep3", () => {
       nicknameError: null,
       isCheckingNickname: false,
     };
-    expect(canProceedStep3(state, defaultNickname, defaultImageColor)).toBe(true);
+    expect(canProceedStep3(state)).toBe(true);
   });
 
-  it("닉네임과 imageColor가 기본값과 동일하면 false를 반환한다", () => {
+  it("닉네임이 기본값과 동일해도 유효하면 true를 반환한다", () => {
     const state: ProfileState = {
       nickname: defaultNickname,
       imageColor: defaultImageColor,
       nicknameError: null,
       isCheckingNickname: false,
     };
-    expect(canProceedStep3(state, defaultNickname, defaultImageColor)).toBe(false);
+    expect(canProceedStep3(state)).toBe(true);
   });
 
   it("nicknameError가 있으면 false를 반환한다", () => {
@@ -210,7 +210,7 @@ describe("canProceedStep3", () => {
       nicknameError: "이미 사용 중인 닉네임이에요",
       isCheckingNickname: false,
     };
-    expect(canProceedStep3(state, defaultNickname, defaultImageColor)).toBe(false);
+    expect(canProceedStep3(state)).toBe(false);
   });
 
   it("닉네임 확인 중(isCheckingNickname)이면 false를 반환한다", () => {
@@ -220,7 +220,7 @@ describe("canProceedStep3", () => {
       nicknameError: null,
       isCheckingNickname: true,
     };
-    expect(canProceedStep3(state, defaultNickname, defaultImageColor)).toBe(false);
+    expect(canProceedStep3(state)).toBe(false);
   });
 
   it("닉네임이 한글자면 false를 반환한다", () => {
@@ -230,7 +230,7 @@ describe("canProceedStep3", () => {
       nicknameError: null,
       isCheckingNickname: false,
     };
-    expect(canProceedStep3(state, defaultNickname, defaultImageColor)).toBe(false);
+    expect(canProceedStep3(state)).toBe(false);
   });
 
   it("닉네임이 빈 문자열이면 false를 반환한다", () => {
@@ -240,6 +240,6 @@ describe("canProceedStep3", () => {
       nicknameError: null,
       isCheckingNickname: false,
     };
-    expect(canProceedStep3(state, defaultNickname, defaultImageColor)).toBe(false);
+    expect(canProceedStep3(state)).toBe(false);
   });
 });
