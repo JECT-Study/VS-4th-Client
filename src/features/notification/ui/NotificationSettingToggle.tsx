@@ -49,9 +49,16 @@ export function NotificationSettingToggle() {
   const [activeModal, setActiveModal] = useState<"none" | "a2hs" | "push">("none");
   const isPending = isEnablingPush || registerPushTokenMutation.isPending || unregisterPushTokenMutation.isPending;
 
+  const isPushSupported = osType !== "other";
+
   useEffect(() => {
+    if (!isPushSupported) {
+      setIsPushEnabled(false);
+      return;
+    }
+
     setIsPushEnabled(pushPermission === "granted");
-  }, [pushPermission]);
+  }, [pushPermission, isPushSupported]);
 
   const handleDisablePush = async () => {
     try {
@@ -74,7 +81,9 @@ export function NotificationSettingToggle() {
       return;
     }
 
-    if (osType === "ios-outdated" || !isPwaInstalled) {
+    if (!isPushSupported) return;
+
+    if (osType === "ios-outdated" || ((osType === "android" || osType === "ios") && !isPwaInstalled)) {
       setActiveModal("a2hs");
       return;
     }
@@ -159,7 +168,7 @@ export function NotificationSettingToggle() {
 
   return (
     <div className="flex items-center gap-2">
-      <Switch checked={isPushEnabled} onChange={handleToggle} disabled={isPending} />
+      <Switch checked={isPushEnabled} onChange={handleToggle} disabled={isPending || !isPushSupported} />
       {isPending && <span className="text-body-s text-grey-light">알림 설정 중...</span>}
 
       <A2HSModal

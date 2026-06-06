@@ -29,6 +29,7 @@ export function PushTokenSync() {
 
   useEffect(() => {
     if (!user) return;
+    if (detectOsType() === "other") return;
     if (!("Notification" in window) || Notification.permission !== "granted") return;
 
     let cancelled = false;
