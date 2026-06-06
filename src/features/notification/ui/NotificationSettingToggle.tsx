@@ -8,7 +8,7 @@ import {
 } from "@features/notification/api/pushTokenMutations";
 import { resolvePushPlatform } from "@features/notification/model/resolvePushPlatform";
 import { isAxiosError } from "axios";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useNotificationSetup } from "../model/useNotificationSetup";
 import { A2HSModal } from "./A2HSModal";
 import { PushPermissionModal } from "./PushPermissionModal";
@@ -19,12 +19,11 @@ export function NotificationSettingToggle() {
   const { osType, isPwaInstalled, pushPermission, promptInstall, requestPushPermission } = useNotificationSetup();
   const registerPushTokenMutation = useRegisterPushTokenMutation();
   const unregisterPushTokenMutation = useUnregisterPushTokenMutation();
+  const isEnablingRef = useRef(false);
 
   const [isPushEnabled, setIsPushEnabled] = useState(false);
   const [activeModal, setActiveModal] = useState<"none" | "a2hs" | "push">("none");
-  const [isEnablingPush, setIsEnablingPush] = useState(false);
-  const isPending =
-    isEnablingPush || registerPushTokenMutation.isPending || unregisterPushTokenMutation.isPending;
+  const isPending = registerPushTokenMutation.isPending || unregisterPushTokenMutation.isPending;
 
   useEffect(() => {
     setIsPushEnabled(pushPermission === "granted");
@@ -40,7 +39,7 @@ export function NotificationSettingToggle() {
   };
 
   const handleToggle = () => {
-    if (isPending) return;
+    if (isPending || isEnablingRef.current) return;
 
     if (isPushEnabled) {
       void handleDisablePush();
@@ -69,17 +68,14 @@ export function NotificationSettingToggle() {
     if (sessionStorage.getItem(SW_RELOAD_FLAG) === "1") return false;
 
     sessionStorage.setItem(SW_RELOAD_FLAG, "1");
-    showToast.warning("앱을 준비하고 있어요. 잠시 후 다시 알림 받기를 눌러 주세요.");
-    window.setTimeout(() => {
-      window.location.reload();
-    }, 300);
+    window.location.reload();
     return true;
   };
 
   const handlePushAllow = () => {
-    if (isPending) return;
+    if (isPending || isEnablingRef.current) return;
 
-    setIsEnablingPush(true);
+    isEnablingRef.current = true;
 
     void (async () => {
       try {
@@ -98,7 +94,6 @@ export function NotificationSettingToggle() {
 
         await registerPushTokenMutation.mutateAsync(resolvePushPlatform(osType));
         setIsPushEnabled(true);
-        showToast.success("푸시 알림이 켜졌어요.");
       } catch (error) {
         setIsPushEnabled(false);
 
@@ -121,7 +116,7 @@ export function NotificationSettingToggle() {
 
         showToast.warning("푸시 알림을 켜지 못했어요. 잠시 후 다시 시도해 주세요.");
       } finally {
-        setIsEnablingPush(false);
+        isEnablingRef.current = false;
         setActiveModal("none");
       }
     })();
@@ -140,7 +135,6 @@ export function NotificationSettingToggle() {
 
       <PushPermissionModal
         isOpen={activeModal === "push"}
-        isLoading={isEnablingPush}
         onClose={() => setActiveModal("none")}
         onAllow={handlePushAllow}
       />
