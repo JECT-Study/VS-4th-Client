@@ -74,7 +74,11 @@ export function ClosedParticipatedVoteList() {
                 </div>
               </div>
 
-              <img src={item.thumbnailUrl} alt="" className="w-[74px] h-[74px] rounded-lg overflow-hidden shrink-0" />
+              <img
+                src={item.thumbnailUrl}
+                alt=""
+                className="w-[74px] h-[74px] rounded-lg overflow-hidden shrink-0 object-cover"
+              />
             </Link>
           ))}
         </ol>
