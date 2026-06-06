@@ -48,16 +48,10 @@ export function NotificationSettingToggle() {
   const [isEnablingPush, setIsEnablingPush] = useState(false);
   const [activeModal, setActiveModal] = useState<"none" | "a2hs" | "push">("none");
   const isPending = isEnablingPush || registerPushTokenMutation.isPending || unregisterPushTokenMutation.isPending;
-  const isDesktop = osType === "other";
 
   useEffect(() => {
-    if (isDesktop) {
-      setIsPushEnabled(false);
-      return;
-    }
-
     setIsPushEnabled(pushPermission === "granted");
-  }, [pushPermission, isDesktop]);
+  }, [pushPermission]);
 
   const handleDisablePush = async () => {
     try {
@@ -80,12 +74,7 @@ export function NotificationSettingToggle() {
       return;
     }
 
-    if (isDesktop) {
-      showToast.info("푸시 알림은 모바일 앱에서만 설정할 수 있어요.");
-      return;
-    }
-
-    if (osType === "ios-outdated" || !isPwaInstalled) {
+    if (osType === "ios-outdated" || ((osType === "android" || osType === "ios") && !isPwaInstalled)) {
       setActiveModal("a2hs");
       return;
     }
@@ -94,27 +83,17 @@ export function NotificationSettingToggle() {
   };
 
   const handleA2HSConfirm = async () => {
-    if (isDesktop) {
+    if (osType !== "android") {
       setActiveModal("none");
       return;
     }
 
-    if (osType === "android") {
-      const isInstalled = await promptInstall();
-      setActiveModal(isInstalled ? "push" : "none");
-      return;
-    }
-
-    if (osType === "ios") {
-      setActiveModal("push");
-      return;
-    }
-
-    setActiveModal("none");
+    const isInstalled = await promptInstall();
+    setActiveModal(isInstalled ? "push" : "none");
   };
 
   const handlePushAllow = () => {
-    if (isPending || isDesktop) return;
+    if (isPending) return;
 
     setIsEnablingPush(true);
     setActiveModal("none");

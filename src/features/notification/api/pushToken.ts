@@ -1,6 +1,5 @@
 import { defaultApi } from "@base/api/defaultApi";
 import { FcmTokenError, type GetFcmTokenOptions, getFcmToken } from "@base/push/fcmToken";
-import { isDesktopBrowser } from "@features/notification/model/isDesktopBrowser";
 import type { RegisterPushTokenRequestPlatformEnum } from "@ject-4-vs-team/api-client";
 
 export type RegisterPushTokenOptions = GetFcmTokenOptions;
@@ -26,10 +25,6 @@ export const registerPushToken = async (
   platform: RegisterPushTokenRequestPlatformEnum,
   options: RegisterPushTokenOptions = {},
 ): Promise<void> => {
-  if (isDesktopBrowser()) {
-    throw new FcmTokenError("푸시 알림은 모바일 앱에서만 설정할 수 있어요.", "UNSUPPORTED");
-  }
-
   if (registerPushTokenPromise) {
     debugPush("api register deduped", { platform });
     return registerPushTokenPromise;

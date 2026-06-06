@@ -1,6 +1,5 @@
 import { userQueryOptions } from "@features/auth/api/userQuery";
 import { registerPushToken } from "@features/notification/api/pushToken";
-import { isDesktopBrowser } from "@features/notification/model/isDesktopBrowser";
 import { resolvePushPlatform } from "@features/notification/model/resolvePushPlatform";
 import type { OSType } from "@features/notification/model/useNotificationSetup";
 import { useQuery } from "@tanstack/react-query";
@@ -30,7 +29,6 @@ export function PushTokenSync() {
 
   useEffect(() => {
     if (!user) return;
-    if (isDesktopBrowser()) return;
     if (!("Notification" in window) || Notification.permission !== "granted") return;
 
     let cancelled = false;
