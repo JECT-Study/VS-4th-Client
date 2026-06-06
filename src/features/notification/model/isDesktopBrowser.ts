@@ -1,18 +1,7 @@
-import type { OSType } from "./useNotificationSetup";
+/** 모바일 UA가 아니면 데스크탑 브라우저로 본다. (동기 판별 — useEffect 대기 없음) */
+export const isDesktopBrowser = (): boolean => {
+  if (typeof navigator === "undefined") return false;
 
-export const detectOsTypeFromUserAgent = (): OSType => {
   const userAgent = navigator.userAgent.toLowerCase();
-
-  if (/android/i.test(userAgent)) {
-    return "android";
-  }
-
-  if (/iphone|ipad|ipod/i.test(userAgent)) {
-    return "Notification" in window ? "ios" : "ios-outdated";
-  }
-
-  return "other";
+  return !/android|iphone|ipad|ipod/i.test(userAgent);
 };
-
-/** 데스크탑 브라우저(모바일 UA 아님) */
-export const isDesktopBrowser = (): boolean => detectOsTypeFromUserAgent() === "other";

@@ -5,6 +5,7 @@ import {
   useRegisterPushTokenMutation,
   useUnregisterPushTokenMutation,
 } from "@features/notification/api/pushTokenMutations";
+import { isDesktopBrowser } from "@features/notification/model/isDesktopBrowser";
 import { resolvePushPlatform } from "@features/notification/model/resolvePushPlatform";
 import { isAxiosError } from "axios";
 import { useEffect, useState } from "react";
@@ -48,7 +49,7 @@ export function NotificationSettingToggle() {
   const [isEnablingPush, setIsEnablingPush] = useState(false);
   const [activeModal, setActiveModal] = useState<"none" | "a2hs" | "push">("none");
   const isPending = isEnablingPush || registerPushTokenMutation.isPending || unregisterPushTokenMutation.isPending;
-  const isDesktop = osType === "other";
+  const isDesktop = isDesktopBrowser();
 
   useEffect(() => {
     if (isDesktop) {
@@ -73,15 +74,10 @@ export function NotificationSettingToggle() {
   };
 
   const handleToggle = () => {
-    if (isPending) return;
+    if (isPending || isDesktop) return;
 
     if (isPushEnabled) {
       void handleDisablePush();
-      return;
-    }
-
-    if (isDesktop) {
-      showToast.info("푸시 알림은 모바일 앱에서만 설정할 수 있어요.");
       return;
     }
 
@@ -94,11 +90,6 @@ export function NotificationSettingToggle() {
   };
 
   const handleA2HSConfirm = async () => {
-    if (isDesktop) {
-      setActiveModal("none");
-      return;
-    }
-
     if (osType === "android") {
       const isInstalled = await promptInstall();
       setActiveModal(isInstalled ? "push" : "none");
@@ -177,6 +168,10 @@ export function NotificationSettingToggle() {
         setIsEnablingPush(false);
       });
   };
+
+  if (isDesktop) {
+    return <span className="text-body-s text-grey-light">모바일 앱에서만 설정할 수 있어요</span>;
+  }
 
   return (
     <div className="flex items-center gap-2">
