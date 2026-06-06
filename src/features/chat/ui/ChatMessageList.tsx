@@ -1,3 +1,4 @@
+import clsx from "clsx";
 import { formatTimeLabel } from "../lib/formatChatTime";
 import type { ChatMessageResponse } from "../model/types";
 
@@ -33,10 +34,10 @@ export function ChatMessageList({ messages, optionA, optionB }: ChatMessageListP
               <div className="max-w-[75%]">
                 <div className="flex justify-end gap-1 mb-1 text-label-s">
                   <span className="text-grey-dark">{message.senderNickname}</span>
-                  <span className={optionTextColor}>{optionLabel}</span>
+                  <span className={clsx(optionTextColor, "max-w-[116px] truncate")}>{optionLabel}</span>
                 </div>
 
-                <div className="flex items-end gap-2">
+                <div className="flex items-end gap-2 justify-end">
                   <span className="text-label-s text-grey-light">{formatTimeLabel(message.sentAt)}</span>
                   <p className="px-4 py-3 bg-white border rounded-2xl border-grey-stroke text-label-m text-grey-black">
                     {message.content}
@@ -60,7 +61,7 @@ export function ChatMessageList({ messages, optionA, optionB }: ChatMessageListP
             <div className="max-w-[75%]">
               <div className="flex gap-1 mb-1 text-label-s">
                 <span className="text-grey-dark">{message.senderNickname}</span>
-                <span className={optionTextColor}>{optionLabel}</span>
+                <span className={clsx(optionTextColor, "max-w-[116px] truncate")}>{optionLabel}</span>
               </div>
 
               <div className="flex items-end gap-2">

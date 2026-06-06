@@ -276,7 +276,9 @@ function MessageItem({ message, optionA, optionB, t }: MessageItemProps) {
         <div className="max-w-[75%]">
           <div className="flex justify-end gap-1 mb-2">
             <span className={clsx("text-label-m", t.senderNickname)}>{message.senderNickname}</span>
-            {message.senderVoteOption && <span className={clsx("text-label-l", optionTextColor)}>{optionLabel}</span>}
+            {message.senderVoteOption && (
+              <span className={clsx("text-label-l max-w-[116px] truncate", optionTextColor)}>{optionLabel}</span>
+            )}
           </div>
           <div className="flex items-end gap-2 justify-end">
             <span className={`text-label-s ${t.time}`}>{formatTimeLabel(message.sentAt)}</span>
@@ -303,7 +305,9 @@ function MessageItem({ message, optionA, optionB, t }: MessageItemProps) {
       <div className="max-w-[75%]">
         <div className="flex gap-1 mb-2">
           <span className={clsx("text-label-m", t.senderNickname)}>{message.senderNickname}</span>
-          {message.senderVoteOption && <span className={clsx("text-label-l", optionTextColor)}>{optionLabel}</span>}
+          {message.senderVoteOption && (
+            <span className={clsx("text-label-l max-w-[116px] truncate", optionTextColor)}>{optionLabel}</span>
+          )}
         </div>
         <div className="flex items-end gap-2">
           <p
