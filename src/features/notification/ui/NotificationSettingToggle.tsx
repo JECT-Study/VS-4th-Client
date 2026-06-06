@@ -5,7 +5,6 @@ import {
   useRegisterPushTokenMutation,
   useUnregisterPushTokenMutation,
 } from "@features/notification/api/pushTokenMutations";
-import { isDesktopBrowser } from "@features/notification/model/isDesktopBrowser";
 import { resolvePushPlatform } from "@features/notification/model/resolvePushPlatform";
 import { isAxiosError } from "axios";
 import { useEffect, useState } from "react";
@@ -49,16 +48,10 @@ export function NotificationSettingToggle() {
   const [isEnablingPush, setIsEnablingPush] = useState(false);
   const [activeModal, setActiveModal] = useState<"none" | "a2hs" | "push">("none");
   const isPending = isEnablingPush || registerPushTokenMutation.isPending || unregisterPushTokenMutation.isPending;
-  const isDesktop = isDesktopBrowser();
 
   useEffect(() => {
-    if (isDesktop) {
-      setIsPushEnabled(false);
-      return;
-    }
-
     setIsPushEnabled(pushPermission === "granted");
-  }, [pushPermission, isDesktop]);
+  }, [pushPermission]);
 
   const handleDisablePush = async () => {
     try {
@@ -74,14 +67,14 @@ export function NotificationSettingToggle() {
   };
 
   const handleToggle = () => {
-    if (isPending || isDesktop) return;
+    if (isPending) return;
 
     if (isPushEnabled) {
       void handleDisablePush();
       return;
     }
 
-    if (osType === "ios-outdated" || !isPwaInstalled) {
+    if (osType === "ios-outdated" || ((osType === "android" || osType === "ios") && !isPwaInstalled)) {
       setActiveModal("a2hs");
       return;
     }
@@ -90,22 +83,17 @@ export function NotificationSettingToggle() {
   };
 
   const handleA2HSConfirm = async () => {
-    if (osType === "android") {
-      const isInstalled = await promptInstall();
-      setActiveModal(isInstalled ? "push" : "none");
+    if (osType !== "android") {
+      setActiveModal("none");
       return;
     }
 
-    if (osType === "ios") {
-      setActiveModal("push");
-      return;
-    }
-
-    setActiveModal("none");
+    const isInstalled = await promptInstall();
+    setActiveModal(isInstalled ? "push" : "none");
   };
 
   const handlePushAllow = () => {
-    if (isPending || isDesktop) return;
+    if (isPending) return;
 
     setIsEnablingPush(true);
     setActiveModal("none");
@@ -168,10 +156,6 @@ export function NotificationSettingToggle() {
         setIsEnablingPush(false);
       });
   };
-
-  if (isDesktop) {
-    return <span className="text-body-s text-grey-light">모바일 앱에서만 설정할 수 있어요</span>;
-  }
 
   return (
     <div className="flex items-center gap-2">
