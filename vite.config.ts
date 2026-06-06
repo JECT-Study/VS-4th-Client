@@ -37,7 +37,7 @@ export default defineConfig({
         globIgnores: ["assets/images/app/**/*"],
       },
       devOptions: {
-        enabled: false,
+        enabled: true,
         type: "module",
       },
     }),
@@ -53,6 +53,10 @@ export default defineConfig({
     },
   },
   server: {
+    port: 3000,
+    strictPort: true,
+  },
+  preview: {
     port: 3000,
     strictPort: true,
   },

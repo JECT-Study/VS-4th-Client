@@ -1,5 +1,9 @@
 import { getFirebaseApp, getFirebaseVapidKey } from "@base/push/firebaseConfig";
-import { ensureServiceWorkerReady, type ServiceWorkerReadyMode } from "@base/push/serviceWorker";
+import {
+  ensureServiceWorkerReady,
+  ServiceWorkerUnavailableError,
+  type ServiceWorkerReadyMode,
+} from "@base/push/serviceWorker";
 import { getMessaging, getToken, isSupported } from "firebase/messaging";
 
 export class FcmTokenError extends Error {
@@ -14,6 +18,22 @@ export class FcmTokenError extends Error {
 }
 
 const sleep = (ms: number) => new Promise<void>((resolve) => window.setTimeout(resolve, ms));
+const GET_TOKEN_TIMEOUT_MS = 10_000;
+
+const withTimeout = async <T>(promise: Promise<T>, timeoutMs: number, label: string): Promise<T> => {
+  let timeoutId: number | undefined;
+
+  try {
+    return await Promise.race([
+      promise,
+      new Promise<never>((_, reject) => {
+        timeoutId = window.setTimeout(() => reject(new Error(`${label} timeout`)), timeoutMs);
+      }),
+    ]);
+  } finally {
+    if (timeoutId !== undefined) window.clearTimeout(timeoutId);
+  }
+};
 
 export type GetFcmTokenOptions = {
   mode?: ServiceWorkerReadyMode;
@@ -26,7 +46,16 @@ export const getFcmToken = async (options: GetFcmTokenOptions = {}): Promise<str
     throw new FcmTokenError("이 브라우저는 Firebase Cloud Messaging을 지원하지 않습니다.", "UNSUPPORTED");
   }
 
-  const registration = await ensureServiceWorkerReady(mode);
+  let registration: ServiceWorkerRegistration | null;
+  try {
+    registration = await ensureServiceWorkerReady(mode);
+  } catch (error) {
+    if (error instanceof ServiceWorkerUnavailableError) {
+      throw new FcmTokenError(error.message, "SERVICE_WORKER_UNAVAILABLE", error);
+    }
+    throw error;
+  }
+
   if (!registration) {
     throw new FcmTokenError("서비스 워커가 준비되지 않아 FCM 토큰을 발급할 수 없습니다.", "SERVICE_WORKER_UNAVAILABLE");
   }
@@ -42,7 +71,7 @@ export const getFcmToken = async (options: GetFcmTokenOptions = {}): Promise<str
 
   for (let attempt = 0; attempt < maxAttempts; attempt += 1) {
     try {
-      const token = await getToken(messaging, tokenOptions);
+      const token = await withTimeout(getToken(messaging, tokenOptions), GET_TOKEN_TIMEOUT_MS, "FCM getToken");
 
       if (!token) {
         throw new FcmTokenError("FCM 토큰이 비어 있습니다.", "TOKEN_REQUEST_FAILED");
@@ -51,6 +80,10 @@ export const getFcmToken = async (options: GetFcmTokenOptions = {}): Promise<str
       return token;
     } catch (error) {
       if (error instanceof FcmTokenError) throw error;
+
+      if (error instanceof ServiceWorkerUnavailableError) {
+        throw new FcmTokenError(error.message, "SERVICE_WORKER_UNAVAILABLE", error);
+      }
 
       lastError = error;
 
