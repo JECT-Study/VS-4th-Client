@@ -3,14 +3,6 @@ import { ensureServiceWorkerReady } from "@base/push/serviceWorker";
 import { getMessaging, getToken, isSupported } from "firebase/messaging";
 
 export const getFcmToken = async (): Promise<string | null> => {
-  const app = getFirebaseApp();
-  const vapidKey = getFirebaseVapidKey();
-
-  if (!app || !vapidKey) {
-    console.warn("Firebase 푸시 설정이 없어 FCM 토큰을 발급할 수 없습니다.");
-    return null;
-  }
-
   if (!(await isSupported())) {
     console.warn("이 브라우저는 Firebase Cloud Messaging을 지원하지 않습니다.");
     return null;
@@ -23,9 +15,9 @@ export const getFcmToken = async (): Promise<string | null> => {
   }
 
   try {
-    const messaging = getMessaging(app);
+    const messaging = getMessaging(getFirebaseApp());
     return await getToken(messaging, {
-      vapidKey,
+      vapidKey: getFirebaseVapidKey(),
       serviceWorkerRegistration: registration,
     });
   } catch (error) {

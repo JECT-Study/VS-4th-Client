@@ -9,33 +9,27 @@ type FirebaseWebConfig = {
   vapidKey: string;
 };
 
-const readFirebaseWebConfig = (): FirebaseWebConfig | null => {
-  const apiKey = import.meta.env.VITE_FIREBASE_API_KEY;
-  const authDomain = import.meta.env.VITE_FIREBASE_AUTH_DOMAIN;
-  const projectId = import.meta.env.VITE_FIREBASE_PROJECT_ID;
-  const messagingSenderId = import.meta.env.VITE_FIREBASE_MESSAGING_SENDER_ID;
-  const appId = import.meta.env.VITE_FIREBASE_APP_ID;
-  const vapidKey = import.meta.env.VITE_FIREBASE_VAPID_KEY;
-
-  if (!apiKey || !authDomain || !projectId || !messagingSenderId || !appId || !vapidKey) {
-    return null;
-  }
-
-  return { apiKey, authDomain, projectId, messagingSenderId, appId, vapidKey };
+/** Firebase Web 공개 설정 (FCM 푸시 토큰 발급용) */
+const FIREBASE_WEB_CONFIG: FirebaseWebConfig = {
+  apiKey: "AIzaSyBMubUnZcS6a7Ngpw5okF08SFx3GKGcm1Q",
+  authDomain: "ject-vs-48246.firebaseapp.com",
+  projectId: "ject-vs-48246",
+  messagingSenderId: "712416945522",
+  appId: "1:712416945522:web:dd8c372c87e48f7af9e9eb",
+  vapidKey: "BMSJh_-zEZ2eWxd4rHbH0YswrljRgRgywRzI0VrGGrJgSQv-UaVaQr706lVaQVRJZkU56p38t-viprTtMauKI3w",
 };
 
-export const isFirebaseConfigured = (): boolean => readFirebaseWebConfig() !== null;
+const readFirebaseWebConfig = (): FirebaseWebConfig => FIREBASE_WEB_CONFIG;
 
-export const getFirebaseVapidKey = (): string | null => readFirebaseWebConfig()?.vapidKey ?? null;
+export const isFirebaseConfigured = (): boolean => true;
 
-export const getFirebaseApp = (): FirebaseApp | null => {
-  const config = readFirebaseWebConfig();
-  if (!config) return null;
+export const getFirebaseVapidKey = (): string => readFirebaseWebConfig().vapidKey;
 
+export const getFirebaseApp = (): FirebaseApp => {
   if (getApps().length > 0) {
     return getApp();
   }
 
-  const { vapidKey: _vapidKey, ...appConfig } = config;
+  const { vapidKey: _vapidKey, ...appConfig } = readFirebaseWebConfig();
   return initializeApp(appConfig);
 };
