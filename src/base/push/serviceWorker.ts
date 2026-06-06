@@ -1,10 +1,15 @@
 const SERVICE_WORKER_URL = "/sw.js";
-const ACTIVATION_TIMEOUT_MS = 20_000;
+const QUICK_TIMEOUT_MS = 2_000;
+const INTERACTIVE_TIMEOUT_MS = 8_000;
 const SW_RELOAD_FLAG = "vs:sw-reload-attempted";
 
 let registrationPromise: Promise<ServiceWorkerRegistration | null> | null = null;
+let cachedRegistration: ServiceWorkerRegistration | null = null;
+let inflightReady: Promise<ServiceWorkerRegistration | null> | null = null;
 
 const sleep = (ms: number) => new Promise<void>((resolve) => window.setTimeout(resolve, ms));
+
+export type ServiceWorkerReadyMode = "quick" | "interactive";
 
 type RegisterSW = (options?: {
   immediate?: boolean;
@@ -38,7 +43,7 @@ const requestSkipWaiting = (registration: ServiceWorkerRegistration) => {
   registration.waiting?.postMessage({ type: "SKIP_WAITING" });
 };
 
-const waitForWorkerState = (worker: ServiceWorker, targetState: ServiceWorkerState) =>
+const waitForWorkerState = (worker: ServiceWorker, targetState: ServiceWorkerState, timeoutMs: number) =>
   new Promise<void>((resolve, reject) => {
     if (worker.state === targetState) {
       resolve();
@@ -47,7 +52,7 @@ const waitForWorkerState = (worker: ServiceWorker, targetState: ServiceWorkerSta
 
     const timeout = window.setTimeout(() => {
       reject(new Error(`Service worker did not reach "${targetState}" state`));
-    }, ACTIVATION_TIMEOUT_MS);
+    }, timeoutMs);
 
     worker.addEventListener("statechange", () => {
       if (worker.state === targetState) {
@@ -57,14 +62,14 @@ const waitForWorkerState = (worker: ServiceWorker, targetState: ServiceWorkerSta
     });
   });
 
-const waitForServiceWorkerActivation = async (registration: ServiceWorkerRegistration) => {
+const waitForServiceWorkerActivation = async (registration: ServiceWorkerRegistration, timeoutMs: number) => {
   if (registration.active) return registration;
 
   requestSkipWaiting(registration);
 
   const worker = registration.installing ?? registration.waiting;
   if (worker) {
-    await waitForWorkerState(worker, "activated");
+    await waitForWorkerState(worker, "activated", timeoutMs);
     return registration;
   }
 
@@ -72,13 +77,13 @@ const waitForServiceWorkerActivation = async (registration: ServiceWorkerRegistr
   return registration;
 };
 
-const waitForControllingServiceWorker = async () => {
+const waitForControllingServiceWorker = async (timeoutMs: number) => {
   if (navigator.serviceWorker.controller) return;
 
   await new Promise<void>((resolve, reject) => {
     const timeout = window.setTimeout(() => {
       reject(new Error("Service worker is not controlling the page"));
-    }, ACTIVATION_TIMEOUT_MS);
+    }, timeoutMs);
 
     const finish = () => {
       if (!navigator.serviceWorker.controller) return;
@@ -103,45 +108,79 @@ const reloadOnceForServiceWorker = (): boolean => {
   return true;
 };
 
-/**
- * FCM 토큰 발급 전 서비스 워커가 등록·활성·페이지 제어 상태인지 보장한다.
- */
-export const ensureServiceWorkerReady = async (): Promise<ServiceWorkerRegistration | null> => {
+const resolveReadyRegistration = async (mode: ServiceWorkerReadyMode): Promise<ServiceWorkerRegistration | null> => {
   if (!("serviceWorker" in navigator)) return null;
 
-  try {
-    let registration = registrationPromise ? await registrationPromise : await navigator.serviceWorker.getRegistration();
+  const timeoutMs = mode === "interactive" ? INTERACTIVE_TIMEOUT_MS : QUICK_TIMEOUT_MS;
+  const allowReload = mode === "interactive";
 
-    if (!registration) {
-      registration = await navigator.serviceWorker.register(SERVICE_WORKER_URL);
-    }
+  let registration = registrationPromise ? await registrationPromise : await navigator.serviceWorker.getRegistration();
 
-    registration = await waitForServiceWorkerActivation(registration);
-    await navigator.serviceWorker.ready;
-
-    try {
-      await waitForControllingServiceWorker();
-    } catch {
-      if (reloadOnceForServiceWorker()) return null;
-      throw new Error("Service worker is not controlling the page");
-    }
-
-    return registration;
-  } catch (error) {
-    console.error("서비스 워커 준비 실패:", error);
-
-    for (let attempt = 0; attempt < 2; attempt += 1) {
-      await sleep(500 * (attempt + 1));
-
-      try {
-        const registration = await navigator.serviceWorker.ready;
-        await waitForControllingServiceWorker();
-        return registration;
-      } catch {
-        // retry
-      }
-    }
-
-    return null;
+  if (!registration) {
+    registration = await navigator.serviceWorker.register(SERVICE_WORKER_URL);
   }
+
+  registration = await waitForServiceWorkerActivation(registration, timeoutMs);
+  await navigator.serviceWorker.ready;
+
+  try {
+    await waitForControllingServiceWorker(timeoutMs);
+  } catch {
+    if (allowReload && reloadOnceForServiceWorker()) return null;
+    throw new Error("Service worker is not controlling the page");
+  }
+
+  cachedRegistration = registration;
+  return registration;
+};
+
+/**
+ * FCM 토큰 발급 전 서비스 워커 준비 상태를 확인한다.
+ * - quick: 앱 시작 동기화용. 짧은 대기, 자동 새로고침 없음.
+ * - interactive: 사용자가 푸시 ON 할 때. 조금 더 기다리고 1회 자동 새로고침 허용.
+ */
+export const ensureServiceWorkerReady = async (
+  mode: ServiceWorkerReadyMode = "quick",
+): Promise<ServiceWorkerRegistration | null> => {
+  if (!("serviceWorker" in navigator)) return null;
+
+  if (cachedRegistration?.active && navigator.serviceWorker.controller) {
+    return cachedRegistration;
+  }
+
+  if (inflightReady) {
+    return inflightReady;
+  }
+
+  inflightReady = (async () => {
+    try {
+      return await resolveReadyRegistration(mode);
+    } catch (error) {
+      if (mode === "quick") {
+        console.warn("서비스 워커 빠른 준비 실패:", error);
+        return null;
+      }
+
+      console.error("서비스 워커 준비 실패:", error);
+
+      for (let attempt = 0; attempt < 2; attempt += 1) {
+        await sleep(400 * (attempt + 1));
+
+        try {
+          const registration = await navigator.serviceWorker.ready;
+          await waitForControllingServiceWorker(INTERACTIVE_TIMEOUT_MS);
+          cachedRegistration = registration;
+          return registration;
+        } catch {
+          // retry
+        }
+      }
+
+      return null;
+    } finally {
+      inflightReady = null;
+    }
+  })();
+
+  return inflightReady;
 };
