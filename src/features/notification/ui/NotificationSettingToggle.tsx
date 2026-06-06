@@ -5,6 +5,7 @@ import {
   useRegisterPushTokenMutation,
   useUnregisterPushTokenMutation,
 } from "@features/notification/api/pushTokenMutations";
+import { isDesktopBrowser } from "@features/notification/model/isDesktopBrowser";
 import { resolvePushPlatform } from "@features/notification/model/resolvePushPlatform";
 import { useEffect, useState } from "react";
 import { useNotificationSetup } from "../model/useNotificationSetup";
@@ -38,6 +39,11 @@ export function NotificationSettingToggle() {
 
     if (isPushEnabled) {
       void handleDisablePush();
+      return;
+    }
+
+    if (isDesktopBrowser()) {
+      showToast.info("푸시 알림은 모바일 앱에서만 설정할 수 있어요.");
       return;
     }
 
