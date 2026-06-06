@@ -13,6 +13,8 @@ export class FcmTokenError extends Error {
   }
 }
 
+const sleep = (ms: number) => new Promise<void>((resolve) => window.setTimeout(resolve, ms));
+
 export const getFcmToken = async (): Promise<string> => {
   if (!(await isSupported())) {
     throw new FcmTokenError("이 브라우저는 Firebase Cloud Messaging을 지원하지 않습니다.", "UNSUPPORTED");
@@ -23,21 +25,33 @@ export const getFcmToken = async (): Promise<string> => {
     throw new FcmTokenError("서비스 워커가 준비되지 않아 FCM 토큰을 발급할 수 없습니다.", "SERVICE_WORKER_UNAVAILABLE");
   }
 
-  try {
-    const messaging = getMessaging(getFirebaseApp());
-    const token = await getToken(messaging, {
-      vapidKey: getFirebaseVapidKey(),
-      serviceWorkerRegistration: registration,
-    });
+  const messaging = getMessaging(getFirebaseApp());
+  const tokenOptions = {
+    vapidKey: getFirebaseVapidKey(),
+    serviceWorkerRegistration: registration,
+  };
 
-    if (!token) {
-      throw new FcmTokenError("FCM 토큰이 비어 있습니다.", "TOKEN_REQUEST_FAILED");
+  let lastError: unknown;
+
+  for (let attempt = 0; attempt < 3; attempt += 1) {
+    try {
+      const token = await getToken(messaging, tokenOptions);
+
+      if (!token) {
+        throw new FcmTokenError("FCM 토큰이 비어 있습니다.", "TOKEN_REQUEST_FAILED");
+      }
+
+      return token;
+    } catch (error) {
+      if (error instanceof FcmTokenError) throw error;
+
+      lastError = error;
+
+      if (attempt < 2) {
+        await sleep(800 * (attempt + 1));
+      }
     }
-
-    return token;
-  } catch (error) {
-    if (error instanceof FcmTokenError) throw error;
-
-    throw new FcmTokenError("FCM 토큰 발급에 실패했습니다.", "TOKEN_REQUEST_FAILED", error);
   }
+
+  throw new FcmTokenError("FCM 토큰 발급에 실패했습니다.", "TOKEN_REQUEST_FAILED", lastError);
 };

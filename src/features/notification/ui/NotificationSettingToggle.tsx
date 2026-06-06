@@ -79,10 +79,10 @@ export function NotificationSettingToggle() {
         if (error.code === "UNSUPPORTED") {
           showToast.warning("이 기기/브라우저에서는 푸시 알림을 지원하지 않아요.");
         } else if (error.code === "SERVICE_WORKER_UNAVAILABLE") {
-          showToast.warning("앱을 한 번 새로고침한 뒤 다시 시도해 주세요.");
+          showToast.warning("앱 준비 중이에요. 잠시 후 다시 시도해 주세요.");
         } else {
           console.error("FCM token error:", error.cause ?? error);
-          showToast.warning("푸시 토큰을 발급하지 못했어요. 앱을 완전히 종료 후 다시 열어 주세요.");
+          showToast.warning("푸시 토큰을 발급하지 못했어요. 앱을 완전히 종료한 뒤 다시 열어 주세요.");
         }
         return;
       }

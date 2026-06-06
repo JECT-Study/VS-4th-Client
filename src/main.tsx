@@ -1,5 +1,6 @@
 // import "@/mocks";
 
+import { initServiceWorkerRegistration } from "@base/push/serviceWorker";
 import { registerSW } from "virtual:pwa-register";
 import { StrictMode } from "react";
 import { createRoot } from "react-dom/client";
@@ -9,9 +10,7 @@ import { initSentry } from "@app/config/sentry";
 
 initSentry();
 
-if ("serviceWorker" in navigator) {
-  registerSW({ immediate: true });
-}
+initServiceWorkerRegistration(registerSW);
 
 const rootElement = document.getElementById("root");
 
