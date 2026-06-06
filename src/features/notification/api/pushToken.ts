@@ -1,4 +1,4 @@
-import { apiClient } from "@base/api/client";
+import { defaultApi } from "@base/api/defaultApi";
 import { FcmTokenError, type GetFcmTokenOptions, getFcmToken } from "@base/push/fcmToken";
 import type { RegisterPushTokenRequestPlatformEnum } from "@ject-4-vs-team/api-client";
 
@@ -41,7 +41,7 @@ export const registerPushToken = async (
     }
 
     debugPush("api register start", { platform, url: "/api/devices/push-token" });
-    await apiClient.post("/api/devices/push-token", { token, platform });
+    await defaultApi.register({ token, platform });
     registeredTokenSnapshot = { token, platform };
     debugPush("api register success", { platform });
   })();
@@ -55,7 +55,7 @@ export const registerPushToken = async (
 
 export const unregisterPushToken = async (): Promise<void> => {
   debugPush("api unregister start", { url: "/api/devices/push-token" });
-  await apiClient.delete("/api/devices/push-token");
+  await defaultApi.unregisterAll();
   registeredTokenSnapshot = null;
   debugPush("api unregister success");
 };
