@@ -1,6 +1,5 @@
 import { Spinner } from "@base/ui/Spinner";
 import { userQueryOptions } from "@features/auth/api/userQuery";
-import { BottomTabBar } from "@features/common/ui/BottomTabBar";
 import { GuestMyPage } from "@features/mypage/ui/GuestMyPage";
 import { MemberMyPage } from "@features/mypage/ui/MemberMyPage";
 import { useQuery } from "@tanstack/react-query";
@@ -28,8 +27,6 @@ function RouteComponent() {
       ) : (
         <GuestMyPage />
       )}
-
-      <BottomTabBar />
     </div>
   );
 }

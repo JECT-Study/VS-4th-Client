@@ -34,7 +34,7 @@ export default defineConfig({
       },
       injectManifest: {
         globPatterns: ["**/*.{js,css,html,ico,png,svg,woff2,webp,avif}"],
-        globIgnores: ["assets/images/app/**/*"],
+        globIgnores: ["assets/images/app/**/*", "assets/images/logo_118x118.png"],
       },
       devOptions: {
         enabled: true,
