@@ -4,8 +4,8 @@ import { useQuery } from "@tanstack/react-query";
 import { useNavigate } from "@tanstack/react-router";
 
 function VoteIcon({ variant }: { variant: "used" | "remaining" }) {
-  const bg = variant === "used" ? "bg-primary" : "bg-[#BEBEDD]";
-  const fill = variant === "used" ? "white" : "#EBEBF5";
+  const bg = variant === "remaining" ? "bg-primary" : "bg-[#BEBEDD]";
+  const fill = variant === "remaining" ? "white" : "#EBEBF5";
   return (
     <div className={`w-10 h-10 rounded-full shrink-0 flex items-center justify-center ${bg}`}>
       <svg
@@ -40,33 +40,33 @@ export function GuestMyPage() {
 
   return (
     <div className="py-6 px-5">
-      <h2 className="text-title-s text-grey-black">비회원으로 이용 중</h2>
-      <p className="text-body-s text-grey-dark mt-[6px] mb-6">
-        로그인하면 세그먼트 결과, 채팅,
-        <br />
-        무제한 투표를 즐길 수 있어요
-      </p>
-      <Button
-        onClick={() => {
-          navigate({ to: "/login" });
-        }}
-      >
-        Google로 시작하기
-      </Button>
-
-      <hr className="w-full h-px bg-grey-divider my-8" />
+      <div className="border-b border-grey-divider pb-8 mb-8">
+        <h2 className="text-title-s text-grey-black">비회원으로 이용 중</h2>
+        <p className="text-body-s text-grey-dark mt-[6px] mb-6">
+          로그인하면 세그먼트 결과, 채팅,
+          <br />
+          무제한 투표를 즐길 수 있어요
+        </p>
+        <Button
+          onClick={() => {
+            navigate({ to: "/login" });
+          }}
+        >
+          Google로 시작하기
+        </Button>
+      </div>
 
       <div className="rounded-[10px] bg-grey-divider px-5 py-6 relative">
         <h2 className="text-title-s">비회원 투표 기회</h2>
         <span className="text-label-m absolute top-6 right-5 text-grey-light">
-          {used}/{total}
+          {remaining}/{total}
         </span>
         <div className="mt-6 flex items-center justify-center gap-6">
-          {Array.from({ length: used }, (_, i) => `used-${i}`).map((id) => (
-            <VoteIcon key={id} variant="used" />
-          ))}
           {Array.from({ length: remaining }, (_, i) => `remaining-${i}`).map((id) => (
             <VoteIcon key={id} variant="remaining" />
+          ))}
+          {Array.from({ length: used }, (_, i) => `used-${i}`).map((id) => (
+            <VoteIcon key={id} variant="used" />
           ))}
         </div>
       </div>

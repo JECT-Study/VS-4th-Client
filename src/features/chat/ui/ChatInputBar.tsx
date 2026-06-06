@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 
 interface ChatInputBarProps {
   disabled?: boolean;
@@ -8,6 +8,15 @@ interface ChatInputBarProps {
 
 export function ChatInputBar({ disabled = false, placeholder = "메시지를 입력하세요.", onSubmit }: ChatInputBarProps) {
   const [message, setMessage] = useState("");
+  const textareaRef = useRef<HTMLTextAreaElement>(null);
+
+  // biome-ignore lint/correctness/useExhaustiveDependencies: message triggers DOM height recalculation
+  useEffect(() => {
+    const el = textareaRef.current;
+    if (!el) return;
+    el.style.height = "auto";
+    el.style.height = `${el.scrollHeight}px`;
+  }, [message]);
 
   const handleSubmit = () => {
     const trimmedMessage = message.trim();
@@ -21,18 +30,21 @@ export function ChatInputBar({ disabled = false, placeholder = "메시지를 입
   };
 
   return (
-    <div className="fixed bottom-0 z-20 flex items-center w-full max-w-md gap-2 px-5 py-3 -translate-x-1/2 bg-white border-t left-1/2 border-grey-stroke">
-      <input
+    <div className="fixed bottom-0 z-20 flex items-end w-full max-w-md gap-2 px-5 py-3 -translate-x-1/2 bg-white border-t left-1/2 border-grey-stroke">
+      <textarea
+        ref={textareaRef}
+        rows={1}
         value={message}
         disabled={disabled}
         placeholder={placeholder}
         onChange={(event) => setMessage(event.target.value)}
         onKeyDown={(event) => {
-          if (event.key === "Enter" && !event.nativeEvent.isComposing) {
+          if (event.key === "Enter" && !event.shiftKey && !event.nativeEvent.isComposing) {
+            event.preventDefault();
             handleSubmit();
           }
         }}
-        className="flex-1 min-w-0 px-4 rounded-full outline-none h-11 bg-grey-chat text-label-m text-grey-black placeholder:text-grey-disabled disabled:text-grey-disabled"
+        className="flex-1 min-w-0 px-4 py-2.5 rounded-2xl outline-none bg-grey-chat text-label-m text-grey-black placeholder:text-grey-disabled disabled:text-grey-disabled resize-none overflow-y-auto max-h-28"
       />
 
       <button

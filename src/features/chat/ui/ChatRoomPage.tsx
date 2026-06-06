@@ -194,7 +194,12 @@ function ChatRoomContent() {
       )}
 
       {isEnded ? (
-        <div className="fixed left-0 right-0 text-center bottom-8 text-label-m text-grey-light">
+        <div
+          className="fixed w-full text-center bottom-0 text-label-m text-grey-dark bg-white pt-[18px] max-w-md"
+          style={{
+            paddingBottom: "calc(env(safe-area-inset-bottom, 0px) + 18px)",
+          }}
+        >
           투표가 종료되어 채팅이 마감되었어요.
         </div>
       ) : (

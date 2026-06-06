@@ -1,3 +1,5 @@
+import { PROFILE_COLOR } from "@features/signup/config/profileColors";
+import clsx from "clsx";
 import { formatTimeLabel } from "../lib/formatChatTime";
 import type { ChatMessageResponse } from "../model/types";
 
@@ -25,7 +27,6 @@ export function ChatMessageList({ messages, optionA, optionB }: ChatMessageListP
         const isOptionA = message.senderVoteOption === "A";
         const optionLabel = isOptionA ? optionA : optionB;
         const optionTextColor = isOptionA ? "text-secondary" : "text-primary";
-        const avatarBg = isOptionA ? "bg-yellow-100" : "bg-blue-100";
 
         if (message.isMine) {
           return (
@@ -33,10 +34,12 @@ export function ChatMessageList({ messages, optionA, optionB }: ChatMessageListP
               <div className="max-w-[75%]">
                 <div className="flex justify-end gap-1 mb-1 text-label-s">
                   <span className="text-grey-dark">{message.senderNickname}</span>
-                  <span className={optionTextColor}>{optionLabel}</span>
+                  {message.senderVoteOption && (
+                    <span className={clsx(optionTextColor, "max-w-[116px] truncate")}>{optionLabel}</span>
+                  )}
                 </div>
 
-                <div className="flex items-end gap-2">
+                <div className="flex items-end gap-2 justify-end">
                   <span className="text-label-s text-grey-light">{formatTimeLabel(message.sentAt)}</span>
                   <p className="px-4 py-3 bg-white border rounded-2xl border-grey-stroke text-label-m text-grey-black">
                     {message.content}
@@ -49,18 +52,19 @@ export function ChatMessageList({ messages, optionA, optionB }: ChatMessageListP
 
         return (
           <div key={message.messageId} className="flex gap-3">
-            <div className={`flex h-9 w-9 shrink-0 items-center justify-center rounded-full ${avatarBg}`}>
-              {message.senderProfileIcon ? (
-                <img src={message.senderProfileIcon} alt="" className="object-cover w-full h-full rounded-full" />
-              ) : (
-                "⚡"
-              )}
+            <div className="flex h-10 w-10 shrink-0">
+              <img
+                src={PROFILE_COLOR[message.senderProfileIcon as keyof typeof PROFILE_COLOR]}
+                alt=""
+                className="object-cover w-full h-full rounded-full"
+              />
             </div>
-
             <div className="max-w-[75%]">
               <div className="flex gap-1 mb-1 text-label-s">
                 <span className="text-grey-dark">{message.senderNickname}</span>
-                <span className={optionTextColor}>{optionLabel}</span>
+                {message.senderVoteOption && (
+                  <span className={clsx(optionTextColor, "max-w-[116px] truncate")}>{optionLabel}</span>
+                )}
               </div>
 
               <div className="flex items-end gap-2">

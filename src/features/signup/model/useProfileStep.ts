@@ -84,11 +84,18 @@ export function useProfileStep() {
   const setNickname = (value: string) => {
     const capped = value.slice(0, 10);
     const localError = validateNickname(capped);
-    setProfileState((prev) => ({ ...prev, nickname: capped, nicknameError: localError }));
+    const willCheck = !localError && capped.length >= 2 && capped !== defaultNicknameRef.current;
+
+    setProfileState((prev) => ({
+      ...prev,
+      nickname: capped,
+      nicknameError: localError,
+      isCheckingNickname: willCheck,
+    }));
 
     if (debounceTimerRef.current) clearTimeout(debounceTimerRef.current);
 
-    if (!localError && capped.length >= 2 && capped !== defaultNicknameRef.current) {
+    if (willCheck) {
       debounceTimerRef.current = setTimeout(() => {
         checkNicknameMutation.mutate(capped);
       }, NICKNAME_CHECK_DEBOUNCE_MS);

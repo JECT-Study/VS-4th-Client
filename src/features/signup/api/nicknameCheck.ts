@@ -2,7 +2,8 @@ import { defaultApi } from "@base/api/defaultApi";
 import axios from "axios";
 
 export async function checkNickname(nickname: string): Promise<void> {
-  await defaultApi.isUniqueNickname({ nickname });
+  const { data } = await defaultApi.isUniqueNickname({ nickname });
+  if (!data.isAvailable) throw new Error("이미 사용 중인 닉네임이에요");
 }
 
 export function extractNicknameCheckError(error: unknown): string {

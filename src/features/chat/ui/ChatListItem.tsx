@@ -58,7 +58,7 @@ export function ChatListItem({ item, status, onClick }: ChatListItemProps) {
           {formatTimeLabel(isOngoing ? item.lastMessageAt : item.endAt)}
         </span>
 
-        {isOngoing && unreadLabel && (
+        {isOngoing && !!unreadLabel && (
           <span className="rounded-full bg-primary px-2 py-[2px] text-label-s text-white">{unreadLabel}</span>
         )}
       </div>
