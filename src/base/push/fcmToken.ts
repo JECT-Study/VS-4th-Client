@@ -1,8 +1,8 @@
 import { getFirebaseApp, getFirebaseVapidKey } from "@base/push/firebaseConfig";
 import {
-  ensureServiceWorkerReady,
-  ServiceWorkerUnavailableError,
   type ServiceWorkerReadyMode,
+  ServiceWorkerUnavailableError,
+  ensureServiceWorkerReady,
 } from "@base/push/serviceWorker";
 import { getMessaging, getToken, isSupported } from "firebase/messaging";
 
@@ -18,7 +18,7 @@ export class FcmTokenError extends Error {
 }
 
 const sleep = (ms: number) => new Promise<void>((resolve) => window.setTimeout(resolve, ms));
-const GET_TOKEN_TIMEOUT_MS = 10_000;
+const GET_TOKEN_TIMEOUT_MS = 5_000;
 
 const withTimeout = async <T>(promise: Promise<T>, timeoutMs: number, label: string): Promise<T> => {
   let timeoutId: number | undefined;
@@ -66,7 +66,7 @@ export const getFcmToken = async (options: GetFcmTokenOptions = {}): Promise<str
     serviceWorkerRegistration: registration,
   };
 
-  const maxAttempts = mode === "interactive" ? 3 : 1;
+  const maxAttempts = mode === "interactive" ? 2 : 1;
   let lastError: unknown;
 
   for (let attempt = 0; attempt < maxAttempts; attempt += 1) {
