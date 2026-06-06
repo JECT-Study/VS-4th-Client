@@ -1,4 +1,3 @@
-import { getFcmToken } from "@base/push/fcmToken";
 import { userQueryOptions } from "@features/auth/api/userQuery";
 import { registerPushToken } from "@features/notification/api/pushToken";
 import { resolvePushPlatform } from "@features/notification/model/resolvePushPlatform";
@@ -33,8 +32,7 @@ export function PushTokenSync() {
     let cancelled = false;
 
     const syncToken = async () => {
-      const token = await getFcmToken();
-      if (!token || cancelled) return;
+      if (cancelled) return;
 
       try {
         await registerPushToken(resolvePushPlatform(detectOsType()));

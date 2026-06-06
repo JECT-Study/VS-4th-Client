@@ -1,5 +1,6 @@
 /// <reference lib="webworker" />
 
+import { FIREBASE_WEB_APP_CONFIG } from "@base/push/firebaseWebConfig";
 import { CacheableResponsePlugin } from "workbox-cacheable-response";
 import { ExpirationPlugin } from "workbox-expiration";
 import { cleanupOutdatedCaches, createHandlerBoundToURL, precacheAndRoute } from "workbox-precaching";
@@ -7,6 +8,19 @@ import { NavigationRoute, registerRoute } from "workbox-routing";
 import { CacheFirst } from "workbox-strategies";
 
 declare let self: ServiceWorkerGlobalScope;
+declare function importScripts(...urls: string[]): void;
+declare const firebase: {
+  initializeApp: (config: Record<string, string>) => unknown;
+  messaging: () => unknown;
+};
+
+// FCM getToken()은 서비스 워커 안에서 Firebase Messaging이 초기화되어 있어야 한다.
+importScripts(
+  "https://www.gstatic.com/firebasejs/12.14.0/firebase-app-compat.js",
+  "https://www.gstatic.com/firebasejs/12.14.0/firebase-messaging-compat.js",
+);
+firebase.initializeApp(FIREBASE_WEB_APP_CONFIG);
+firebase.messaging();
 
 // ── Precaching ──────────────────────────────────────────────
 

@@ -1,10 +1,12 @@
 import { Switch } from "@base/ui/Switch";
 import { showToast } from "@base/ui/Toast";
+import { FcmTokenError } from "@features/notification/api/pushToken";
 import {
   useRegisterPushTokenMutation,
   useUnregisterPushTokenMutation,
 } from "@features/notification/api/pushTokenMutations";
 import { resolvePushPlatform } from "@features/notification/model/resolvePushPlatform";
+import { isAxiosError } from "axios";
 import { useEffect, useState } from "react";
 import { useNotificationSetup } from "../model/useNotificationSetup";
 import { A2HSModal } from "./A2HSModal";
@@ -72,11 +74,25 @@ export function NotificationSettingToggle() {
       setIsPushEnabled(true);
     } catch (error) {
       setIsPushEnabled(false);
-      if (error instanceof Error && error.message === "FCM_TOKEN_UNAVAILABLE") {
-        showToast.warning("푸시 토큰을 발급하지 못했어요. 앱을 홈 화면에 추가했는지 확인해 주세요.");
-      } else {
-        showToast.warning("푸시 알림을 켜지 못했어요. 잠시 후 다시 시도해 주세요.");
+
+      if (error instanceof FcmTokenError) {
+        if (error.code === "UNSUPPORTED") {
+          showToast.warning("이 기기/브라우저에서는 푸시 알림을 지원하지 않아요.");
+        } else if (error.code === "SERVICE_WORKER_UNAVAILABLE") {
+          showToast.warning("앱을 한 번 새로고침한 뒤 다시 시도해 주세요.");
+        } else {
+          console.error("FCM token error:", error.cause ?? error);
+          showToast.warning("푸시 토큰을 발급하지 못했어요. 앱을 완전히 종료 후 다시 열어 주세요.");
+        }
+        return;
       }
+
+      if (isAxiosError(error) && error.response?.status === 401) {
+        showToast.warning("로그인 후 다시 시도해 주세요.");
+        return;
+      }
+
+      showToast.warning("푸시 알림을 켜지 못했어요. 잠시 후 다시 시도해 주세요.");
     }
 
     setActiveModal("none");
