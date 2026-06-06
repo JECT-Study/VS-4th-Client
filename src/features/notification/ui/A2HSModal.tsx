@@ -88,7 +88,7 @@ export function A2HSModal({ isOpen, os, onClose, onConfirm }: A2HSModalProps) {
             <div className="flex flex-col w-full gap-2">
               <button
                 type="button"
-                onClick={os === "android" ? onConfirm : onClose}
+                onClick={onConfirm}
                 className="w-full bg-primary text-white py-3.5 rounded-[12px] font-bold text-body-m"
               >
                 {os === "ios" ? "확인했어요" : "홈 화면에 추가하기"}

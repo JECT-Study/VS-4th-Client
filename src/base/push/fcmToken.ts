@@ -1,5 +1,5 @@
 import { getFirebaseApp, getFirebaseVapidKey } from "@base/push/firebaseConfig";
-import { ensureServiceWorkerReady } from "@base/push/serviceWorker";
+import { ensureServiceWorkerReady, type ServiceWorkerReadyMode } from "@base/push/serviceWorker";
 import { getMessaging, getToken, isSupported } from "firebase/messaging";
 
 export class FcmTokenError extends Error {
@@ -15,12 +15,18 @@ export class FcmTokenError extends Error {
 
 const sleep = (ms: number) => new Promise<void>((resolve) => window.setTimeout(resolve, ms));
 
-export const getFcmToken = async (): Promise<string> => {
+export type GetFcmTokenOptions = {
+  mode?: ServiceWorkerReadyMode;
+};
+
+export const getFcmToken = async (options: GetFcmTokenOptions = {}): Promise<string> => {
+  const mode = options.mode ?? "quick";
+
   if (!(await isSupported())) {
     throw new FcmTokenError("이 브라우저는 Firebase Cloud Messaging을 지원하지 않습니다.", "UNSUPPORTED");
   }
 
-  const registration = await ensureServiceWorkerReady();
+  const registration = await ensureServiceWorkerReady(mode);
   if (!registration) {
     throw new FcmTokenError("서비스 워커가 준비되지 않아 FCM 토큰을 발급할 수 없습니다.", "SERVICE_WORKER_UNAVAILABLE");
   }
@@ -31,9 +37,10 @@ export const getFcmToken = async (): Promise<string> => {
     serviceWorkerRegistration: registration,
   };
 
+  const maxAttempts = mode === "interactive" ? 3 : 1;
   let lastError: unknown;
 
-  for (let attempt = 0; attempt < 3; attempt += 1) {
+  for (let attempt = 0; attempt < maxAttempts; attempt += 1) {
     try {
       const token = await getToken(messaging, tokenOptions);
 
@@ -47,8 +54,8 @@ export const getFcmToken = async (): Promise<string> => {
 
       lastError = error;
 
-      if (attempt < 2) {
-        await sleep(800 * (attempt + 1));
+      if (attempt < maxAttempts - 1) {
+        await sleep(600 * (attempt + 1));
       }
     }
   }

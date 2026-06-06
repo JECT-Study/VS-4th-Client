@@ -4,7 +4,7 @@ import { registerPushToken, unregisterPushToken } from "./pushToken";
 
 export const useRegisterPushTokenMutation = () =>
   useMutation({
-    mutationFn: (platform: RegisterPushTokenRequestPlatformEnum) => registerPushToken(platform),
+    mutationFn: (platform: RegisterPushTokenRequestPlatformEnum) => registerPushToken(platform, { mode: "interactive" }),
   });
 
 export const useUnregisterPushTokenMutation = () =>
