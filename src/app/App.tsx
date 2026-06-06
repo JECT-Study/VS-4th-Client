@@ -2,6 +2,7 @@ import { setupApiInterceptors } from "@app/config/apiInterceptors";
 import { queryClient } from "@app/config/queryClient";
 import { router } from "@app/config/router";
 import { PushNotificationBridge } from "@base/ui/PushNotificationBridge";
+import { PushTokenSync } from "@base/ui/PushTokenSync";
 import { Toast } from "@base/ui/Toast";
 import * as Sentry from "@sentry/react";
 import { QueryClientProvider } from "@tanstack/react-query";
@@ -20,6 +21,7 @@ export function App() {
             InnerWrap={({ children }) => (
               <>
                 <PushNotificationBridge />
+                <PushTokenSync />
                 {children}
               </>
             )}
