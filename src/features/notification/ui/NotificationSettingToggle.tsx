@@ -13,7 +13,7 @@ import { A2HSModal } from "./A2HSModal";
 import { PushPermissionModal } from "./PushPermissionModal";
 
 export function NotificationSettingToggle() {
-  const { osType, isPwaInstalled, pushPermission, promptInstall, requestPushPermission } = useNotificationSetup();
+  const { osType, isPwaInstalled, pushPermission, promptInstall } = useNotificationSetup();
   const registerPushTokenMutation = useRegisterPushTokenMutation();
   const unregisterPushTokenMutation = useUnregisterPushTokenMutation();
   const isEnablingRef = useRef(false);
@@ -65,11 +65,11 @@ export function NotificationSettingToggle() {
     if (isPending || isEnablingRef.current) return;
 
     isEnablingRef.current = true;
+    setActiveModal("none");
 
-    void (async () => {
-      try {
-        const isGranted = await requestPushPermission();
-        if (!isGranted) {
+    void Notification.requestPermission()
+      .then(async (permission) => {
+        if (permission !== "granted") {
           setIsPushEnabled(false);
           showToast.warning("브라우저 설정에서 알림 권한을 허용해 주세요.");
           return;
@@ -77,18 +77,12 @@ export function NotificationSettingToggle() {
 
         await registerPushTokenMutation.mutateAsync(resolvePushPlatform(osType));
         setIsPushEnabled(true);
-      } catch (error) {
+      })
+      .catch((error) => {
         setIsPushEnabled(false);
 
         if (error instanceof FcmTokenError) {
-          if (error.code === "UNSUPPORTED") {
-            showToast.warning("이 기기/브라우저에서는 푸시 알림을 지원하지 않아요.");
-          } else if (error.code === "SERVICE_WORKER_UNAVAILABLE") {
-            showToast.warning("앱 준비 중이에요. 잠시 후 다시 시도해 주세요.");
-          } else {
-            console.error("FCM token error:", error.cause ?? error);
-            showToast.warning("푸시 토큰을 발급하지 못했어요. 앱을 완전히 종료한 뒤 다시 열어 주세요.");
-          }
+          showToast.warning(error.message);
           return;
         }
 
@@ -98,11 +92,10 @@ export function NotificationSettingToggle() {
         }
 
         showToast.warning("푸시 알림을 켜지 못했어요. 잠시 후 다시 시도해 주세요.");
-      } finally {
+      })
+      .finally(() => {
         isEnablingRef.current = false;
-        setActiveModal("none");
-      }
-    })();
+      });
   };
 
   return (
