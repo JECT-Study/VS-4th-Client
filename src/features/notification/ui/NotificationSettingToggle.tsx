@@ -5,7 +5,6 @@ import {
   useRegisterPushTokenMutation,
   useUnregisterPushTokenMutation,
 } from "@features/notification/api/pushTokenMutations";
-import { isDesktopBrowser } from "@features/notification/model/isDesktopBrowser";
 import { resolvePushPlatform } from "@features/notification/model/resolvePushPlatform";
 import { isAxiosError } from "axios";
 import { useEffect, useState } from "react";
@@ -49,7 +48,7 @@ export function NotificationSettingToggle() {
   const [isEnablingPush, setIsEnablingPush] = useState(false);
   const [activeModal, setActiveModal] = useState<"none" | "a2hs" | "push">("none");
   const isPending = isEnablingPush || registerPushTokenMutation.isPending || unregisterPushTokenMutation.isPending;
-  const isDesktop = isDesktopBrowser();
+  const isDesktop = osType === "other";
 
   useEffect(() => {
     if (isDesktop) {
@@ -74,14 +73,18 @@ export function NotificationSettingToggle() {
   };
 
   const handleToggle = () => {
-    if (isPending || isDesktop) return;
+    if (isPending) return;
 
     if (isPushEnabled) {
       void handleDisablePush();
       return;
     }
 
-    // fa76a0e: 모든 기기에 PWA 설치를 요구 (be98baa에서 모바일만 검사하도록 바뀐 부분 복원)
+    if (isDesktop) {
+      showToast.info("푸시 알림은 모바일 앱에서만 설정할 수 있어요.");
+      return;
+    }
+
     if (osType === "ios-outdated" || !isPwaInstalled) {
       setActiveModal("a2hs");
       return;
@@ -91,6 +94,11 @@ export function NotificationSettingToggle() {
   };
 
   const handleA2HSConfirm = async () => {
+    if (isDesktop) {
+      setActiveModal("none");
+      return;
+    }
+
     if (osType === "android") {
       const isInstalled = await promptInstall();
       setActiveModal(isInstalled ? "push" : "none");
@@ -98,12 +106,10 @@ export function NotificationSettingToggle() {
     }
 
     if (osType === "ios") {
-      // 30e1991: iOS는 홈 화면 추가 확인 후 권한 모달로 이어짐
       setActiveModal("push");
       return;
     }
 
-    // fa76a0e: 데스크탑(other)은 A2HS 확인 후 진행하지 않음 (30e1991에서 push로 열리던 부분 복원)
     setActiveModal("none");
   };
 
@@ -171,10 +177,6 @@ export function NotificationSettingToggle() {
         setIsEnablingPush(false);
       });
   };
-
-  if (isDesktop) {
-    return <span className="text-body-s text-grey-light">모바일 앱에서만 설정할 수 있어요</span>;
-  }
 
   return (
     <div className="flex items-center gap-2">
