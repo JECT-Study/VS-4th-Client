@@ -1,7 +1,7 @@
 const SERVICE_WORKER_URL = "/sw.js";
 const REGISTRATION_TIMEOUT_MS = 5_000;
-const QUICK_TIMEOUT_MS = 2_000;
-const INTERACTIVE_TIMEOUT_MS = 10_000;
+const QUICK_TIMEOUT_MS = 3_000;
+const INTERACTIVE_TIMEOUT_MS = 15_000;
 
 let registrationPromise: Promise<ServiceWorkerRegistration | null> | null = null;
 let cachedRegistration: ServiceWorkerRegistration | null = null;
@@ -91,7 +91,7 @@ const waitForWorkerState = (worker: ServiceWorker, targetState: ServiceWorkerSta
     });
   });
 
-const waitForServiceWorkerActivation = async (registration: ServiceWorkerRegistration, timeoutMs: number) => {
+const waitForActiveServiceWorker = async (registration: ServiceWorkerRegistration, timeoutMs: number) => {
   if (registration.active) return registration;
 
   requestSkipWaiting(registration);
@@ -106,29 +106,6 @@ const waitForServiceWorkerActivation = async (registration: ServiceWorkerRegistr
   return registration;
 };
 
-const waitForControllingServiceWorker = async (timeoutMs: number) => {
-  if (navigator.serviceWorker.controller) return;
-
-  await new Promise<void>((resolve, reject) => {
-    const timeout = window.setTimeout(() => {
-      reject(new Error("Service worker is not controlling the page"));
-    }, timeoutMs);
-
-    const finish = () => {
-      if (!navigator.serviceWorker.controller) return;
-      window.clearTimeout(timeout);
-      resolve();
-    };
-
-    if (navigator.serviceWorker.controller) {
-      finish();
-      return;
-    }
-
-    navigator.serviceWorker.addEventListener("controllerchange", finish, { once: true });
-  });
-};
-
 const resolveReadyRegistration = async (mode: ServiceWorkerReadyMode): Promise<ServiceWorkerRegistration | null> => {
   if (!("serviceWorker" in navigator)) return null;
 
@@ -140,23 +117,27 @@ const resolveReadyRegistration = async (mode: ServiceWorkerReadyMode): Promise<S
     registration = await navigator.serviceWorker.register(SERVICE_WORKER_URL);
   }
 
-  registration = await waitForServiceWorkerActivation(registration, timeoutMs);
+  registration = await waitForActiveServiceWorker(registration, timeoutMs);
   await navigator.serviceWorker.ready;
-  await waitForControllingServiceWorker(timeoutMs);
+
+  if (!registration.active) {
+    throw new Error("Service worker is not active");
+  }
 
   cachedRegistration = registration;
   return registration;
 };
 
 /**
- * FCM 토큰 발급 전 서비스 워커 준비 상태를 확인한다.
+ * FCM getToken()에 필요한 active 서비스 워커 registration을 반환한다.
+ * 페이지 controlling 여부는 FCM 토큰 발급에 필수가 아니다.
  */
 export const ensureServiceWorkerReady = async (
   mode: ServiceWorkerReadyMode = "quick",
 ): Promise<ServiceWorkerRegistration | null> => {
   if (!("serviceWorker" in navigator)) return null;
 
-  if (cachedRegistration?.active && navigator.serviceWorker.controller) {
+  if (cachedRegistration?.active) {
     return cachedRegistration;
   }
 
@@ -176,13 +157,14 @@ export const ensureServiceWorkerReady = async (
       console.error("서비스 워커 준비 실패:", error);
 
       for (let attempt = 0; attempt < 2; attempt += 1) {
-        await sleep(400 * (attempt + 1));
+        await sleep(500 * (attempt + 1));
 
         try {
           const registration = await navigator.serviceWorker.ready;
-          await waitForControllingServiceWorker(INTERACTIVE_TIMEOUT_MS);
-          cachedRegistration = registration;
-          return registration;
+          if (registration.active) {
+            cachedRegistration = registration;
+            return registration;
+          }
         } catch {
           // retry
         }
@@ -195,8 +177,4 @@ export const ensureServiceWorkerReady = async (
   })();
 
   return inflightReady;
-};
-
-export const isServiceWorkerControlling = (): boolean => {
-  return "serviceWorker" in navigator && Boolean(navigator.serviceWorker.controller);
 };

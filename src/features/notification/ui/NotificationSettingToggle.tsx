@@ -1,4 +1,3 @@
-import { isServiceWorkerControlling } from "@base/push/serviceWorker";
 import { Switch } from "@base/ui/Switch";
 import { showToast } from "@base/ui/Toast";
 import { FcmTokenError } from "@features/notification/api/pushToken";
@@ -12,8 +11,6 @@ import { useEffect, useRef, useState } from "react";
 import { useNotificationSetup } from "../model/useNotificationSetup";
 import { A2HSModal } from "./A2HSModal";
 import { PushPermissionModal } from "./PushPermissionModal";
-
-const SW_RELOAD_FLAG = "vs:sw-reload-attempted";
 
 export function NotificationSettingToggle() {
   const { osType, isPwaInstalled, pushPermission, promptInstall, requestPushPermission } = useNotificationSetup();
@@ -64,14 +61,6 @@ export function NotificationSettingToggle() {
     setActiveModal("push");
   };
 
-  const reloadOnceForServiceWorker = () => {
-    if (sessionStorage.getItem(SW_RELOAD_FLAG) === "1") return false;
-
-    sessionStorage.setItem(SW_RELOAD_FLAG, "1");
-    window.location.reload();
-    return true;
-  };
-
   const handlePushAllow = () => {
     if (isPending || isEnablingRef.current) return;
 
@@ -83,12 +72,6 @@ export function NotificationSettingToggle() {
         if (!isGranted) {
           setIsPushEnabled(false);
           showToast.warning("브라우저 설정에서 알림 권한을 허용해 주세요.");
-          return;
-        }
-
-        if (!isServiceWorkerControlling()) {
-          if (reloadOnceForServiceWorker()) return;
-          showToast.warning("앱 준비가 필요해요. 앱을 완전히 종료한 뒤 다시 열어 주세요.");
           return;
         }
 

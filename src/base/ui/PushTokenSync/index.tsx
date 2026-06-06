@@ -23,7 +23,6 @@ const detectOsType = (): OSType => {
 
 /**
  * 로그인 상태에서 알림 권한이 이미 허용된 경우 FCM 토큰을 서버에 동기화한다.
- * 앱 첫 로딩을 막지 않도록 지연·백그라운드로 실행한다.
  */
 export function PushTokenSync() {
   const { data: user } = useQuery(userQueryOptions());
@@ -31,7 +30,6 @@ export function PushTokenSync() {
   useEffect(() => {
     if (!user) return;
     if (!("Notification" in window) || Notification.permission !== "granted") return;
-    if (!("serviceWorker" in navigator) || !navigator.serviceWorker.controller) return;
 
     let cancelled = false;
 
