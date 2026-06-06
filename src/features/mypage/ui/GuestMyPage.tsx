@@ -4,8 +4,8 @@ import { useQuery } from "@tanstack/react-query";
 import { useNavigate } from "@tanstack/react-router";
 
 function VoteIcon({ variant }: { variant: "used" | "remaining" }) {
-  const bg = variant === "used" ? "bg-primary" : "bg-[#BEBEDD]";
-  const fill = variant === "used" ? "white" : "#EBEBF5";
+  const bg = variant === "remaining" ? "bg-primary" : "bg-[#BEBEDD]";
+  const fill = variant === "remaining" ? "white" : "#EBEBF5";
   return (
     <div className={`w-10 h-10 rounded-full shrink-0 flex items-center justify-center ${bg}`}>
       <svg
@@ -59,14 +59,14 @@ export function GuestMyPage() {
       <div className="rounded-[10px] bg-grey-divider px-5 py-6 relative">
         <h2 className="text-title-s">비회원 투표 기회</h2>
         <span className="text-label-m absolute top-6 right-5 text-grey-light">
-          {used}/{total}
+          {remaining}/{total}
         </span>
         <div className="mt-6 flex items-center justify-center gap-6">
-          {Array.from({ length: used }, (_, i) => `used-${i}`).map((id) => (
-            <VoteIcon key={id} variant="used" />
-          ))}
           {Array.from({ length: remaining }, (_, i) => `remaining-${i}`).map((id) => (
             <VoteIcon key={id} variant="remaining" />
+          ))}
+          {Array.from({ length: used }, (_, i) => `used-${i}`).map((id) => (
+            <VoteIcon key={id} variant="used" />
           ))}
         </div>
       </div>
