@@ -36,7 +36,11 @@ export function VoteSummaryCard({ header, gauge }: VoteSummaryCardProps) {
               <circle cx="8" cy="8" r="5.4" stroke="currentColor" strokeWidth="1.2" />
               <path d="M8 5V8L10.2 10.2" stroke="currentColor" strokeWidth="1.2" strokeLinecap="round" />
             </svg>
-            {isEnded ? <span className="text-label-s">00:00:00</span> : <VoteTimeCountdown endAt={header.endAt} />}
+            {isEnded ? (
+              <span className="text-label-s text-grey-light">투표 종료</span>
+            ) : (
+              <VoteTimeCountdown endAt={header.endAt} />
+            )}
           </div>
 
           <Link
@@ -44,7 +48,7 @@ export function VoteSummaryCard({ header, gauge }: VoteSummaryCardProps) {
             params={{ voteId: String(header.voteId) }}
             className="flex items-center gap-1 text-grey-light"
           >
-            <span className="text-label-s">상세보기</span>
+            <span className="text-label-s">{isEnded ? "결과보기" : "상세보기"}</span>
             <img src="/assets/icons/arrow-right-s.svg" alt="" className="w-4 h-4" />
           </Link>
         </div>
