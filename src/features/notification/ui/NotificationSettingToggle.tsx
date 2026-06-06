@@ -5,6 +5,7 @@ import {
   useRegisterPushTokenMutation,
   useUnregisterPushTokenMutation,
 } from "@features/notification/api/pushTokenMutations";
+import { isMobilePushDevice } from "@features/notification/model/isMobilePushDevice";
 import { resolvePushPlatform } from "@features/notification/model/resolvePushPlatform";
 import { isAxiosError } from "axios";
 import { useEffect, useState } from "react";
@@ -49,7 +50,7 @@ export function NotificationSettingToggle() {
   const [activeModal, setActiveModal] = useState<"none" | "a2hs" | "push">("none");
   const isPending = isEnablingPush || registerPushTokenMutation.isPending || unregisterPushTokenMutation.isPending;
 
-  const isPushSupported = osType !== "other";
+  const isPushSupported = isMobilePushDevice(osType);
 
   useEffect(() => {
     if (!isPushSupported) {
@@ -92,6 +93,11 @@ export function NotificationSettingToggle() {
   };
 
   const handleA2HSConfirm = async () => {
+    if (!isPushSupported) {
+      setActiveModal("none");
+      return;
+    }
+
     if (osType === "android") {
       const isInstalled = await promptInstall();
       setActiveModal(isInstalled ? "push" : "none");
@@ -102,7 +108,7 @@ export function NotificationSettingToggle() {
   };
 
   const handlePushAllow = () => {
-    if (isPending) return;
+    if (isPending || !isPushSupported) return;
 
     setIsEnablingPush(true);
     setActiveModal("none");
@@ -166,9 +172,13 @@ export function NotificationSettingToggle() {
       });
   };
 
+  if (!isPushSupported) {
+    return <span className="text-body-s text-grey-light">모바일 앱에서만 설정할 수 있어요</span>;
+  }
+
   return (
     <div className="flex items-center gap-2">
-      <Switch checked={isPushEnabled} onChange={handleToggle} disabled={isPending || !isPushSupported} />
+      <Switch checked={isPushEnabled} onChange={handleToggle} disabled={isPending} />
       {isPending && <span className="text-body-s text-grey-light">알림 설정 중...</span>}
 
       <A2HSModal
