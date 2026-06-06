@@ -260,7 +260,7 @@ describe("useImmersiveFeed", () => {
 
       mockInitialFn.mockResolvedValue({ items: initialVotes });
       mockFetchNext
-        .mockResolvedValueOnce({ items: [] })          // 소진 응답
+        .mockResolvedValueOnce({ items: [] }) // 소진 응답
         .mockResolvedValueOnce({ items: cycleVotes }); // 초기화 후 재요청
 
       let now = 0;

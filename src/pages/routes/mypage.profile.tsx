@@ -113,7 +113,12 @@ function useProfileEdit() {
     const localError = validateNickname(capped);
     const willCheck = !localError && capped.length >= 2 && capped !== originalNicknameRef.current;
 
-    setProfileState((prev) => ({ ...prev, nickname: capped, nicknameError: localError, isCheckingNickname: willCheck }));
+    setProfileState((prev) => ({
+      ...prev,
+      nickname: capped,
+      nicknameError: localError,
+      isCheckingNickname: willCheck,
+    }));
 
     if (debounceTimerRef.current) clearTimeout(debounceTimerRef.current);
 
