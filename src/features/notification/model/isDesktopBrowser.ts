@@ -1,17 +1,18 @@
-/** 데스크탑(마우스/트랙패드) 환경인지 동기 판별한다. */
-export const isDesktopBrowser = (): boolean => {
-  if (typeof window === "undefined" || typeof navigator === "undefined") {
-    return false;
-  }
+import type { OSType } from "./useNotificationSetup";
 
-  const hasHover = window.matchMedia("(hover: hover)").matches;
-  const hasFinePointer = window.matchMedia("(pointer: fine)").matches;
-
-  // UA가 모바일이어도 실제 입력 장치가 마우스/트랙패드면 데스크탑으로 본다.
-  if (hasHover && hasFinePointer) {
-    return true;
-  }
-
+export const detectOsTypeFromUserAgent = (): OSType => {
   const userAgent = navigator.userAgent.toLowerCase();
-  return !/android|iphone|ipad|ipod/i.test(userAgent);
+
+  if (/android/i.test(userAgent)) {
+    return "android";
+  }
+
+  if (/iphone|ipad|ipod/i.test(userAgent)) {
+    return "Notification" in window ? "ios" : "ios-outdated";
+  }
+
+  return "other";
 };
+
+/** 데스크탑 브라우저(모바일 UA 아님) */
+export const isDesktopBrowser = (): boolean => detectOsTypeFromUserAgent() === "other";
