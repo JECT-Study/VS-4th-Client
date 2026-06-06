@@ -1,7 +1,7 @@
+import { PROFILE_COLOR } from "@features/signup/config/profileColors";
 import clsx from "clsx";
 import { formatTimeLabel } from "../lib/formatChatTime";
 import type { ChatMessageResponse } from "../model/types";
-import { PROFILE_COLOR } from "@features/signup/config/profileColors";
 
 interface ChatMessageListProps {
   messages: ChatMessageResponse[];
@@ -34,7 +34,9 @@ export function ChatMessageList({ messages, optionA, optionB }: ChatMessageListP
               <div className="max-w-[75%]">
                 <div className="flex justify-end gap-1 mb-1 text-label-s">
                   <span className="text-grey-dark">{message.senderNickname}</span>
-                  <span className={clsx(optionTextColor, "max-w-[116px] truncate")}>{optionLabel}</span>
+                  {message.senderVoteOption && (
+                    <span className={clsx(optionTextColor, "max-w-[116px] truncate")}>{optionLabel}</span>
+                  )}
                 </div>
 
                 <div className="flex items-end gap-2 justify-end">
@@ -60,7 +62,9 @@ export function ChatMessageList({ messages, optionA, optionB }: ChatMessageListP
             <div className="max-w-[75%]">
               <div className="flex gap-1 mb-1 text-label-s">
                 <span className="text-grey-dark">{message.senderNickname}</span>
-                <span className={clsx(optionTextColor, "max-w-[116px] truncate")}>{optionLabel}</span>
+                {message.senderVoteOption && (
+                  <span className={clsx(optionTextColor, "max-w-[116px] truncate")}>{optionLabel}</span>
+                )}
               </div>
 
               <div className="flex items-end gap-2">

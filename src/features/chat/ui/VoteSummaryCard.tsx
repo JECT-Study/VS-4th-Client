@@ -14,13 +14,13 @@ export function VoteSummaryCard({ header, gauge }: VoteSummaryCardProps) {
     <section className="sticky z-10 px-5 bg-white top-14">
       <div className="rounded-2xl bg-white p-4 shadow-[0px_5px_12px_2px_rgba(120,_120,_136,_0.06)] border border-grey-chat">
         <div className="flex items-center justify-between text-label-l gap-[6px]">
-          <span className="text-label-l text-secondary flex items-center gap-[2px] max-w-[156px]">
+          <span className="text-label-l text-secondary flex items-center gap-[2px] max-w-[156px] min-w-0">
             <span>{gauge.optionARatio}%</span>
-            <span className="truncate">{header.optionA}</span>
+            <span className="truncate flex-1 min-w-0">{header.optionA}</span>
           </span>
-          <span className="text-label-l text-primary flex items-center gap-[2px] max-w-[156px]">
+          <span className="text-label-l text-primary flex items-center gap-[2px] max-w-[156px] min-w-0">
             <span>{gauge.optionBRatio}%</span>
-            <span className="truncate">{header.optionB}</span>
+            <span className="truncate flex-1 min-w-0">{header.optionB}</span>
           </span>
         </div>
 
