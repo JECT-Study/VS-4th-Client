@@ -74,7 +74,7 @@ export function NotificationSettingToggle() {
       return;
     }
 
-    if (osType === "ios-outdated" || ((osType === "android" || osType === "ios") && !isPwaInstalled)) {
+    if (osType === "ios-outdated" || !isPwaInstalled) {
       setActiveModal("a2hs");
       return;
     }
