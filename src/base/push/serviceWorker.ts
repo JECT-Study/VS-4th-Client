@@ -1,7 +1,7 @@
 const SERVICE_WORKER_URL = "/sw.js";
+const REGISTRATION_TIMEOUT_MS = 5_000;
 const QUICK_TIMEOUT_MS = 2_000;
-const INTERACTIVE_TIMEOUT_MS = 8_000;
-const SW_RELOAD_FLAG = "vs:sw-reload-attempted";
+const INTERACTIVE_TIMEOUT_MS = 10_000;
 
 let registrationPromise: Promise<ServiceWorkerRegistration | null> | null = null;
 let cachedRegistration: ServiceWorkerRegistration | null = null;
@@ -16,6 +16,35 @@ type RegisterSW = (options?: {
   onRegisteredSW?: (swScriptUrl: string, registration: ServiceWorkerRegistration | undefined) => void;
   onRegisterError?: (error: unknown) => void;
 }) => (reloadPage?: boolean) => Promise<void>;
+
+const withTimeout = async <T>(promise: Promise<T>, timeoutMs: number, label: string): Promise<T> => {
+  let timeoutId: number | undefined;
+
+  const timeoutPromise = new Promise<never>((_, reject) => {
+    timeoutId = window.setTimeout(() => {
+      reject(new Error(`${label} timeout`));
+    }, timeoutMs);
+  });
+
+  try {
+    return await Promise.race([promise, timeoutPromise]);
+  } finally {
+    if (timeoutId !== undefined) window.clearTimeout(timeoutId);
+  }
+};
+
+const getRegistration = async (): Promise<ServiceWorkerRegistration | null> => {
+  if (registrationPromise) {
+    try {
+      const registration = await withTimeout(registrationPromise, REGISTRATION_TIMEOUT_MS, "Service worker registration");
+      if (registration) return registration;
+    } catch (error) {
+      console.warn("서비스 워커 등록 대기 실패, 직접 조회합니다:", error);
+    }
+  }
+
+  return (await navigator.serviceWorker.getRegistration()) ?? null;
+};
 
 /**
  * vite-plugin-pwa registerSW와 공유하는 등록 Promise를 초기화한다.
@@ -100,21 +129,12 @@ const waitForControllingServiceWorker = async (timeoutMs: number) => {
   });
 };
 
-const reloadOnceForServiceWorker = (): boolean => {
-  if (sessionStorage.getItem(SW_RELOAD_FLAG) === "1") return false;
-
-  sessionStorage.setItem(SW_RELOAD_FLAG, "1");
-  window.location.reload();
-  return true;
-};
-
 const resolveReadyRegistration = async (mode: ServiceWorkerReadyMode): Promise<ServiceWorkerRegistration | null> => {
   if (!("serviceWorker" in navigator)) return null;
 
   const timeoutMs = mode === "interactive" ? INTERACTIVE_TIMEOUT_MS : QUICK_TIMEOUT_MS;
-  const allowReload = mode === "interactive";
 
-  let registration = registrationPromise ? await registrationPromise : await navigator.serviceWorker.getRegistration();
+  let registration = await getRegistration();
 
   if (!registration) {
     registration = await navigator.serviceWorker.register(SERVICE_WORKER_URL);
@@ -122,13 +142,7 @@ const resolveReadyRegistration = async (mode: ServiceWorkerReadyMode): Promise<S
 
   registration = await waitForServiceWorkerActivation(registration, timeoutMs);
   await navigator.serviceWorker.ready;
-
-  try {
-    await waitForControllingServiceWorker(timeoutMs);
-  } catch {
-    if (allowReload && reloadOnceForServiceWorker()) return null;
-    throw new Error("Service worker is not controlling the page");
-  }
+  await waitForControllingServiceWorker(timeoutMs);
 
   cachedRegistration = registration;
   return registration;
@@ -136,8 +150,6 @@ const resolveReadyRegistration = async (mode: ServiceWorkerReadyMode): Promise<S
 
 /**
  * FCM 토큰 발급 전 서비스 워커 준비 상태를 확인한다.
- * - quick: 앱 시작 동기화용. 짧은 대기, 자동 새로고침 없음.
- * - interactive: 사용자가 푸시 ON 할 때. 조금 더 기다리고 1회 자동 새로고침 허용.
  */
 export const ensureServiceWorkerReady = async (
   mode: ServiceWorkerReadyMode = "quick",
@@ -183,4 +195,8 @@ export const ensureServiceWorkerReady = async (
   })();
 
   return inflightReady;
+};
+
+export const isServiceWorkerControlling = (): boolean => {
+  return "serviceWorker" in navigator && Boolean(navigator.serviceWorker.controller);
 };
