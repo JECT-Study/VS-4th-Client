@@ -1,6 +1,7 @@
 import { showToast } from "@base/ui/Toast";
 import type { User } from "@features/auth/model/types";
 import { logout } from "@features/mypage/api/logout";
+import { isDesktopBrowser } from "@features/notification/model/isDesktopBrowser";
 import { NotificationSettingToggle } from "@features/notification/ui/NotificationSettingToggle";
 import { PROFILE_COLOR } from "@features/signup/config/profileColors";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
@@ -54,11 +55,12 @@ export function MemberMyPage({ user }: MemberMyPageProps) {
           <img src="/assets/icons/arrow-right-s.svg" alt="계정" />
         </Link>
 
-        <div className="flex items-center justify-between w-full">
-          <span className="text-title-s">투표 결과 푸시 알림</span>
-          {/* 👇 기존 Switch 주석 자리에 모달 로직이 포함된 토글 컴포넌트 부착 */}
-          <NotificationSettingToggle />
-        </div>
+        {!isDesktopBrowser() && (
+          <div className="flex items-center justify-between w-full">
+            <span className="text-title-s">투표 결과 푸시 알림</span>
+            <NotificationSettingToggle />
+          </div>
+        )}
 
         <button
           type="button"

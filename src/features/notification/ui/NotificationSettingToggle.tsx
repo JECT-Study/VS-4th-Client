@@ -5,6 +5,7 @@ import {
   useRegisterPushTokenMutation,
   useUnregisterPushTokenMutation,
 } from "@features/notification/api/pushTokenMutations";
+import { isDesktopBrowser } from "@features/notification/model/isDesktopBrowser";
 import { resolvePushPlatform } from "@features/notification/model/resolvePushPlatform";
 import { isAxiosError } from "axios";
 import { useEffect, useState } from "react";
@@ -48,7 +49,7 @@ export function NotificationSettingToggle() {
   const [isEnablingPush, setIsEnablingPush] = useState(false);
   const [activeModal, setActiveModal] = useState<"none" | "a2hs" | "push">("none");
   const isPending = isEnablingPush || registerPushTokenMutation.isPending || unregisterPushTokenMutation.isPending;
-  const isDesktop = osType === "other";
+  const isDesktop = isDesktopBrowser();
 
   useEffect(() => {
     if (isDesktop) {
