@@ -18,7 +18,7 @@
   },
   "packageManager": "pnpm@10.10.0",
   "dependencies": {
-    "@ject-4-vs-team/api-client": "^2026.530.3",
+    "@ject-4-vs-team/api-client": "^2026.606.1",
     "@sentry/react": "^10.46.0",
     "@stomp/stompjs": "^7.3.0",
     "@tanstack/react-form": "^1.28.5",
