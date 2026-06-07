@@ -1,5 +1,12 @@
 /// <reference lib="webworker" />
 
+import {
+  type FcmMessagePayload,
+  type PushPayload,
+  isFcmPayload,
+  normalizePushNotification,
+  shouldShowBackgroundNotification,
+} from "@base/push/fcmNotificationPayload";
 import { FIREBASE_WEB_APP_CONFIG } from "@base/push/firebaseWebConfig";
 import { initializeApp } from "firebase/app";
 import { getMessaging, onBackgroundMessage } from "firebase/messaging/sw";
@@ -13,61 +20,10 @@ declare let self: ServiceWorkerGlobalScope;
 
 // ── Firebase Cloud Messaging ─────────────────────────────────
 
-const DEFAULT_ICON = "/assets/images/logo_118x118.png";
-const DEFAULT_BADGE = "/assets/images/logo_118x118.png";
 const DEFAULT_NOTIFICATION_URL = "/home";
 
-type FcmMessagePayload = {
-  notification?: {
-    title?: string;
-    body?: string;
-    icon?: string;
-  };
-  data?: Record<string, string | undefined>;
-  fcmOptions?: {
-    link?: string;
-  };
-};
-
-type PushPayload = {
-  title?: string;
-  body?: string;
-  redirect_url?: string;
-  url?: string;
-  tag?: string;
-  icon?: string;
-  badge?: string;
-};
-
-const isFcmPayload = (payload: unknown): payload is FcmMessagePayload => {
-  if (!payload || typeof payload !== "object") return false;
-
-  const maybeFcmPayload = payload as Record<string, unknown>;
-  return "from" in maybeFcmPayload || "fcmMessageId" in maybeFcmPayload || "notification" in maybeFcmPayload;
-};
-
-const normalizeNotification = (payload: FcmMessagePayload | PushPayload) => {
-  const notification = "notification" in payload ? payload.notification : undefined;
-  const data = "data" in payload ? payload.data : undefined;
-
-  return {
-    title: notification?.title ?? data?.title ?? ("title" in payload ? payload.title : undefined) ?? "VS",
-    body: notification?.body ?? data?.body ?? ("body" in payload ? payload.body : undefined) ?? "",
-    icon: notification?.icon ?? data?.icon ?? ("icon" in payload ? payload.icon : undefined) ?? DEFAULT_ICON,
-    badge: data?.badge ?? ("badge" in payload ? payload.badge : undefined) ?? DEFAULT_BADGE,
-    tag: data?.tag ?? ("tag" in payload ? payload.tag : undefined),
-    redirectUrl:
-      data?.redirect_url ??
-      data?.url ??
-      ("redirect_url" in payload ? payload.redirect_url : undefined) ??
-      ("url" in payload ? payload.url : undefined) ??
-      ("fcmOptions" in payload ? payload.fcmOptions?.link : undefined) ??
-      DEFAULT_NOTIFICATION_URL,
-  };
-};
-
 const showPushNotification = (payload: FcmMessagePayload | PushPayload) => {
-  const notification = normalizeNotification(payload);
+  const notification = normalizePushNotification(payload);
 
   return self.registration.showNotification(notification.title, {
     body: notification.body,
@@ -83,7 +39,10 @@ try {
   const messaging = getMessaging(firebaseApp);
 
   onBackgroundMessage(messaging, (payload) => {
-    void showPushNotification(payload as FcmMessagePayload);
+    const fcmPayload = payload as FcmMessagePayload;
+    if (!shouldShowBackgroundNotification(fcmPayload)) return;
+
+    void showPushNotification(fcmPayload);
   });
 } catch (error) {
   // Firebase 초기화 실패가 서비스 워커 설치/활성화 자체를 막으면 앱 전체 네트워크가 불안정해질 수 있다.

@@ -1,3 +1,4 @@
+import { initForegroundMessaging } from "@base/push/foregroundMessaging";
 import { useRouter } from "@tanstack/react-router";
 import { useEffect } from "react";
 
@@ -10,6 +11,24 @@ import { useEffect } from "react";
  */
 export function PushNotificationBridge() {
   const router = useRouter();
+
+  useEffect(function initForegroundPushMessaging() {
+    let unsubscribe: (() => void) | undefined;
+    let cancelled = false;
+
+    void initForegroundMessaging().then((cleanup) => {
+      if (cancelled) {
+        cleanup?.();
+        return;
+      }
+      unsubscribe = cleanup;
+    });
+
+    return () => {
+      cancelled = true;
+      unsubscribe?.();
+    };
+  }, []);
 
   useEffect(
     function listenForPushNavigation() {
