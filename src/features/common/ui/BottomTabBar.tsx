@@ -6,9 +6,9 @@ export function BottomTabBar() {
   const currentPath = routerState.location.pathname;
   const isImmersiveVotePath = currentPath.startsWith("/immersive-votes");
 
-  const getIconClassName = (key: string, isActive: boolean) => {
+  // 1. 여기서 사용하지 않는 isActive 매개변수를 아예 삭제합니다.
+  const getIconClassName = (key: string) => {
     if (key === "home") return "h-5 w-5";
-    if (key === "chat" && isActive) return "h-7 w-7";
     return "h-6 w-6";
   };
 
@@ -48,7 +48,7 @@ export function BottomTabBar() {
               <img
                 src={iconSrc}
                 alt={`${tab.label} 아이콘`}
-                className={`${getIconClassName(tab.key, isActive)} flex-shrink-0`}
+                className={`${getIconClassName(tab.key)} flex-shrink-0`}
                 style={
                   shouldApplyFilter
                     ? {
