@@ -5,7 +5,6 @@ import { withdraw } from "@features/mypage/api/withdraw";
 import { WITHDRAWAL_REASONS, useWithdrawalForm } from "@features/mypage/model/useWithdrawalForm";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { useNavigate } from "@tanstack/react-router";
-import clsx from "clsx";
 import { useState } from "react";
 import { Header } from "./MypageHeader";
 
@@ -28,14 +27,19 @@ export function WithdrawalPage() {
     },
   });
 
+  // 바텀시트 닫기 핸들러 (마우스 클릭 & 키보드 엔터/스페이스 모두 대응)
+  const handleCloseBottomSheet = () => {
+    setIsSelectOpen(false);
+  };
+
   return (
-    <div className="flex flex-col min-h-screen bg-white">
+    <div className="relative flex flex-col min-h-screen bg-white">
       <Header title="회원 탈퇴" />
 
       <main className="flex-1 px-5 pt-8 pb-32">
         <section className="mb-10">
-          <h2 className="text-title-l font-bold text-center mb-2">정말 탈퇴하시겠어요?</h2>
-          <p className="text-body-m text-grey-dark text-center mb-6">
+          <h2 className="mb-2 font-semibold text-center text-h-s">정말 탈퇴하시겠어요?</h2>
+          <p className="mb-6 font-medium text-center text-title-s text-grey-dark">
             탈퇴한 후에는 계정을 복구할 수 없어요
             <br />
             아래 내용을 확인해 주세요
@@ -48,8 +52,9 @@ export function WithdrawalPage() {
               "참여하신 투표의 결과와 채팅 내용을 다시 볼 수 없어요",
               "참여하신 투표와 채팅 데이터는 커뮤니티 통계를 위해 익명으로 유지돼요",
             ].map((text) => (
-              <li key={text} className="flex gap-2 text-body-s text-grey-dark">
-                <span className="shrink-0">•</span>
+              <li key={text} className="flex gap-2 font-normal text-body-s text-grey-dark">
+                {/* 👇 font-bold 를 추가하여 점을 굵게 변경했습니다. (더 굵게 원하시면 font-black 사용) */}
+                <span className="font-bold shrink-0">•</span>
                 <span>{text}</span>
               </li>
             ))}
@@ -58,52 +63,28 @@ export function WithdrawalPage() {
 
         <section className="flex flex-col gap-6">
           <div className="flex flex-col gap-2">
-            <label htmlFor="withdrawal-reason-btn" className="text-label-m font-bold">
-              서비스 이용에 불편함이 있으셨나요? *
+            <label htmlFor="withdrawal-reason-btn" className="font-normal text-body-s">
+              서비스 이용에 불편함이 있으셨나요?
             </label>
-            <div className="relative">
+            <div>
               <button
                 id="withdrawal-reason-btn"
                 type="button"
-                onClick={() => setIsSelectOpen(!isSelectOpen)}
-                className="w-full h-12 px-4 flex items-center justify-between border border-grey-divider rounded-lg text-body-m bg-white"
+                onClick={() => setIsSelectOpen(true)}
+                className="flex items-center justify-between w-full h-12 px-4 font-normal bg-white border rounded-lg border-grey-divider text-body-s"
               >
                 <span className={reason ? "text-black" : "text-grey-light"}>
                   {reason || "아쉬웠던 점을 선택해 주세요"}
                 </span>
-                <img
-                  src="/assets/icons/dropdown-arrow.svg"
-                  className={clsx("w-5 h-5 transition-transform", isSelectOpen && "rotate-180")}
-                  alt=""
-                />
+                <img src="/assets/icons/dropdown-arrow.svg" className="w-5 h-5" alt="" />
               </button>
-
-              {isSelectOpen && (
-                <ul className="absolute top-14 left-0 w-full bg-white border border-grey-divider rounded-lg z-10 shadow-lg overflow-hidden">
-                  {WITHDRAWAL_REASONS.map((r: string) => (
-                    <li key={r}>
-                      <button
-                        type="button"
-                        onClick={() => {
-                          setReason(r);
-                          setIsSelectOpen(false);
-                        }}
-                        className="w-full px-4 py-3 text-left text-body-m hover:bg-grey-bg transition-colors"
-                      >
-                        {r}
-                      </button>
-                    </li>
-                  ))}
-                </ul>
-              )}
             </div>
           </div>
 
-          {/* '기타' 사유 선택 시에만 노출되는 텍스트 에어리어 */}
           {reason === "기타" && (
             <div className="flex flex-col gap-2">
-              <label htmlFor="withdrawal-feedback" className="text-label-m font-bold">
-                소중한 의견을 반영해 더 나은 VS가 될게요
+              <label htmlFor="withdrawal-feedback" className="font-normal text-body-s">
+                남겨주신 소중한 의견으로 더 나은 VS가 될게요
               </label>
               <div className="relative">
                 <textarea
@@ -111,14 +92,13 @@ export function WithdrawalPage() {
                   value={feedback}
                   onChange={(e) => setFeedback(e.target.value.slice(0, 500))}
                   placeholder="10자 이상 입력해 주세요. (선택)"
-                  className="w-full h-32 p-4 border border-grey-divider rounded-lg text-body-m resize-none focus:outline-primary bg-white"
+                  className="w-full h-32 p-4 bg-white border rounded-lg resize-none border-grey-divider text-body-s focus:outline-none focus:border-black focus:ring-1 focus:ring-black"
                 />
                 <span className="absolute bottom-3 right-4 text-label-s text-grey-light">{feedback.length}/500</span>
               </div>
             </div>
           )}
 
-          {/* 👇 만들어두신 공통 Checkbox 컴포넌트 적용 */}
           <Checkbox
             checked={isAgreed}
             onChange={setIsAgreed}
@@ -128,12 +108,10 @@ export function WithdrawalPage() {
         </section>
       </main>
 
-      {/* 하단 고정 버튼부 */}
-      <footer className="fixed bottom-0 left-0 w-full p-5 bg-white flex gap-3 border-t border-grey-divider max-w-md mx-auto right-0">
-        {/* 👇 만들어두신 공통 Button 컴포넌트 적용 */}
+      <footer className="fixed bottom-0 left-0 right-0 z-10 flex w-full max-w-md gap-3 p-5 mx-auto bg-white border-t border-grey-divider">
         <Button
           variant="primary"
-          className="flex-1 h-14 font-bold"
+          className="flex-1 font-bold h-14"
           disabled={withdrawMutation.isPending}
           onClick={() => navigate({ to: "/mypage/account" })}
         >
@@ -146,10 +124,52 @@ export function WithdrawalPage() {
           className="flex-1 h-14 font-bold border-none !bg-grey-bg"
           onClick={() => withdrawMutation.mutate({ category: reason, reason: feedback })}
         >
-          {/* Button 내부 variant에 따라 색상이 강제되므로, 탈퇴하기 버튼의 디자인을 맞추기 위해 !bg-grey-bg 등 Tailwind 강제 적용(오버라이딩)을 섞어 쓸 수 있습니다. */}
           탈퇴하기
         </Button>
       </footer>
+
+      {isSelectOpen && (
+        <div className="fixed inset-0 z-50 flex flex-col justify-end w-full max-w-md mx-auto">
+          {/* 어두운 배경 */}
+          <div
+            className="absolute inset-0 transition-opacity bg-black/60"
+            onClick={handleCloseBottomSheet}
+            onKeyDown={(e) => {
+              if (e.key === "Enter" || e.key === " ") {
+                e.preventDefault();
+                handleCloseBottomSheet();
+              }
+            }}
+            role="button"
+            tabIndex={0}
+            aria-label="바텀시트 닫기"
+          />
+
+          {/* 바텀시트 본체 */}
+          <div className="relative z-10 w-full pt-3 pb-8 bg-white rounded-t-2xl animate-slide-up">
+            {/* 상단 드래그 핸들 아이콘 (디자인 시안 반영) */}
+            <div className="w-10 h-1 mx-auto mb-4 rounded-full bg-grey-divider" />
+
+            <ul className="flex flex-col">
+              {WITHDRAWAL_REASONS.map((r: string) => (
+                <li key={r}>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setReason(r);
+                      setIsSelectOpen(false);
+                    }}
+                    // px-5를 컨테이너에서 버튼으로 옮겨 터치 영역 확장, border-b 제거
+                    className="w-full px-5 py-4 font-normal text-left transition-colors text-body-s active:bg-grey-bg"
+                  >
+                    {r}
+                  </button>
+                </li>
+              ))}
+            </ul>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
