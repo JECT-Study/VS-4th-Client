@@ -17,7 +17,7 @@ export function NotificationListItem({ item, onClick }: NotificationListItemProp
       >
         <div className="flex min-w-0 flex-col gap-1 pr-4">
           <h4 className={`truncate text-body-m ${item.isRead ? "text-grey-dark" : "font-medium text-grey-black"}`}>
-            {item.message}
+            {item.body}
           </h4>
           <p className="truncate text-body-s text-grey-dark">{item.title}</p>
           <span className="mt-1 text-label-m text-grey-light">{item.timeAgo}</span>
