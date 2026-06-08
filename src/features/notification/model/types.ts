@@ -4,7 +4,6 @@ export interface NotificationItem {
   voteId: number;
   type: "VOTE_ENDED";
   title: string;
-  message: string;
   body: string;
   thumbnailUrl?: string;
   timeAgo: string;

@@ -39,7 +39,6 @@ const toNotificationItem = (item: ApiNotificationItem): NotificationItem => ({
   voteId: item.voteId ?? 0,
   type: item.type ?? "VOTE_ENDED",
   title: item.title ?? "",
-  message: item.body ?? "",
   body: item.body ?? "",
   thumbnailUrl: item.thumbnailUrl,
   timeAgo: formatRelativeTime(item.createdAt),
