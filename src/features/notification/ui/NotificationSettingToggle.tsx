@@ -29,6 +29,8 @@ export function NotificationSettingToggle() {
     try {
       await unregisterPushTokenMutation.mutateAsync();
       setIsPushEnabled(false);
+      // 알림 OFF 성공 토스트 추가
+      showToast.success("푸시 알림이 꺼졌어요.");
     } catch {
       showToast.warning("푸시 알림을 끄지 못했어요. 잠시 후 다시 시도해 주세요.");
     }
@@ -77,6 +79,8 @@ export function NotificationSettingToggle() {
     try {
       await registerPushTokenMutation.mutateAsync(resolvePushPlatform(osType));
       setIsPushEnabled(true);
+      // 알림 ON 성공 토스트 추가
+      showToast.success("푸시 알림이 켜졌어요.");
     } catch (error) {
       setIsPushEnabled(false);
       if (error instanceof FcmTokenError) {
