@@ -95,7 +95,7 @@ export function ImmersiveVoteCard({ vote, updateVote }: ImmersiveVoteCardProps) 
         )}
       </div>
 
-      <div className="absolute right-3 top-[50%] z-30 flex -translate-y-1/2 flex-col items-center gap-5">
+      <div className="absolute inset-y-0 right-3 z-30 flex flex-col items-center justify-center gap-5">
         <EmojiReactionButton
           emojiList={emojiList}
           totalCount={vote.emojiSummary.total}
