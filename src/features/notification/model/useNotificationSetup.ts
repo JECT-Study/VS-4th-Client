@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useState } from "react";
+import { showToast } from "@base/ui/Toast"; // 토스트 임포트
 
 export type OSType = "android" | "ios" | "ios-outdated" | "other";
 
@@ -11,13 +12,20 @@ interface NavigatorWithStandalone extends Navigator {
   standalone?: boolean;
 }
 
+// 💡 핵심 해결: 리액트 라이프사이클 밖에서 이벤트를 전역으로 미리 잡아둡니다.
+let globalDeferredPrompt: BeforeInstallPromptEvent | null = null;
+
+if (typeof window !== "undefined") {
+  window.addEventListener("beforeinstallprompt", (e) => {
+    e.preventDefault();
+    globalDeferredPrompt = e as BeforeInstallPromptEvent;
+  });
+}
+
 export function useNotificationSetup() {
   const [osType, setOsType] = useState<OSType>("other");
   const [isPwaInstalled, setIsPwaInstalled] = useState(false);
   const [pushPermission, setPushPermission] = useState<NotificationPermission>("default");
-
-  // 안드로이드 설치 팝업 제어를 위한 이벤트 객체 저장
-  const [deferredPrompt, setDeferredPrompt] = useState<BeforeInstallPromptEvent | null>(null);
 
   useEffect(() => {
     // 1. 기기 OS 및 iOS 버전(웹 푸시 지원 여부) 감지
@@ -26,7 +34,6 @@ export function useNotificationSetup() {
     if (/android/i.test(userAgent)) {
       setOsType("android");
     } else if (/iphone|ipad|ipod/i.test(userAgent)) {
-      // iOS 16.4 이상부터 window.Notification 객체를 지원합니다.
       if ("Notification" in window) {
         setOsType("ios");
       } else {
@@ -49,14 +56,6 @@ export function useNotificationSetup() {
       setPushPermission(Notification.permission);
     }
 
-    // 4. 안드로이드 전용: 설치 가능 상태일 때 이벤트 가로채기
-    const handleBeforeInstallPrompt = (e: Event) => {
-      e.preventDefault(); // 크롬의 기본 하단 설치 배너 방지
-      setDeferredPrompt(e as BeforeInstallPromptEvent);
-    };
-
-    window.addEventListener("beforeinstallprompt", handleBeforeInstallPrompt);
-
     // 사용자가 독립된 앱(Standalone) 모드로 진입하는 것을 감지
     const handleAppInstalled = () => setIsPwaInstalled(true);
     window.addEventListener("appinstalled", handleAppInstalled);
@@ -64,7 +63,6 @@ export function useNotificationSetup() {
     document.addEventListener("visibilitychange", syncInstallState);
 
     return () => {
-      window.removeEventListener("beforeinstallprompt", handleBeforeInstallPrompt);
       window.removeEventListener("appinstalled", handleAppInstalled);
       window.removeEventListener("focus", syncInstallState);
       document.removeEventListener("visibilitychange", syncInstallState);
@@ -73,17 +71,29 @@ export function useNotificationSetup() {
 
   // 안드로이드 네이티브 설치 프롬프트 띄우기
   const promptInstall = useCallback(async () => {
-    if (!deferredPrompt) return false;
-
-    deferredPrompt.prompt();
-    const { outcome } = await deferredPrompt.userChoice;
-
-    if (outcome === "accepted") {
-      setIsPwaInstalled(true);
+    // 전역 변수에서 prompt 이벤트를 가져옵니다.
+    if (!globalDeferredPrompt) {
+      // 이벤트가 잡히지 않은 경우 (카카오톡 인앱 브라우저 등) 직접 설치 유도
+      showToast.info("브라우저 메뉴에서 '홈 화면에 추가'를 직접 눌러주세요.");
+      return false;
     }
-    setDeferredPrompt(null);
-    return outcome === "accepted";
-  }, [deferredPrompt]);
+
+    try {
+      globalDeferredPrompt.prompt();
+      const { outcome } = await globalDeferredPrompt.userChoice;
+
+      if (outcome === "accepted") {
+        setIsPwaInstalled(true);
+      }
+
+      // 프롬프트는 단 한 번만 호출할 수 있으므로 사용 후 초기화
+      globalDeferredPrompt = null;
+      return outcome === "accepted";
+    } catch (error) {
+      console.error("설치 팝업 띄우기 실패:", error);
+      return false;
+    }
+  }, []);
 
   // 브라우저 푸시 알림 권한 요청
   const requestPushPermission = useCallback(async () => {
