@@ -30,7 +30,8 @@ export function ChatInputBar({ disabled = false, placeholder = "메시지를 입
   };
 
   return (
-    <div className="fixed bottom-0 z-20 flex items-end w-full max-w-md gap-2 px-5 py-3 -translate-x-1/2 bg-white border-t left-1/2 border-grey-stroke">
+    // 👇 핵심 수정: py-3 제거 -> pt-3 및 pb-[calc(12px+env(safe-area-inset-bottom))] 적용
+    <div className="fixed bottom-0 z-20 flex items-end w-full max-w-md gap-2 px-5 pt-3 pb-[calc(12px+env(safe-area-inset-bottom))] -translate-x-1/2 bg-white border-t left-1/2 border-grey-stroke">
       <textarea
         ref={textareaRef}
         rows={1}
@@ -54,7 +55,7 @@ export function ChatInputBar({ disabled = false, placeholder = "메시지를 입
         className="flex items-center justify-center text-white rounded-full h-11 w-11 shrink-0 bg-primary disabled:bg-grey-disabled"
         aria-label="메시지 전송"
       >
-        <img src="/assets/icons/send.svg" alt="" className="h-5 w-5" />
+        <img src="/assets/icons/send.svg" alt="" className="w-5 h-5" />
       </button>
     </div>
   );

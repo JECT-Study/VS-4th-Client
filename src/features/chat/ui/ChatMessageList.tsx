@@ -12,8 +12,8 @@ interface ChatMessageListProps {
 export function ChatMessageList({ messages, optionA, optionB }: ChatMessageListProps) {
   if (messages.length === 0) {
     return (
-      // 빈 화면일 때도 공간을 다 채우도록 flex-1 추가
-      <div className="flex flex-col items-center justify-center flex-1 min-h-[420px] px-5 text-center">
+      // 👇 수정됨: flex-1과 420px 제거, 화면 크기에 비례하여 중앙 정렬되도록 min-h 변경
+      <div className="flex flex-col items-center justify-center min-h-[calc(100dvh-220px)] px-5 text-center">
         <h2 className="text-title-m text-grey-black">첫 번째 메시지를 남겨보세요!</h2>
         <p className="mt-4 whitespace-pre-line text-body-s text-grey-light">
           가볍게 한마디 남기면{"\n"}다른 의견도 자연스럽게 볼 수 있어요
@@ -23,11 +23,10 @@ export function ChatMessageList({ messages, optionA, optionB }: ChatMessageListP
   }
 
   return (
-    // 👇 h-full 대신 flex-1을 사용하여 남는 공간을 꽉 채우도록 수정
-    // 👇 justify-end 속성 제거 (스크롤 잘림 버그 방지)
-    <section className="flex flex-col flex-1 px-5 py-4 space-y-5 min-h-[420px]">
-      {/* 👇 상단에 남는 공간을 모두 밀어내는 빈 영역을 추가하여 자연스럽게 메시지들을 하단 정렬합니다. */}
-      <div className="flex-1" />
+    // 👇 수정됨: 420px 제거 -> 화면 높이 비례 적용
+    // 👇 justify-end 부활, 하단 패딩(pb-4)을 pb-1로 줄여서 입력창과의 불필요한 간격 축소
+    <section className="flex flex-col justify-end px-5 pt-4 pb-1 space-y-5 min-h-[calc(100dvh-220px)]">
+      {/* ❌ 이전에 추가했던 <div className="flex-1" /> 는 삭제합니다! */}
 
       {messages.map((message) => {
         const isOptionA = message.senderVoteOption === "A";

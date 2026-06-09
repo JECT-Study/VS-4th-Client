@@ -179,17 +179,20 @@ function ChatRoomContent() {
       <VoteSummaryCard header={header} gauge={gauge} />
 
       <ChatMessageList messages={messages} optionA={header.optionA} optionB={header.optionB} />
-      <div className="h-[calc(80px+env(safe-area-inset-bottom))]" aria-hidden="true" />
+
+      {/* 👇 수정됨: 80px -> 68px (또는 60px)로 줄여서 불필요한 하단 공백 제거 */}
+      <div className="h-[calc(68px+env(safe-area-inset-bottom))] shrink-0" aria-hidden="true" />
       <div ref={bottomRef} />
 
       {showScrollButton && (
         <button
           type="button"
-          className="fixed z-20 flex items-center justify-center w-12 h-12 text-grey-black -translate-x-1/2 bg-white border rounded-full shadow-[0_6px_20px_rgba(19,19,19,0.12)] bottom-[calc(88px+env(safe-area-inset-bottom))] left-[calc(50%+144px)] border-grey-stroke"
+          // 👇 버튼 위치도 변경된 높이에 맞게 살짝 수정
+          className="fixed z-20 flex items-center justify-center w-12 h-12 text-grey-black -translate-x-1/2 bg-white border rounded-full shadow-[0_6px_20px_rgba(19,19,19,0.12)] bottom-[calc(76px+env(safe-area-inset-bottom))] left-[calc(50%+144px)] border-grey-stroke"
           onClick={handleScrollToBottom}
           aria-label="최신 메시지로 이동"
         >
-          <img src="/assets/icons/arrow-bottom.svg" alt="" className="h-5 w-5" />
+          <img src="/assets/icons/arrow-bottom.svg" alt="" className="w-5 h-5" />
         </button>
       )}
 
