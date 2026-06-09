@@ -6,7 +6,7 @@ import { WITHDRAWAL_REASONS, useWithdrawalForm } from "@features/mypage/model/us
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { useNavigate } from "@tanstack/react-router";
 import { useState } from "react";
-import clsx from "clsx"; // clsx 추가
+import clsx from "clsx";
 import { Header } from "./MypageHeader";
 
 export function WithdrawalPage() {
@@ -118,16 +118,17 @@ export function WithdrawalPage() {
             계속 이용하기
           </Button>
 
-          {/* 수정된 탈퇴하기 버튼 */}
+          {/* 수정된 탈퇴하기 버튼: 기본적으로 테두리(border) 유지 */}
           <Button
               variant="ghost"
               disabled={!isFormValid || withdrawMutation.isPending}
               isLoading={withdrawMutation.isPending}
               className={clsx(
-                  "flex-1 h-14 font-bold transition-colors duration-200 border border-grey-divider",
+                  // 공통 적용: 굵기, 높이, 트랜지션, 그리고 기본 테두리 추가
+                  "flex-1 h-14 font-bold transition-colors duration-200 !border !border-grey-divider",
                   isFormValid
-                      ? "bg-white text-[#704AF8]" // 활성화 상태: 이미지와 동일하게 흰 배경, 테두리, 보라색 텍스트
-                      : "!bg-grey-bg text-grey-light"            // 비활성화 상태: 기존 회색 배경
+                      ? "!bg-white !text-primary"        // 활성화 상태: 흰 배경, 보라색 텍스트
+                      : "!bg-grey-bg !text-grey-light"   // 비활성화 상태: 회색 배경, 회색 텍스트
               )}
               onClick={() => withdrawMutation.mutate({ category: reason, reason: feedback })}
           >
