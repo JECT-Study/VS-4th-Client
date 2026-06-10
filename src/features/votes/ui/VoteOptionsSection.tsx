@@ -2,6 +2,7 @@ import { useLayoutEffect, useRef } from "react";
 import type { VoteOption } from "../model/types";
 import { VoteBar } from "./VoteBar";
 import { VoteTimeRemaining } from "./VoteTimeRemaining";
+import clsx from "clsx";
 
 interface VoteOptionsSectionProps {
   options: VoteOption[] | undefined;
@@ -37,6 +38,18 @@ export function VoteOptionsSection({
     for (const btn of btns) btn.style.minHeight = `${maxH}px`;
   }, [options]);
 
+  const mostVoted = options?.reduce((max, current) => {
+    if (!current.ratio) {
+      return max;
+    }
+
+    if (!max?.ratio) {
+      return current;
+    }
+
+    return max.ratio >= current.ratio ? max : current;
+  }, options[0]);
+
   return (
     <div className="px-4 py-5 rounded-[20px] border border-grey-stroke mt-5">
       <div className="flex items-center gap-2">
@@ -56,6 +69,7 @@ export function VoteOptionsSection({
 
         {options?.map((option, index) => {
           const isSelected = myVote?.selectedOptionId === option.optionId;
+          const isLeading = mostVoted?.optionId === option.optionId;
           const hasVoted = myVote?.voted ?? false;
           return (
             <button
@@ -64,16 +78,25 @@ export function VoteOptionsSection({
                 buttonRefs.current[index] = el;
               }}
               type="button"
-              className={`text-body-s px-4 py-3 rounded-lg w-full text-left relative overflow-hidden flex items-center ${isEnded ? (index === 0 ? "bg-grey-stroke text-grey-light" : "bg-grey-purple text-grey-divider") : (hasVoted && isSelected) ? "text-grey-divider bg-grey-stroke" : "text-grey-black bg-grey-stroke"}`}
+              className="text-label-m px-4 py-3 rounded-lg w-full text-left relative overflow-hidden flex items-center text-grey-black, bg-grey-divider"
               onClick={() => onOptionClick(option.optionId)}
               disabled={isParticipatePending || isEnded}
             >
-              {hasVoted && option.ratio !== null && !isEnded && (
-                <VoteBar ratio={option.ratio} isSelected={isSelected} />
+              {hasVoted && option.ratio !== null && (
+                <VoteBar ratio={option.ratio} isLeading={isLeading} isEnded={isEnded} />
               )}
-              <span className="relative z-10 line-clamp-2">
-                {option.label} {hasVoted && option.ratio !== null && `(${option.ratio}%)`}
+              <span
+                className={clsx(
+                  "relative z-10 line-clamp-2 flex items-center gap-[2px]",
+                  hasVoted && isSelected && "text-label-l",
+                )}
+              >
+                {isSelected && <img src="/assets/icons/selected-vote.svg" alt="" />}
+                <span>{option.label}</span>
               </span>
+              {hasVoted && option.ratio !== null && (
+                <span className="absolute right-3 top-1/2 -translate-y-1/2 text-label-l">({option.ratio}%)</span>
+              )}
             </button>
           );
         })}

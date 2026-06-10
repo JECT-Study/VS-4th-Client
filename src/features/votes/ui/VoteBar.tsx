@@ -1,6 +1,7 @@
+import clsx from "clsx";
 import { useEffect, useState } from "react";
 
-export function VoteBar({ ratio, isSelected }: { ratio: number; isSelected: boolean }) {
+export function VoteBar({ ratio, isLeading, isEnded }: { ratio: number; isLeading: boolean; isEnded: boolean }) {
   const [animatedWidth, setAnimatedWidth] = useState(0);
 
   useEffect(() => {
@@ -10,7 +11,10 @@ export function VoteBar({ ratio, isSelected }: { ratio: number; isSelected: bool
 
   return (
     <span
-      className={`absolute inset-y-0 left-0 rounded-lg transition-[width] duration-700 ease-out ${isSelected ? "bg-primary" : "bg-grey-disabled"}`}
+      className={clsx(
+        "absolute inset-y-0 left-0 rounded-lg transition-[width] duration-700 ease-out",
+        isLeading ? (isEnded ? "bg-grey-disabled" : "bg-primary-300") : isEnded ? "bg-grey-stroke" : "bg-primary-100",
+      )}
       style={{ width: `${animatedWidth}%` }}
     />
   );
