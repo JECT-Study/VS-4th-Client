@@ -1,8 +1,8 @@
+import clsx from "clsx";
 import { useLayoutEffect, useRef } from "react";
 import type { VoteOption } from "../model/types";
 import { VoteBar } from "./VoteBar";
 import { VoteTimeRemaining } from "./VoteTimeRemaining";
-import clsx from "clsx";
 
 interface VoteOptionsSectionProps {
   options: VoteOption[] | undefined;
@@ -82,7 +82,7 @@ export function VoteOptionsSection({
               onClick={() => onOptionClick(option.optionId)}
               disabled={isParticipatePending || isEnded}
             >
-              {hasVoted && option.ratio !== null && (
+              {(hasVoted || isEnded) && option.ratio !== null && (
                 <VoteBar ratio={option.ratio} isLeading={isLeading} isEnded={isEnded} />
               )}
               <span
@@ -94,8 +94,8 @@ export function VoteOptionsSection({
                 {isSelected && <img src="/assets/icons/selected-vote.svg" alt="" />}
                 <span>{option.label}</span>
               </span>
-              {hasVoted && option.ratio !== null && (
-                <span className="absolute right-3 top-1/2 -translate-y-1/2 text-label-l">({option.ratio}%)</span>
+              {(hasVoted || isEnded) && option.ratio !== null && (
+                <span className="absolute right-3 top-1/2 -translate-y-1/2 text-label-l">{option.ratio}%</span>
               )}
             </button>
           );
