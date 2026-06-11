@@ -18,8 +18,8 @@ export function WithdrawalPage() {
   const withdrawMutation = useMutation({
     mutationFn: withdraw,
     onSuccess: () => {
-      queryClient.removeQueries({ queryKey: ["user"] });
-      queryClient.invalidateQueries({ refetchType: "all" });
+      queryClient.clear();
+      queryClient.setQueryData(["user", "me"], null);
       showToast.success("탈퇴가 완료되었어요.");
       navigate({ to: "/home" });
     },
