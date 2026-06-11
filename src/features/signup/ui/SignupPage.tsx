@@ -1,5 +1,5 @@
 import { Button } from "@base/ui/Button";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useSignupFunnel } from "../model/useSignupFunnel";
 import { SignupHeader } from "./SignupHeader";
 import { CompleteStep } from "./components/steps/CompleteStep";
@@ -8,9 +8,35 @@ import LeaveConfirmationModal from "./components/steps/LeaveConfirmationModal";
 import { ProfileStep } from "./components/steps/ProfileStep";
 import { TermsStep } from "./components/steps/TermsStep";
 
+function useKeyboardInset() {
+  const [keyboardInset, setKeyboardInset] = useState(0);
+
+  useEffect(() => {
+    const visualViewport = window.visualViewport;
+    if (!visualViewport) return;
+
+    const updateKeyboardInset = () => {
+      const inset = Math.max(0, window.innerHeight - visualViewport.height - visualViewport.offsetTop);
+      setKeyboardInset(inset);
+    };
+
+    updateKeyboardInset();
+    visualViewport.addEventListener("resize", updateKeyboardInset);
+    visualViewport.addEventListener("scroll", updateKeyboardInset);
+
+    return () => {
+      visualViewport.removeEventListener("resize", updateKeyboardInset);
+      visualViewport.removeEventListener("scroll", updateKeyboardInset);
+    };
+  }, []);
+
+  return keyboardInset;
+}
+
 export function SignupPage() {
   const funnel = useSignupFunnel();
   const [isLeaveModalOpen, setIsLeaveModalOpen] = useState(false);
+  const keyboardInset = useKeyboardInset();
 
   const handleBack = () => {
     if (funnel.currentStep === 3 && funnel.hasProfileChanges) {
@@ -32,7 +58,7 @@ export function SignupPage() {
       />
 
       {/* 👇 수정 2: overflow-y-auto 제거 (내부 스크롤 대신 전체 화면 스크롤 사용) */}
-      <div className="flex-1 px-5 py-4">
+      <div className="flex-1 px-5 py-4 pb-28">
         {funnel.currentStep === 1 && (
           <TermsStep
             termsState={funnel.termsState}
@@ -60,7 +86,13 @@ export function SignupPage() {
       </div>
 
       {/* 하단 버튼 영역 */}
-      <div className="px-5 pt-2 shrink-0" style={{ paddingBottom: "calc(1rem + env(safe-area-inset-bottom, 0px))" }}>
+      <div
+        className="fixed bottom-0 left-1/2 -translate-x-1/2 w-full max-w-md bg-white px-5 pt-2"
+        style={{
+          bottom: keyboardInset,
+          paddingBottom: keyboardInset > 0 ? "1rem" : "calc(1rem + env(safe-area-inset-bottom, 0px))",
+        }}
+      >
         <Button onClick={funnel.onPrimaryAction} disabled={!funnel.canProceed} isLoading={funnel.isSavePending}>
           {funnel.primaryButtonLabel}
         </Button>
