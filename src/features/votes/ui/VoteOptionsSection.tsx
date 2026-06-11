@@ -78,7 +78,7 @@ export function VoteOptionsSection({
                 buttonRefs.current[index] = el;
               }}
               type="button"
-              className="text-label-m px-4 py-3 rounded-lg w-full text-left relative overflow-hidden flex items-center text-grey-black, bg-grey-divider"
+              className="text-label-m px-4 py-3 rounded-lg w-full text-left relative overflow-hidden flex items-center text-grey-black bg-grey-divider"
               onClick={() => onOptionClick(option.optionId)}
               disabled={isParticipatePending || isEnded}
             >
@@ -87,12 +87,12 @@ export function VoteOptionsSection({
               )}
               <span
                 className={clsx(
-                  "relative z-10 line-clamp-2 flex items-center gap-[2px]",
+                  "relative z-10 flex min-w-0 flex-1 items-center gap-1 pr-10",
                   hasVoted && isSelected && "text-label-l",
                 )}
               >
-                {isSelected && <img src="/assets/icons/selected-vote.svg" alt="" />}
-                <span>{option.label}</span>
+                {isSelected && <img src="/assets/icons/selected-vote.svg" alt="" className="shrink-0" />}
+                <span className="min-w-0 line-clamp-2">{option.label}</span>
               </span>
               {(hasVoted || isEnded) && option.ratio !== null && (
                 <span className="absolute right-3 top-1/2 -translate-y-1/2 text-label-l">{option.ratio}%</span>
