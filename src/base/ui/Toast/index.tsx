@@ -28,7 +28,11 @@ const showToast = {
       () => <CustomToast type="info" message={message} />,
       duration !== undefined ? { duration } : undefined,
     ),
-  success: (message: string) => toast.custom(() => <CustomToast type="success" message={message} />),
+  success: (message: string, duration?: number) =>
+    toast.custom(
+      () => <CustomToast type="success" message={message} />,
+      duration !== undefined ? { duration } : undefined,
+    ),
   warning: (message: string) => toast.custom(() => <CustomToast type="warning" message={message} />),
   hot: (message: string) => toast.custom(() => <CustomToast type="hot" message={message} />),
 };

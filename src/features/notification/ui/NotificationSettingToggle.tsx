@@ -16,6 +16,22 @@ import { useNotificationSetup } from "../model/useNotificationSetup";
 import { A2HSModal } from "./A2HSModal";
 import { PushPermissionModal } from "./PushPermissionModal";
 
+const NOTIFICATION_SETTING_TOAST_DURATION_MS = 3000;
+
+const formatNotificationSettingDate = (date?: string | null) => {
+  const targetDate = date ? new Date(date) : new Date();
+
+  if (Number.isNaN(targetDate.getTime())) {
+    return formatNotificationSettingDate();
+  }
+
+  const year = targetDate.getFullYear();
+  const month = String(targetDate.getMonth() + 1).padStart(2, "0");
+  const day = String(targetDate.getDate()).padStart(2, "0");
+
+  return `${year}.${month}.${day}`;
+};
+
 export function NotificationSettingToggle() {
   const { osType, isPwaInstalled, promptInstall, requestPushPermission } = useNotificationSetup();
   const notificationSettingQuery = useNotificationSettingQuery();
@@ -33,9 +49,12 @@ export function NotificationSettingToggle() {
 
   const handleDisablePush = async () => {
     try {
-      await updateNotificationSettingMutation.mutateAsync(false);
+      const setting = await updateNotificationSettingMutation.mutateAsync(false);
       await unregisterPushTokenMutation.mutateAsync();
-      showToast.success("푸시 알림이 꺼졌어요.");
+      showToast.success(
+        `${formatNotificationSettingDate(setting.pushDisabledAt)} 푸시 알림을 거부했어요.`,
+        NOTIFICATION_SETTING_TOAST_DURATION_MS,
+      );
     } catch {
       showToast.warning("푸시 알림을 끄지 못했어요. 잠시 후 다시 시도해 주세요.");
     }
@@ -82,8 +101,11 @@ export function NotificationSettingToggle() {
 
     try {
       await registerPushTokenMutation.mutateAsync(resolvePushPlatform(osType));
-      await updateNotificationSettingMutation.mutateAsync(true);
-      showToast.success("푸시 알림이 켜졌어요.");
+      const setting = await updateNotificationSettingMutation.mutateAsync(true);
+      showToast.success(
+        `${formatNotificationSettingDate(setting.pushEnabledAt)} 푸시 알림을 허용했어요.`,
+        NOTIFICATION_SETTING_TOAST_DURATION_MS,
+      );
     } catch (error) {
       if (error instanceof FcmTokenError) {
         showToast.warning(error.message);
