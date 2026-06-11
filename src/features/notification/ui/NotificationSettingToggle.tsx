@@ -1,5 +1,9 @@
 import { Switch } from "@base/ui/Switch";
 import { showToast } from "@base/ui/Toast";
+import {
+  useNotificationSettingQuery,
+  useUpdateNotificationSettingMutation,
+} from "@features/notification/api/notificationSetting";
 import { FcmTokenError } from "@features/notification/api/pushToken";
 import {
   useRegisterPushTokenMutation,
@@ -7,29 +11,30 @@ import {
 } from "@features/notification/api/pushTokenMutations";
 import { isDesktopBrowser } from "@features/notification/model/isDesktopBrowser";
 import { resolvePushPlatform } from "@features/notification/model/resolvePushPlatform";
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { useNotificationSetup } from "../model/useNotificationSetup";
 import { A2HSModal } from "./A2HSModal";
 import { PushPermissionModal } from "./PushPermissionModal";
 
 export function NotificationSettingToggle() {
-  const { osType, isPwaInstalled, pushPermission, promptInstall, requestPushPermission } = useNotificationSetup();
+  const { osType, isPwaInstalled, promptInstall, requestPushPermission } = useNotificationSetup();
+  const notificationSettingQuery = useNotificationSettingQuery();
+  const updateNotificationSettingMutation = useUpdateNotificationSettingMutation();
   const registerPushTokenMutation = useRegisterPushTokenMutation();
   const unregisterPushTokenMutation = useUnregisterPushTokenMutation();
 
-  const [isPushEnabled, setIsPushEnabled] = useState(false);
   const [activeModal, setActiveModal] = useState<"none" | "a2hs" | "push">("none");
-  const isPending = registerPushTokenMutation.isPending || unregisterPushTokenMutation.isPending;
-
-  useEffect(() => {
-    setIsPushEnabled(pushPermission === "granted");
-  }, [pushPermission]);
+  const isPushEnabled = notificationSettingQuery.data?.pushEnabled ?? false;
+  const isPending =
+    notificationSettingQuery.isLoading ||
+    updateNotificationSettingMutation.isPending ||
+    registerPushTokenMutation.isPending ||
+    unregisterPushTokenMutation.isPending;
 
   const handleDisablePush = async () => {
     try {
+      await updateNotificationSettingMutation.mutateAsync(false);
       await unregisterPushTokenMutation.mutateAsync();
-      setIsPushEnabled(false);
-      // 알림 OFF 성공 토스트 추가
       showToast.success("푸시 알림이 꺼졌어요.");
     } catch {
       showToast.warning("푸시 알림을 끄지 못했어요. 잠시 후 다시 시도해 주세요.");
@@ -70,7 +75,6 @@ export function NotificationSettingToggle() {
   const handlePushAllow = async () => {
     const isGranted = await requestPushPermission();
     if (!isGranted) {
-      setIsPushEnabled(false);
       alert("브라우저 설정에서 알림 권한을 허용해 주세요.");
       setActiveModal("none");
       return;
@@ -78,11 +82,9 @@ export function NotificationSettingToggle() {
 
     try {
       await registerPushTokenMutation.mutateAsync(resolvePushPlatform(osType));
-      setIsPushEnabled(true);
-      // 알림 ON 성공 토스트 추가
+      await updateNotificationSettingMutation.mutateAsync(true);
       showToast.success("푸시 알림이 켜졌어요.");
     } catch (error) {
-      setIsPushEnabled(false);
       if (error instanceof FcmTokenError) {
         showToast.warning(error.message);
       } else {
