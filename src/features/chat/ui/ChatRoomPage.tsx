@@ -1,4 +1,4 @@
-import { useParams } from "@tanstack/react-router";
+import { useParams, useSearch } from "@tanstack/react-router";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { ChatAccessGate } from "./ChatAccessRequiredPage";
 import { ChatInputBar } from "./ChatInputBar";
@@ -27,6 +27,7 @@ export function ChatRoomPage() {
 
 function ChatRoomContent() {
   const params = useParams({ strict: false });
+  const search = useSearch({ from: "/chat/$chatRoomId" });
   const voteId = Number(params.chatRoomId);
   const { data: header, isLoading: isHeaderLoading, isError: isHeaderError } = useChatRoomHeaderQuery(voteId);
 
@@ -167,6 +168,7 @@ function ChatRoomContent() {
   }
 
   const isEnded = header.status === "ENDED";
+  const backTab = search.tab === "ENDED" || search.tab === "ONGOING" ? search.tab : header.status;
 
   const handleSubmitMessage = (message: string) => {
     sendMessageMutation.mutate(message);
@@ -174,7 +176,7 @@ function ChatRoomContent() {
 
   return (
     <main className="min-h-screen bg-white">
-      <ChatRoomHeader title={header.title} participantCount={gauge.participantCount} />
+      <ChatRoomHeader title={header.title} participantCount={gauge.participantCount} backTab={backTab} />
 
       <VoteSummaryCard header={header} gauge={gauge} />
 

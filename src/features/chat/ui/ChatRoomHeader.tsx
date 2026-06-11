@@ -1,18 +1,20 @@
 import { useNavigate } from "@tanstack/react-router";
+import type { ChatTabType } from "../model/types";
 
 interface ChatRoomHeaderProps {
   title: string;
   participantCount: number;
+  backTab: ChatTabType;
 }
 
-export function ChatRoomHeader({ title, participantCount }: ChatRoomHeaderProps) {
+export function ChatRoomHeader({ title, participantCount, backTab }: ChatRoomHeaderProps) {
   const navigate = useNavigate();
 
   return (
     <header className="sticky top-0 z-10 flex items-center px-1 py-[6px] bg-white h-14 border-grey-stroke">
       <button
         type="button"
-        onClick={() => navigate({ to: "/chat" })}
+        onClick={() => navigate({ to: "/chat", search: { tab: backTab } })}
         className="flex items-center justify-center h-11 w-11"
         aria-label="뒤로가기"
       >
