@@ -1,5 +1,4 @@
-import { useNavigate } from "@tanstack/react-router";
-import { useState } from "react";
+import { useNavigate, useSearch } from "@tanstack/react-router";
 import { useChatListQuery } from "../api/chatListQuery";
 import type { ChatTabType } from "../model/types";
 import { ChatAccessGate } from "./ChatAccessRequiredPage";
@@ -17,11 +16,19 @@ export function ChatListPage() {
 
 function ChatListContent() {
   const navigate = useNavigate();
-  const [activeTab, setActiveTab] = useState<ChatTabType>("ONGOING");
+  const search = useSearch({ from: "/chat/" });
+  const activeTab: ChatTabType = search.tab === "ENDED" ? "ENDED" : "ONGOING";
 
   const { data, isLoading, isError } = useChatListQuery(activeTab);
 
   const currentItems = data?.chats ?? [];
+  const handleChangeTab = (tab: ChatTabType) => {
+    navigate({
+      to: "/chat",
+      search: { tab },
+      replace: true,
+    });
+  };
 
   return (
     <main className="min-h-screen pb-20 bg-white">
@@ -29,7 +36,7 @@ function ChatListContent() {
         <h1 className="text-title-m text-grey-black">채팅</h1>
       </header>
 
-      <ChatTabs activeTab={activeTab} onChangeTab={setActiveTab} />
+      <ChatTabs activeTab={activeTab} onChangeTab={handleChangeTab} />
 
       {isLoading && (
         <div className="py-10 text-center text-label-m text-grey-light">채팅 목록을 불러오는 중입니다.</div>
@@ -48,6 +55,9 @@ function ChatListContent() {
               to: "/chat/$chatRoomId",
               params: {
                 chatRoomId: String(voteId),
+              },
+              search: {
+                tab: activeTab,
               },
             });
           }}
