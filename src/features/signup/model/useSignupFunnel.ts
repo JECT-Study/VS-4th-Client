@@ -61,7 +61,10 @@ export function useSignupFunnel() {
       case 2:
         return canProceedStep2(genderBirthStep.genderBirthState);
       case 3:
-        return canProceedStep3(profileStep.profileState) && profileStep.profileState.nickname !== profileStep.getDefaults().nickname;
+        return (
+          canProceedStep3(profileStep.profileState) &&
+          profileStep.profileState.nickname !== profileStep.getDefaults().nickname
+        );
       case 4:
         return true;
     }

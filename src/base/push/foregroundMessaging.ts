@@ -1,8 +1,5 @@
+import { type FcmMessagePayload, normalizePushNotification } from "@base/push/fcmNotificationPayload";
 import { getFirebaseApp } from "@base/push/firebaseConfig";
-import {
-  type FcmMessagePayload,
-  normalizePushNotification,
-} from "@base/push/fcmNotificationPayload";
 import { getMessaging, isSupported, onMessage } from "firebase/messaging";
 
 const showForegroundNotification = async (payload: FcmMessagePayload) => {

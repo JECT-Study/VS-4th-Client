@@ -42,16 +42,15 @@ export const isFcmPayload = (payload: unknown): payload is FcmMessagePayload => 
   return "from" in maybeFcmPayload || "fcmMessageId" in maybeFcmPayload || "notification" in maybeFcmPayload;
 };
 
-export const normalizePushNotification = (
-  payload: FcmMessagePayload | PushPayload,
-): NormalizedPushNotification => {
+export const normalizePushNotification = (payload: FcmMessagePayload | PushPayload): NormalizedPushNotification => {
   const notification = "notification" in payload ? payload.notification : undefined;
   const data = "data" in payload ? payload.data : undefined;
 
   return {
     title: notification?.title ?? data?.title ?? ("title" in payload ? payload.title : undefined) ?? "VS",
     body: notification?.body ?? data?.body ?? ("body" in payload ? payload.body : undefined) ?? "",
-    icon: notification?.icon ?? data?.icon ?? ("icon" in payload ? payload.icon : undefined) ?? DEFAULT_NOTIFICATION_ICON,
+    icon:
+      notification?.icon ?? data?.icon ?? ("icon" in payload ? payload.icon : undefined) ?? DEFAULT_NOTIFICATION_ICON,
     badge: data?.badge ?? ("badge" in payload ? payload.badge : undefined) ?? DEFAULT_NOTIFICATION_BADGE,
     tag:
       ("fcmMessageId" in payload ? payload.fcmMessageId : undefined) ??

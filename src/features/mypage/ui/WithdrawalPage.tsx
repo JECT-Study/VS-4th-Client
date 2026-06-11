@@ -5,8 +5,8 @@ import { withdraw } from "@features/mypage/api/withdraw";
 import { WITHDRAWAL_REASONS, useWithdrawalForm } from "@features/mypage/model/useWithdrawalForm";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { useNavigate } from "@tanstack/react-router";
-import { useState } from "react";
 import clsx from "clsx";
+import { useState } from "react";
 import { Header } from "./MypageHeader";
 
 export function WithdrawalPage() {
