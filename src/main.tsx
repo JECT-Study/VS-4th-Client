@@ -1,7 +1,7 @@
 // import "@/mocks";
 
-import { initServiceWorkerRegistration } from "@base/push/serviceWorker";
 import { registerSW } from "virtual:pwa-register";
+import { initServiceWorkerRegistration } from "@base/push/serviceWorker";
 import { StrictMode } from "react";
 import { createRoot } from "react-dom/client";
 import "@app/styles/index.css";

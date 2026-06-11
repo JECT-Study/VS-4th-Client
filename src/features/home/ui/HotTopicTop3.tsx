@@ -45,16 +45,16 @@ export function HotTopicTop3({ hotTopics, onClickVote }: HotTopicTop3Props) {
 
               <div className="w-[74px] h-[74px] overflow-hidden rounded-lg shrink-0 bg-grey-divider">
                 {item.thumbnailUrl && (
-                    <img
-                        src={item.thumbnailUrl}
-                        alt={item.title}
-                        // 1. text-transparent를 추가하여 안드로이드에서 alt 텍스트가 노출되는 것을 방지합니다.
-                        className="object-cover w-full h-full text-transparent"
-                        // 2. 이미지가 깨졌을 때 브라우저 기본 테두리가 나오지 않도록 img 태그 자체를 숨깁니다.
-                        onError={(e) => {
-                          e.currentTarget.style.display = "none";
-                        }}
-                    />
+                  <img
+                    src={item.thumbnailUrl}
+                    alt={item.title}
+                    // 1. text-transparent를 추가하여 안드로이드에서 alt 텍스트가 노출되는 것을 방지합니다.
+                    className="object-cover w-full h-full text-transparent"
+                    // 2. 이미지가 깨졌을 때 브라우저 기본 테두리가 나오지 않도록 img 태그 자체를 숨깁니다.
+                    onError={(e) => {
+                      e.currentTarget.style.display = "none";
+                    }}
+                  />
                 )}
               </div>
             </button>

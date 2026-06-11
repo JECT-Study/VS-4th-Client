@@ -131,7 +131,7 @@ function useProfileEdit() {
 
   const hasChanges =
     profileState.nickname !== originalNicknameRef.current || profileState.imageColor !== originalImageColorRef.current;
-  const canSave = canProceedStep3(profileState) && hasChanges;
+  const canSave = canProceedStep3(profileState) && profileState.nickname !== originalNicknameRef.current;
 
   return { profileState, setImageColor, setNickname, canSave, hasChanges };
 }

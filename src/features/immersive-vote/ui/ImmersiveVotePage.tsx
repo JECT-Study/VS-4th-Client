@@ -32,7 +32,7 @@ export function ImmersiveVotePage() {
   return (
     <main
       ref={containerRef}
-      className="relative h-dvh overflow-hidden bg-grey-black"
+      className="relative h-dvh overflow-hidden overscroll-none bg-grey-black"
       onTouchStart={handleTouchStart}
       onTouchEnd={handleTouchEnd}
     >

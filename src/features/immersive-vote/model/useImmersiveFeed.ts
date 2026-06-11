@@ -16,6 +16,19 @@ import {
 } from "../config/constants";
 import type { ImmersiveFeedItem } from "./types";
 
+function isInsideScrollable(target: Element | null, boundary: Element): boolean {
+  let el = target;
+  while (el && el !== boundary) {
+    const style = getComputedStyle(el);
+    const overflowY = style.overflowY;
+    if ((overflowY === "auto" || overflowY === "scroll") && el.scrollHeight > el.clientHeight) {
+      return true;
+    }
+    el = el.parentElement;
+  }
+  return false;
+}
+
 export function useImmersiveFeed() {
   const queryClient = useQueryClient();
   const { data: initialData, isError } = useQuery(immersiveFeedQueryOptions());
@@ -24,6 +37,7 @@ export function useImmersiveFeed() {
   const [trackIndex, setTrackIndex] = useState(0);
   const [isTransitionEnabled, setIsTransitionEnabled] = useState(true);
   const touchStartY = useRef<number | null>(null);
+  const touchStartedInScrollable = useRef(false);
   const trackIndexRef = useRef(0);
   const lastNavigationTime = useRef(0);
   const seenIdsRef = useRef<Set<number>>(new Set());
@@ -120,11 +134,19 @@ export function useImmersiveFeed() {
 
   const handleTouchStart = useCallback((event: TouchEvent) => {
     touchStartY.current = event.touches[0]?.clientY ?? null;
+    const container = containerRef.current;
+    touchStartedInScrollable.current = container
+      ? isInsideScrollable(event.target as Element | null, container)
+      : false;
   }, []);
 
   const handleTouchEnd = useCallback(
     (event: TouchEvent) => {
       if (touchStartY.current === null) return;
+      if (touchStartedInScrollable.current) {
+        touchStartY.current = null;
+        return;
+      }
       const touchEndY = event.changedTouches[0]?.clientY;
       if (touchEndY === undefined) {
         touchStartY.current = null;
@@ -144,8 +166,22 @@ export function useImmersiveFeed() {
 
   useEffect(() => {
     const el = containerRef.current;
+    if (!el) return;
+
+    const preventPullToRefresh = (e: globalThis.TouchEvent) => {
+      if (isInsideScrollable(e.target as Element | null, el)) return;
+      e.preventDefault();
+    };
+
+    el.addEventListener("touchmove", preventPullToRefresh, { passive: false });
+    return () => el.removeEventListener("touchmove", preventPullToRefresh);
+  }, []);
+
+  useEffect(() => {
+    const el = containerRef.current;
     if (!el || feedLength === 0) return;
     const handler = (e: globalThis.WheelEvent) => {
+      if (isInsideScrollable(e.target as Element | null, el)) return;
       if (e.deltaY > WHEEL_NAVIGATION_THRESHOLD) {
         e.preventDefault();
         goToNextVote();

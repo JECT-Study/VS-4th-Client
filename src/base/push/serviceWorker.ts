@@ -40,8 +40,7 @@ const withTimeout = async <T>(promise: Promise<T>, timeoutMs: number, label: str
   }
 };
 
-const getLocalDevHint = () =>
-  "로컬 테스트는 `pnpm dev:pwa`로 실행해 주세요. (`pnpm dev`에는 sw.js가 없습니다)";
+const getLocalDevHint = () => "로컬 테스트는 `pnpm dev:pwa`로 실행해 주세요. (`pnpm dev`에는 sw.js가 없습니다)";
 
 const isJavaScriptResponse = (contentType: string) =>
   contentType.includes("javascript") || contentType.includes("ecmascript");
@@ -123,7 +122,9 @@ const resolveRegistration = async (): Promise<ServiceWorkerRegistration> => {
 
   const scriptAvailable = await isServiceWorkerScriptAvailable();
   if (!scriptAvailable) {
-    throw new ServiceWorkerUnavailableError(import.meta.env.DEV ? getLocalDevHint() : "서비스 워커 파일을 불러올 수 없습니다.");
+    throw new ServiceWorkerUnavailableError(
+      import.meta.env.DEV ? getLocalDevHint() : "서비스 워커 파일을 불러올 수 없습니다.",
+    );
   }
 
   return navigator.serviceWorker.register(SERVICE_WORKER_URL);

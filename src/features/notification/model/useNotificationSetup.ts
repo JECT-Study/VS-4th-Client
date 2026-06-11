@@ -1,5 +1,5 @@
-import { useCallback, useEffect, useState } from "react";
 import { showToast } from "@base/ui/Toast"; // 토스트 임포트
+import { useCallback, useEffect, useState } from "react";
 
 export type OSType = "android" | "ios" | "ios-outdated" | "other";
 
