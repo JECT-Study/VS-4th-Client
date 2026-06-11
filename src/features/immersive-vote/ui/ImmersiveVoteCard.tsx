@@ -95,7 +95,7 @@ export function ImmersiveVoteCard({ vote, updateVote }: ImmersiveVoteCardProps) 
         )}
       </div>
 
-      <div className="absolute inset-y-0 right-3 z-30 flex flex-col items-center justify-center gap-5">
+      <div className="absolute top-1/2 -translate-y-1/4 inset-y-0 right-3 z-30 flex flex-col items-center justify-center gap-5 h-fit">
         <EmojiReactionButton
           emojiList={emojiList}
           totalCount={vote.emojiSummary.total}
@@ -103,15 +103,15 @@ export function ImmersiveVoteCard({ vote, updateVote }: ImmersiveVoteCardProps) 
           onEmojiClick={handleEmojiClick}
         />
 
-        <button
-          type="button"
-          className="flex flex-col items-center gap-1 drop-shadow w-12 h-12 justify-center"
-          onClick={openChat}
-        >
+        <button type="button" className="flex flex-col items-center gap-1 w-12 h-12 justify-center" onClick={openChat}>
           <span className="flex h-9 w-9 items-center justify-center">
-            <img src="/assets/icons/chat-reels-big.svg" alt="채팅 보기" className="h-7 w-7" />
+            <img
+              src="/assets/icons/chat-reels-big.svg"
+              alt="채팅 보기"
+              className="h-7 w-7 drop-shadow-[0_0_5px_rgba(0,0,0,0.4)]"
+            />
           </span>
-          <span className="text-label-s text-[#F7F6F9]">{vote.commentCount}</span>
+          <span className="text-label-s text-[#F7F6F9] drop-shadow-[0_0_5px_rgba(0,0,0,0.4)]">{vote.commentCount}</span>
         </button>
 
         <button
@@ -120,7 +120,7 @@ export function ImmersiveVoteCard({ vote, updateVote }: ImmersiveVoteCardProps) 
           onClick={() => setIsShareOpen(true)}
           aria-label="공유하기"
         >
-          <img src="/assets/icons/share-big.svg" alt="" className="h-7 w-7" />
+          <img src="/assets/icons/share-big.svg" alt="" className="h-7 w-7 drop-shadow-[0_0_5px_rgba(0,0,0,0.4)]" />
         </button>
       </div>
 
