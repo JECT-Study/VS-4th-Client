@@ -22,6 +22,8 @@ declare let self: ServiceWorkerGlobalScope;
 
 const DEFAULT_NOTIFICATION_URL = "/home";
 
+const toAppUrl = (url: string) => new URL(url, self.location.origin);
+
 const showPushNotification = (payload: FcmMessagePayload | PushPayload) => {
   const notification = normalizePushNotification(payload);
 
@@ -139,19 +141,24 @@ self.addEventListener("push", (event) => {
 self.addEventListener("notificationclick", (event) => {
   event.notification.close();
 
-  const redirectUrl: string = event.notification.data?.redirect_url ?? DEFAULT_NOTIFICATION_URL;
+  const redirectUrl = toAppUrl(event.notification.data?.redirect_url ?? DEFAULT_NOTIFICATION_URL);
+  const redirectPath = `${redirectUrl.pathname}${redirectUrl.search}${redirectUrl.hash}`;
 
   event.waitUntil(
-    self.clients.matchAll({ type: "window", includeUncontrolled: true }).then((windowClients) => {
+    self.clients.matchAll({ type: "window", includeUncontrolled: true }).then(async (windowClients) => {
       for (const client of windowClients) {
         if (new URL(client.url).origin === self.location.origin) {
-          client.focus();
-          client.postMessage({ type: "PUSH_NOTIFICATION_CLICK", url: redirectUrl });
-          return;
+          try {
+            await client.focus();
+            client.postMessage({ type: "PUSH_NOTIFICATION_CLICK", url: redirectPath });
+            return;
+          } catch {
+            break;
+          }
         }
       }
 
-      return self.clients.openWindow(redirectUrl);
+      return self.clients.openWindow(redirectUrl.href);
     }),
   );
 });
