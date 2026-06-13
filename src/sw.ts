@@ -21,8 +21,61 @@ declare let self: ServiceWorkerGlobalScope;
 // ── Firebase Cloud Messaging ─────────────────────────────────
 
 const DEFAULT_NOTIFICATION_URL = "/home";
+const FCM_MESSAGE_DATA_KEY = "FCM_MSG";
 
-const toAppUrl = (url: string) => new URL(url, self.location.origin);
+type NotificationClickData = {
+  redirect_url?: string;
+  url?: string;
+  [FCM_MESSAGE_DATA_KEY]?: FcmMessagePayload;
+};
+
+const toAppUrl = (url?: string) => {
+  const appUrl = new URL(url ?? DEFAULT_NOTIFICATION_URL, self.location.origin);
+  return appUrl.origin === self.location.origin ? appUrl : new URL(DEFAULT_NOTIFICATION_URL, self.location.origin);
+};
+
+const getNotificationClickUrl = (data?: NotificationClickData) => {
+  const fcmMessage = data?.[FCM_MESSAGE_DATA_KEY];
+
+  return toAppUrl(
+    data?.redirect_url ??
+      data?.url ??
+      fcmMessage?.data?.redirect_url ??
+      fcmMessage?.data?.url ??
+      fcmMessage?.fcmOptions?.link ??
+      DEFAULT_NOTIFICATION_URL,
+  );
+};
+
+const openAppFromNotificationClick = async (redirectUrl: URL) => {
+  const redirectPath = `${redirectUrl.pathname}${redirectUrl.search}${redirectUrl.hash}`;
+  const windowClients = await self.clients.matchAll({ type: "window", includeUncontrolled: true });
+
+  for (const client of windowClients) {
+    if (new URL(client.url).origin === self.location.origin) {
+      try {
+        await client.focus();
+        client.postMessage({ type: "PUSH_NOTIFICATION_CLICK", url: redirectPath });
+        return;
+      } catch {
+        break;
+      }
+    }
+  }
+
+  await self.clients.openWindow(redirectUrl.href);
+};
+
+// Firebase SDK도 notificationclick 핸들러를 등록한다. 먼저 앱 열기를 처리하고 전파를 막아
+// FCM notification payload에서 link가 없을 때 알림만 닫히는 Android Chrome PWA 케이스를 방지한다.
+self.addEventListener("notificationclick", (event) => {
+  event.stopImmediatePropagation();
+  event.notification.close();
+
+  const redirectUrl = getNotificationClickUrl(event.notification.data as NotificationClickData | undefined);
+
+  event.waitUntil(openAppFromNotificationClick(redirectUrl));
+});
 
 const showPushNotification = (payload: FcmMessagePayload | PushPayload) => {
   const notification = normalizePushNotification(payload);
@@ -134,31 +187,4 @@ self.addEventListener("push", (event) => {
   if (isFcmPayload(payload)) return;
 
   event.waitUntil(showPushNotification(payload));
-});
-
-// ── Notification click ──────────────────────────────────────
-
-self.addEventListener("notificationclick", (event) => {
-  event.notification.close();
-
-  const redirectUrl = toAppUrl(event.notification.data?.redirect_url ?? DEFAULT_NOTIFICATION_URL);
-  const redirectPath = `${redirectUrl.pathname}${redirectUrl.search}${redirectUrl.hash}`;
-
-  event.waitUntil(
-    self.clients.matchAll({ type: "window", includeUncontrolled: true }).then(async (windowClients) => {
-      for (const client of windowClients) {
-        if (new URL(client.url).origin === self.location.origin) {
-          try {
-            await client.focus();
-            client.postMessage({ type: "PUSH_NOTIFICATION_CLICK", url: redirectPath });
-            return;
-          } catch {
-            break;
-          }
-        }
-      }
-
-      return self.clients.openWindow(redirectUrl.href);
-    }),
-  );
 });
