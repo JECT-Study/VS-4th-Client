@@ -37,6 +37,7 @@ export function SignupPage() {
   const funnel = useSignupFunnel();
   const [isLeaveModalOpen, setIsLeaveModalOpen] = useState(false);
   const keyboardInset = useKeyboardInset();
+  const isKeyboardOpen = keyboardInset > 0;
 
   const handleBack = () => {
     if (funnel.currentStep === 3 && funnel.hasProfileChanges) {
@@ -58,7 +59,10 @@ export function SignupPage() {
       />
 
       {/* 👇 수정 2: overflow-y-auto 제거 (내부 스크롤 대신 전체 화면 스크롤 사용) */}
-      <div className="flex-1 px-5 py-4 pb-28">
+      <div
+        className="flex-1 px-5 py-4 pb-28 transition-transform duration-200 ease-out"
+        style={{ transform: isKeyboardOpen ? "translateY(-90px)" : undefined }}
+      >
         {funnel.currentStep === 1 && (
           <TermsStep
             termsState={funnel.termsState}
