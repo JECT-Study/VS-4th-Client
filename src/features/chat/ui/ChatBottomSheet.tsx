@@ -9,6 +9,7 @@ import { useSendChatMessageMutation } from "../api/sendChatMessageMutation";
 import { formatTimeLabel } from "../lib/formatChatTime";
 import type { ChatMessageResponse } from "../model/types";
 import { useChatWebSocket } from "../model/useChatWebSocket";
+import { useMarkLatestChatAsRead } from "../model/useMarkLatestChatAsRead";
 
 const SCROLL_BUTTON_THRESHOLD_PX = 100;
 const LOAD_MORE_THRESHOLD_PX = 50;
@@ -99,6 +100,13 @@ function ChatContent({ voteId, t }: ChatContentProps) {
       .reverse()
       .flatMap((p) => p.messages) ?? [];
   const messagesCount = allMessages.length;
+  const latestMessageId = allMessages[allMessages.length - 1]?.messageId ?? null;
+
+  const markAsRead = useMarkLatestChatAsRead(voteId);
+  useEffect(() => {
+    if (latestMessageId == null) return;
+    markAsRead(latestMessageId);
+  }, [latestMessageId, markAsRead]);
 
   // 새 메시지 수신 시 하단 자동 스크롤 (하단에 있을 때만)
   useEffect(() => {
@@ -153,8 +161,10 @@ function ChatContent({ voteId, t }: ChatContentProps) {
 
       <div className="relative flex-1 min-h-0">
         <div ref={scrollContainerRef} onScroll={handleScroll} className="h-full overflow-y-auto overscroll-contain">
-          {renderMessageArea(isLoaded, allMessages, optionA, optionB, t, isFetchingNextPage)}
-          <div ref={bottomRef} />
+          <div className="flex flex-col justify-end min-h-full">
+            {renderMessageArea(isLoaded, allMessages, optionA, optionB, t, isFetchingNextPage)}
+            <div ref={bottomRef} />
+          </div>
         </div>
 
         {showScrollButton && (

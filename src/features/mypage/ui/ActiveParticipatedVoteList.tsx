@@ -57,8 +57,8 @@ export function ActiveParticipatedVoteList() {
           {voteList.map((item) => (
             <Link
               key={item.id}
-              to="/immersive-votes"
-              search={{ startVoteId: item.id }}
+              to="/votes/$voteId"
+              params={{ voteId: String(item.id) }}
               className="flex items-center gap-7 justify-between"
             >
               <div className="overflow-hidden">

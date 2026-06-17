@@ -53,6 +53,15 @@ export function useImmersiveFeed() {
   }, []);
 
   useEffect(() => {
+    const html = document.documentElement;
+    const prev = html.style.overscrollBehavior;
+    html.style.overscrollBehavior = "none";
+    return () => {
+      html.style.overscrollBehavior = prev;
+    };
+  }, []);
+
+  useEffect(() => {
     if (!initialData) return;
     setVotes(initialData.items ?? []);
     seenIdsRef.current = new Set((initialData.items ?? []).map((v) => v.voteId));
