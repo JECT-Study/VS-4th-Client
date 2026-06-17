@@ -131,7 +131,8 @@ function useProfileEdit() {
 
   const hasChanges =
     profileState.nickname !== originalNicknameRef.current || profileState.imageColor !== originalImageColorRef.current;
-  const canSave = hasChanges && (profileState.nickname === originalNicknameRef.current || canProceedStep3(profileState));
+  const canSave =
+    hasChanges && (profileState.nickname === originalNicknameRef.current || canProceedStep3(profileState));
 
   return { profileState, setImageColor, setNickname, canSave, hasChanges };
 }
@@ -141,6 +142,7 @@ function RouteComponent() {
   const [isPickerOpen, setIsPickerOpen] = useState(false);
   const [isLeaveModalOpen, setIsLeaveModalOpen] = useState(false);
   const keyboardInset = useKeyboardInset();
+  const isKeyboardOpen = keyboardInset > 0;
   const navigate = useNavigate();
   const queryClient = useQueryClient();
 
@@ -179,7 +181,10 @@ function RouteComponent() {
         </div>
       </header>
 
-      <div className="flex flex-col gap-6 mt-5 px-5">
+      <div
+        className="flex flex-col gap-6 mt-5 px-5 transition-transform duration-200 ease-out"
+        style={{ transform: isKeyboardOpen ? "translateY(-20px)" : undefined }}
+      >
         <div className="flex flex-col gap-6">
           <div className="flex flex-col items-center gap-3">
             <button
