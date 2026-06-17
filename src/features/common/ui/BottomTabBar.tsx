@@ -1,7 +1,9 @@
 import { bottomTabs } from "@features/common/config/bottomTabs.ts";
+import { useQueryClient } from "@tanstack/react-query";
 import { Link, useRouterState } from "@tanstack/react-router";
 
 export function BottomTabBar() {
+  const queryClient = useQueryClient();
   const routerState = useRouterState();
   const currentPath = routerState.location.pathname;
   const isImmersiveVotePath = currentPath.startsWith("/immersive-votes");
@@ -34,7 +36,14 @@ export function BottomTabBar() {
             to={tab.path}
             aria-current={isActive ? "page" : undefined}
             onClick={(event) => {
-              if (isActive) event.preventDefault();
+              if (!isActive) return;
+
+              event.preventDefault();
+
+              if (tab.key !== "home") return;
+
+              window.scrollTo({ top: 0, behavior: "smooth" });
+              queryClient.invalidateQueries({ queryKey: ["home"] });
             }}
             className={`grid h-full grid-rows-[28px_16px] place-items-center content-center gap-1 text-label-s transition-colors ${
               isImmersiveVotePath
