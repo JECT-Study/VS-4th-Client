@@ -19,9 +19,9 @@ const SCROLL_BUTTON_THRESHOLD_PX = 180;
 
 export function ChatRoomPage() {
   return (
-    <ChatAccessGate>
-      <ChatRoomContent />
-    </ChatAccessGate>
+      <ChatAccessGate>
+        <ChatRoomContent />
+      </ChatAccessGate>
   );
 }
 
@@ -82,11 +82,11 @@ function ChatRoomContent() {
       setShowScrollButton(!isAtBottom);
 
       if (
-        !hasScrolledOnEnterRef.current ||
-        window.scrollY > LOAD_MORE_THRESHOLD_PX ||
-        !hasNextPage ||
-        isFetchingNextPage ||
-        isFetchingOlderMessagesRef.current
+          !hasScrolledOnEnterRef.current ||
+          window.scrollY > LOAD_MORE_THRESHOLD_PX ||
+          !hasNextPage ||
+          isFetchingNextPage ||
+          isFetchingOlderMessagesRef.current
       ) {
         return;
       }
@@ -153,17 +153,17 @@ function ChatRoomContent() {
 
   if (isLoading) {
     return (
-      <main className="min-h-screen bg-white">
-        <div className="py-10 text-center text-label-m text-grey-light">채팅방을 불러오는 중입니다.</div>
-      </main>
+        <main className="flex flex-col min-h-[100dvh] bg-white">
+          <div className="py-10 text-center text-label-m text-grey-light">채팅방을 불러오는 중입니다.</div>
+        </main>
     );
   }
 
   if (isError || !header || !gauge || !messagesData) {
     return (
-      <main className="min-h-screen bg-white">
-        <div className="py-10 text-center text-label-m text-grey-light">채팅방을 불러오지 못했습니다.</div>
-      </main>
+        <main className="flex flex-col min-h-[100dvh] bg-white">
+          <div className="py-10 text-center text-label-m text-grey-light">채팅방을 불러오지 못했습니다.</div>
+        </main>
     );
   }
 
@@ -175,41 +175,40 @@ function ChatRoomContent() {
   };
 
   return (
-    <main className="min-h-screen bg-white">
-      <ChatRoomHeader title={header.title} participantCount={gauge.participantCount} backTab={backTab} />
+      <main className="flex flex-col min-h-[100dvh] bg-white">
+        <ChatRoomHeader title={header.title} participantCount={gauge.participantCount} backTab={backTab} />
 
-      <VoteSummaryCard header={header} gauge={gauge} />
+        <VoteSummaryCard header={header} gauge={gauge} />
 
-      <ChatMessageList messages={messages} optionA={header.optionA} optionB={header.optionB} />
+        <ChatMessageList messages={messages} optionA={header.optionA} optionB={header.optionB} />
 
-      {/* 입력창 높이를 고려하여 하단 여백 복구 */}
-      <div className="h-[calc(88px+env(safe-area-inset-bottom))] shrink-0" aria-hidden="true" />
-      <div ref={bottomRef} />
+        {/* 👇 하단 여백을 원래대로 돌려서 불필요한 공백 제거 */}
+        <div className="h-[calc(68px+env(safe-area-inset-bottom))] shrink-0" aria-hidden="true" />
+        <div ref={bottomRef} />
 
-      {showScrollButton && (
-        <button
-          type="button"
-          // 👇 버튼 위치도 변경된 높이에 맞게 살짝 수정
-          className="fixed z-20 flex items-center justify-center w-12 h-12 text-grey-black -translate-x-1/2 bg-white border rounded-full shadow-[0_6px_20px_rgba(19,19,19,0.12)] bottom-[calc(76px+env(safe-area-inset-bottom))] left-[calc(50%+144px)] border-grey-stroke"
-          onClick={handleScrollToBottom}
-          aria-label="최신 메시지로 이동"
-        >
-          <img src="/assets/icons/arrow-bottom.svg" alt="" className="w-5 h-5" />
-        </button>
-      )}
+        {showScrollButton && (
+            <button
+                type="button"
+                className="fixed z-20 flex items-center justify-center w-12 h-12 text-grey-black -translate-x-1/2 bg-white border rounded-full shadow-[0_6px_20px_rgba(19,19,19,0.12)] bottom-[calc(76px+env(safe-area-inset-bottom))] left-[calc(50%+144px)] border-grey-stroke"
+                onClick={handleScrollToBottom}
+                aria-label="최신 메시지로 이동"
+            >
+              <img src="/assets/icons/arrow-bottom.svg" alt="" className="w-5 h-5" />
+            </button>
+        )}
 
-      {isEnded ? (
-        <div
-          className="fixed w-full text-center bottom-0 text-label-m text-grey-dark bg-white pt-[18px] max-w-md"
-          style={{
-            paddingBottom: "calc(env(safe-area-inset-bottom, 0px) + 18px)",
-          }}
-        >
-          투표가 종료되어 채팅이 마감되었어요.
-        </div>
-      ) : (
-        <ChatInputBar disabled={sendMessageMutation.isPending} onSubmit={handleSubmitMessage} />
-      )}
-    </main>
+        {isEnded ? (
+            <div
+                className="fixed w-full text-center bottom-0 text-label-m text-grey-dark bg-white pt-[18px] max-w-md"
+                style={{
+                  paddingBottom: "calc(env(safe-area-inset-bottom, 0px) + 18px)",
+                }}
+            >
+              투표가 종료되어 채팅이 마감되었어요.
+            </div>
+        ) : (
+            <ChatInputBar disabled={sendMessageMutation.isPending} onSubmit={handleSubmitMessage} />
+        )}
+      </main>
   );
 }
