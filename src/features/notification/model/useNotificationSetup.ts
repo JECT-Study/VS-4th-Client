@@ -34,11 +34,7 @@ export function useNotificationSetup() {
     if (/android/i.test(userAgent)) {
       setOsType("android");
     } else if (/iphone|ipad|ipod/i.test(userAgent)) {
-      if ("Notification" in window) {
-        setOsType("ios");
-      } else {
-        setOsType("ios-outdated");
-      }
+      setOsType("ios");
     }
 
     // 2. PWA(홈 화면) 설치 여부 감지
