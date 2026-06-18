@@ -21,7 +21,7 @@ vi.mock("../api/immersiveFeedQuery", () => {
   };
 });
 
-const makeVote = (voteId: number): ImmersiveFeedItem => ({
+const makeVote = (voteId: number, overrides: Partial<ImmersiveFeedItem> = {}): ImmersiveFeedItem => ({
   voteId,
   title: `투표 ${voteId}`,
   content: "내용",
@@ -38,6 +38,7 @@ const makeVote = (voteId: number): ImmersiveFeedItem => ({
   myEmoji: null,
   commentCount: 0,
   currentViewerCount: 0,
+  ...overrides,
 });
 
 function createTestQueryClient() {
@@ -56,6 +57,65 @@ function createWrapper(queryClient: QueryClient) {
 describe("useImmersiveFeed", () => {
   beforeEach(() => {
     vi.clearAllMocks();
+  });
+
+  describe("피드 항목 필터링", () => {
+    it("초기 피드에서 이미 참여한 투표와 종료된 투표를 제외한다", async () => {
+      mockInitialFn.mockResolvedValue({
+        items: [
+          makeVote(1),
+          makeVote(2, { myVote: { voted: true, selectedOptionId: 20 } }),
+          makeVote(3, { status: "ENDED" }),
+        ],
+      });
+      mockFetchNext.mockResolvedValue({ items: [] });
+
+      const queryClient = createTestQueryClient();
+      const { result } = renderHook(() => useImmersiveFeed(), {
+        wrapper: createWrapper(queryClient),
+      });
+
+      await waitFor(() => expect(result.current.votes.map((vote) => vote.voteId)).toEqual([1]));
+    });
+
+    it("추가 피드에서도 이미 참여한 투표와 종료된 투표를 제외한다", async () => {
+      const initialVotes = [makeVote(1), makeVote(2), makeVote(3), makeVote(4), makeVote(5)];
+      const nextVotes = [
+        makeVote(6, { myVote: { voted: true, selectedOptionId: 60 } }),
+        makeVote(7, { status: "ENDED" }),
+        makeVote(8),
+      ];
+
+      mockInitialFn.mockResolvedValue({ items: initialVotes });
+      mockFetchNext.mockResolvedValueOnce({ items: nextVotes });
+
+      let now = 0;
+      vi.spyOn(Date, "now").mockImplementation(() => {
+        now += 1000;
+        return now;
+      });
+
+      const queryClient = createTestQueryClient();
+      const { result } = renderHook(() => useImmersiveFeed(), {
+        wrapper: createWrapper(queryClient),
+      });
+
+      await waitFor(() => expect(result.current.votes).toHaveLength(5));
+
+      for (let i = 0; i < 3; i++) {
+        act(() => {
+          result.current.handleTouchStart({ touches: [{ clientY: 200 }] } as never);
+        });
+        act(() => {
+          result.current.handleTouchEnd({ changedTouches: [{ clientY: 0 }] } as never);
+        });
+      }
+
+      await waitFor(() => expect(result.current.votes.map((vote) => vote.voteId)).toEqual([1, 2, 3, 4, 5, 8]));
+      expect(mockFetchNext.mock.calls[0]?.[0]).toEqual(expect.arrayContaining([1, 2, 3, 4, 5]));
+
+      vi.spyOn(Date, "now").mockRestore();
+    });
   });
 
   describe("handleTrackTransitionEnd — 루프 리셋", () => {

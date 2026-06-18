@@ -29,6 +29,10 @@ function isInsideScrollable(target: Element | null, boundary: Element): boolean 
   return false;
 }
 
+const isEligibleFeedVote = (vote: ImmersiveFeedItem) => vote.status === "ONGOING" && !vote.myVote.voted;
+
+const filterEligibleFeedVotes = (items: ImmersiveFeedItem[]) => items.filter(isEligibleFeedVote);
+
 export function useImmersiveFeed() {
   const queryClient = useQueryClient();
   const { data: initialData, isError } = useQuery(immersiveFeedQueryOptions());
@@ -63,8 +67,9 @@ export function useImmersiveFeed() {
 
   useEffect(() => {
     if (!initialData) return;
-    setVotes(initialData.items ?? []);
-    seenIdsRef.current = new Set((initialData.items ?? []).map((v) => v.voteId));
+    const initialItems = initialData.items ?? [];
+    setVotes(filterEligibleFeedVotes(initialItems));
+    seenIdsRef.current = new Set(initialItems.map((v) => v.voteId));
     isExhaustedRef.current = false;
   }, [initialData]);
 
@@ -87,20 +92,26 @@ export function useImmersiveFeed() {
     fetchNextImmersiveFeed(excludeIds)
       .then((result) => {
         const newItems = result.items ?? [];
+        for (const vote of newItems) seenIdsRef.current.add(vote.voteId);
+
         if (newItems.length === 0) {
           seenIdsRef.current = new Set();
           return fetchNextImmersiveFeed([]).then((retry) => {
             const retryItems = retry.items ?? [];
+            for (const vote of retryItems) seenIdsRef.current.add(vote.voteId);
+
             if (retryItems.length === 0) {
               isExhaustedRef.current = true;
               return;
             }
-            setVotes((prev) => [...prev, ...retryItems]);
-            for (const vote of retryItems) seenIdsRef.current.add(vote.voteId);
+            const eligibleRetryItems = filterEligibleFeedVotes(retryItems);
+            if (eligibleRetryItems.length === 0) return;
+            setVotes((prev) => [...prev, ...eligibleRetryItems]);
           });
         }
-        setVotes((prev) => [...prev, ...newItems]);
-        for (const vote of newItems) seenIdsRef.current.add(vote.voteId);
+        const eligibleNewItems = filterEligibleFeedVotes(newItems);
+        if (eligibleNewItems.length === 0) return;
+        setVotes((prev) => [...prev, ...eligibleNewItems]);
       })
       .catch(() => {})
       .finally(() => {
