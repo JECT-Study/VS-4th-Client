@@ -10,9 +10,9 @@ interface SignupHeaderProps {
 export function SignupHeader({ currentStep, onBack, onSkip, isSavePending }: SignupHeaderProps) {
   return (
     <header className="flex items-center justify-between py-[6px] pl-1 pr-5">
-      <div className="flex items-center gap-[2px]">
+      <div className="flex items-center gap-2">
         {currentStep === 4 ? (
-          <span aria-hidden="true" className="block p-[10px]">
+            <span aria-hidden="true" className="block p-[10px]">
             <img src="/assets/icons/arrow-left.svg" alt="" className="invisible" />
           </span>
         ) : (
@@ -21,7 +21,7 @@ export function SignupHeader({ currentStep, onBack, onSkip, isSavePending }: Sig
           </button>
         )}
 
-        <h1 className="text-title-m py-[10px]">회원가입</h1>
+        <h1 className="text-title-m text-grey-black">회원가입</h1>
       </div>
 
       {currentStep === 3 && (
