@@ -182,8 +182,8 @@ function ChatRoomContent() {
 
       <ChatMessageList messages={messages} optionA={header.optionA} optionB={header.optionB} />
 
-      {/* 👇 수정됨: 80px -> 68px (또는 60px)로 줄여서 불필요한 하단 공백 제거 */}
-      <div className="h-[calc(68px+env(safe-area-inset-bottom))] shrink-0" aria-hidden="true" />
+      {/* 입력창 높이를 고려하여 하단 여백 복구 */}
+      <div className="h-[calc(88px+env(safe-area-inset-bottom))] shrink-0" aria-hidden="true" />
       <div ref={bottomRef} />
 
       {showScrollButton && (
