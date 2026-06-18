@@ -12,7 +12,7 @@ interface ChatMessageListProps {
 export function ChatMessageList({ messages, optionA, optionB }: ChatMessageListProps) {
     if (messages.length === 0) {
         return (
-            <div className="flex flex-col items-center justify-center min-h-[calc(100dvh-280px)] px-5 text-center">
+            <div className="flex flex-col items-center justify-center flex-1 px-5 text-center">
                 <h2 className="text-title-m text-grey-black">첫 번째 메시지를 남겨보세요!</h2>
                 <p className="mt-4 whitespace-pre-line text-body-s text-grey-light">
                     가볍게 한마디 남기면{"\n"}다른 의견도 자연스럽게 볼 수 있어요
@@ -22,7 +22,7 @@ export function ChatMessageList({ messages, optionA, optionB }: ChatMessageListP
     }
 
     return (
-        <section className="flex flex-col justify-end px-5 pt-4 pb-1 space-y-5 min-h-[calc(100dvh-280px)]">
+        <section className="flex flex-col justify-end flex-1 px-5 pt-4 pb-1 space-y-5">
             {messages.map((message) => {
                 const isOptionA = message.senderVoteOption === "A";
                 const optionLabel = isOptionA ? optionA : optionB;
