@@ -23,9 +23,11 @@ declare let self: ServiceWorkerGlobalScope;
 const DEFAULT_NOTIFICATION_URL = "/home";
 const FCM_MESSAGE_DATA_KEY = "FCM_MSG";
 
+// 👇 수정: 백엔드에서 전달되는 voteId 타입을 추가했습니다.
 type NotificationClickData = {
   redirect_url?: string;
   url?: string;
+  voteId?: string;
   [FCM_MESSAGE_DATA_KEY]?: FcmMessagePayload;
 };
 
@@ -36,6 +38,14 @@ const toAppUrl = (url?: string) => {
 
 const getNotificationClickUrl = (data?: NotificationClickData) => {
   const fcmMessage = data?.[FCM_MESSAGE_DATA_KEY];
+
+  // 👇 수정: 데이터에서 voteId를 추출합니다.
+  const voteId = data?.voteId ?? fcmMessage?.data?.voteId;
+
+  // 👇 수정: voteId가 존재하면 투표 상세 페이지로 URL을 조립하여 반환합니다.
+  if (voteId) {
+    return toAppUrl(`/votes/${voteId}`);
+  }
 
   return toAppUrl(
     data?.redirect_url ??
@@ -80,12 +90,18 @@ self.addEventListener("notificationclick", (event) => {
 const showPushNotification = (payload: FcmMessagePayload | PushPayload) => {
   const notification = normalizePushNotification(payload);
 
+  // 👇 수정: 서비스 워커가 직접 알림을 띄울 때 클릭 이벤트로 voteId가 넘어가도록 데이터에 포함시킵니다.
+  const voteId = "data" in payload ? payload.data?.voteId : undefined;
+
   return self.registration.showNotification(notification.title, {
     body: notification.body,
     icon: notification.icon,
     badge: notification.badge,
     tag: notification.tag,
-    data: { redirect_url: notification.redirectUrl },
+    data: {
+      redirect_url: notification.redirectUrl,
+      voteId: voteId,
+    },
   });
 };
 
@@ -94,6 +110,9 @@ try {
   const messaging = getMessaging(firebaseApp);
 
   onBackgroundMessage(messaging, (payload) => {
+    // 👇 백엔드에서 온 푸시 데이터를 개발자 도구 콘솔에서 확인할 수 있게 남겨둡니다.
+    console.log("📬 [푸시 수신] 백엔드가 보낸 데이터:", payload);
+
     const fcmPayload = payload as FcmMessagePayload;
     if (!shouldShowBackgroundNotification(fcmPayload)) return;
 
@@ -111,10 +130,15 @@ cleanupOutdatedCaches();
 
 // ── Navigation fallback ─────────────────────────────────────
 
-const navigationRoute = new NavigationRoute(createHandlerBoundToURL("/index.html"), {
-  denylist: [/^\/api(?:\/|$)/],
-});
-registerRoute(navigationRoute);
+// 👇 수정: 로컬 개발 환경에서 /index.html 캐싱 에러로 인해 서비스 워커가 죽는 것을 방지합니다.
+try {
+  const navigationRoute = new NavigationRoute(createHandlerBoundToURL("/index.html"), {
+    denylist: [/^\/api(?:\/|$)/],
+  });
+  registerRoute(navigationRoute);
+} catch (error) {
+  console.warn("로컬 개발 환경: /index.html이 캐싱되지 않아 NavigationRoute 등록을 건너뜁니다.");
+}
 
 // ── Runtime caching ─────────────────────────────────────────
 
