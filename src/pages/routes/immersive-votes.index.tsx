@@ -1,5 +1,4 @@
 import { showToast } from "@base/ui/Toast";
-import { immersiveFeedQueryOptions } from "@features/immersive-vote/api/immersiveFeedQuery";
 import { ImmersiveVotePage } from "@features/immersive-vote/ui/ImmersiveVotePage";
 import { voteDetailQueryOptions } from "@features/votes/api/voteDetailQuery";
 import { createFileRoute, isRedirect, redirect } from "@tanstack/react-router";
@@ -21,7 +20,7 @@ export const Route = createFileRoute("/immersive-votes/")({
         if (isRedirect(e)) throw e;
       }
     }
-    return queryClient.prefetchQuery(immersiveFeedQueryOptions());
+    return null;
   },
   component: ImmersiveVotePage,
 });

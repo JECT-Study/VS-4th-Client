@@ -7,7 +7,7 @@ export interface ImmersiveFeedItem {
   title: string;
   content: string;
   imageUrl: string | null;
-  status: VoteStatus;
+  status?: VoteStatus;
   endAt: string;
   participantCount: number;
   options: VoteOption[];

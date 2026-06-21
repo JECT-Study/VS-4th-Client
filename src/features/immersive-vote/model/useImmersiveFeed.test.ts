@@ -78,6 +78,20 @@ describe("useImmersiveFeed", () => {
       await waitFor(() => expect(result.current.votes.map((vote) => vote.voteId)).toEqual([1, 2]));
     });
 
+    it("status가 없는 피드 응답 항목도 진행중 투표로 간주해 표시한다", async () => {
+      mockInitialFn.mockResolvedValue({
+        items: [makeVote(1, { status: undefined }), makeVote(2, { status: undefined })],
+      });
+      mockFetchNext.mockResolvedValue({ items: [] });
+
+      const queryClient = createTestQueryClient();
+      const { result } = renderHook(() => useImmersiveFeed(), {
+        wrapper: createWrapper(queryClient),
+      });
+
+      await waitFor(() => expect(result.current.votes.map((vote) => vote.voteId)).toEqual([1, 2]));
+    });
+
     it("추가 피드에서도 종료된 투표만 제외하고 이미 참여한 진행중 투표는 포함한다", async () => {
       const initialVotes = [makeVote(1), makeVote(2), makeVote(3), makeVote(4), makeVote(5)];
       const nextVotes = [
