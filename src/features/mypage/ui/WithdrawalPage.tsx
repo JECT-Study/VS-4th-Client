@@ -53,7 +53,6 @@ export function WithdrawalPage() {
           <ul className="bg-grey-bg rounded-[16px] p-5 flex flex-col gap-4">
             {[
               "프로필 정보 및 닉네임이 모두 삭제돼요",
-              "동일 이메일로 30일 내 재가입이 제한돼요",
               "참여하신 투표의 결과와 채팅 내용을 다시 볼 수 없어요",
               "참여하신 투표와 채팅 데이터는 커뮤니티 통계를 위해 익명으로 유지돼요",
             ].map((text) => (
