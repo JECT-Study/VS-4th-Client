@@ -29,7 +29,7 @@ function isInsideScrollable(target: Element | null, boundary: Element): boolean 
   return false;
 }
 
-const isEligibleFeedVote = (vote: ImmersiveFeedItem) => vote.status === "ONGOING" && !vote.myVote.voted;
+const isEligibleFeedVote = (vote: ImmersiveFeedItem) => vote.status === "ONGOING";
 
 const filterEligibleFeedVotes = (items: ImmersiveFeedItem[]) => items.filter(isEligibleFeedVote);
 
