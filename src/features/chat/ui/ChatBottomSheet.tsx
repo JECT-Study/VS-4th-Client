@@ -13,6 +13,9 @@ import { useMarkLatestChatAsRead } from "../model/useMarkLatestChatAsRead";
 
 const SCROLL_BUTTON_THRESHOLD_PX = 100;
 const LOAD_MORE_THRESHOLD_PX = 50;
+const UNKNOWN_USER_NICKNAME = "알 수 없음";
+const UNKNOWN_USER_DISPLAY_NAME = "(알 수 없음)";
+const DEFAULT_PROFILE_IMAGE = "/assets/icons/default-profile.svg";
 
 const THEME = {
   light: {
@@ -279,13 +282,18 @@ function MessageItem({ message, optionA, optionB, t }: MessageItemProps) {
   const isOptionA = message.senderVoteOption === "A";
   const optionLabel = isOptionA ? optionA : optionB;
   const optionTextColor = isOptionA ? "text-secondary" : "text-primary";
+  const isUnknownUser = message.senderNickname === UNKNOWN_USER_NICKNAME || !message.senderProfileIcon;
+  const displayName = message.senderNickname === UNKNOWN_USER_NICKNAME ? UNKNOWN_USER_DISPLAY_NAME : message.senderNickname;
+  const profileImage = isUnknownUser
+    ? DEFAULT_PROFILE_IMAGE
+    : PROFILE_COLOR[message.senderProfileIcon as keyof typeof PROFILE_COLOR];
 
   if (message.isMine) {
     return (
       <div className="flex justify-end">
         <div className="max-w-[75%]">
           <div className="flex justify-end gap-1 mb-2">
-            <span className={clsx("text-label-m", t.senderNickname)}>{message.senderNickname}</span>
+            <span className={clsx("text-label-m", t.senderNickname)}>{displayName}</span>
             {message.senderVoteOption && (
               <span className={clsx("text-label-l max-w-[116px] truncate", optionTextColor)}>{optionLabel}</span>
             )}
@@ -306,15 +314,11 @@ function MessageItem({ message, optionA, optionB, t }: MessageItemProps) {
   return (
     <div className="flex gap-2">
       <div className="flex h-10 w-10 shrink-0">
-        <img
-          src={PROFILE_COLOR[message.senderProfileIcon as keyof typeof PROFILE_COLOR]}
-          alt=""
-          className="object-cover w-full h-full rounded-full"
-        />
+        <img src={profileImage} alt="" className="object-cover w-full h-full rounded-full bg-gray-200" />
       </div>
       <div className="max-w-[75%]">
         <div className="flex gap-1 mb-2">
-          <span className={clsx("text-label-m", t.senderNickname)}>{message.senderNickname}</span>
+          <span className={clsx("text-label-m", t.senderNickname)}>{displayName}</span>
           {message.senderVoteOption && (
             <span className={clsx("text-label-l max-w-[116px] truncate", optionTextColor)}>{optionLabel}</span>
           )}
