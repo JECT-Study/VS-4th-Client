@@ -161,7 +161,7 @@ function ChatContent({ voteId, t }: ChatContentProps) {
 
       <div className="relative flex-1 min-h-0">
         <div ref={scrollContainerRef} onScroll={handleScroll} className="h-full overflow-y-auto overscroll-contain">
-          <div className="flex flex-col justify-end min-h-full">
+          <div className={clsx("flex min-h-full flex-col", messagesCount > 0 ? "justify-end" : "justify-center")}>
             {renderMessageArea(isLoaded, allMessages, optionA, optionB, t, isFetchingNextPage)}
             <div ref={bottomRef} />
           </div>
