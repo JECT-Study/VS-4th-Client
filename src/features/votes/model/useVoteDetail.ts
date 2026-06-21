@@ -1,5 +1,6 @@
 import { showToast } from "@base/ui/Toast";
 import { userQueryOptions } from "@features/auth/api/userQuery";
+import { useNotificationPrompt } from "@features/notification/model/useNotificationPrompt";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { isAxiosError } from "axios";
 import { useState } from "react";
@@ -54,6 +55,7 @@ export function useVoteDetail(voteId: string) {
   });
 
   const [isFreeVoteLimitModalOpen, setIsFreeVoteLimitModalOpen] = useState(false);
+  const { isOpen: isPushPromptOpen, checkAndShow: checkAndShowPushPrompt, handleDismiss: handlePushPromptDismiss } = useNotificationPrompt();
 
   const isInitialLoading = isVoteDetailLoading || isUserLoading || (isEnded && isVoteResultLoading);
 
@@ -87,6 +89,7 @@ export function useVoteDetail(voteId: string) {
         );
       }
       queryClient.invalidateQueries({ queryKey: ["me", "participated-votes"] });
+      if (user) checkAndShowPushPrompt();
     },
     onError: (_err, _optionId, context) => {
       if (context?.previous) queryClient.setQueryData(queryKey, context.previous);
@@ -244,5 +247,7 @@ export function useVoteDetail(voteId: string) {
     participateMutation,
     isFreeVoteLimitModalOpen,
     setIsFreeVoteLimitModalOpen,
+    isPushPromptOpen,
+    handlePushPromptDismiss,
   };
 }

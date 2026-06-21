@@ -14,6 +14,7 @@ export function useImmersiveVote(
   vote: ImmersiveFeedItem,
   updateVote: (voteId: number, updater: (vote: ImmersiveFeedItem) => ImmersiveFeedItem) => void,
   onFreeVoteLimitExceeded: () => void,
+  onVoteSuccess?: () => void,
 ) {
   const [floatingEmojis, setFloatingEmojis] = useState<FloatingEmoji[]>([]);
   const { data: user } = useQuery(userQueryOptions());
@@ -86,6 +87,7 @@ export function useImmersiveVote(
         );
       }
       queryClient.invalidateQueries({ queryKey: ["me", "participated-votes"] });
+      if (!isGuest && response.action === "VOTED") onVoteSuccess?.();
     },
     onError: (err, _optionId, snapshot) => {
       if (snapshot) {

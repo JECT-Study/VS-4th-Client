@@ -1,8 +1,10 @@
 import { showToast } from "@base/ui/Toast";
 import { userQueryOptions } from "@features/auth/api/userQuery";
 import { ChatBottomSheet } from "@features/chat/ui/ChatBottomSheet";
+import { useNotificationPrompt } from "@features/notification/model/useNotificationPrompt";
 import ChatAuthRequiredModal from "@features/votes/ui/ChatAuthRequiredModal";
 import FreeVoteLimitModal from "@features/votes/ui/FreeVoteLimitModal";
+import PushNotificationPromptModal from "@features/votes/ui/PushNotificationPromptModal";
 import { useQuery } from "@tanstack/react-query";
 import { useCallback, useRef, useState } from "react";
 import type { FloatingEmojiOrigin, ImmersiveFeedItem } from "../model/types";
@@ -27,11 +29,13 @@ export function ImmersiveVoteCard({ vote, updateVote }: ImmersiveVoteCardProps) 
   const [isChatAuthOpen, setIsChatAuthOpen] = useState(false);
   const [isChatOpen, setIsChatOpen] = useState(false);
   const [isFreeVoteLimitModalOpen, setIsFreeVoteLimitModalOpen] = useState(false);
+  const { isOpen: isPushPromptOpen, checkAndShow: checkAndShowPushPrompt, handleDismiss: handlePushPromptDismiss } = useNotificationPrompt();
 
   const { emojiList, floatingEmojis, handleOptionClick, handleEmojiClick, removeFloatingEmoji } = useImmersiveVote(
     vote,
     updateVote,
     () => setIsFreeVoteLimitModalOpen(true),
+    checkAndShowPushPrompt,
   );
   useImmersiveVoteLive(vote, updateVote);
 
@@ -137,6 +141,7 @@ export function ImmersiveVoteCard({ vote, updateVote }: ImmersiveVoteCardProps) 
       <ImmersiveShareModal isOpen={isShareOpen} voteId={vote.voteId} onClose={() => setIsShareOpen(false)} />
       <ChatAuthRequiredModal isOpen={isChatAuthOpen} onClose={() => setIsChatAuthOpen(false)} />
       <FreeVoteLimitModal isOpen={isFreeVoteLimitModalOpen} onClose={() => setIsFreeVoteLimitModalOpen(false)} />
+      <PushNotificationPromptModal isOpen={isPushPromptOpen} onClose={handlePushPromptDismiss} />
       <ChatBottomSheet isOpen={isChatOpen} onClose={() => setIsChatOpen(false)} voteId={vote.voteId} isDark />
     </article>
   );

@@ -1,6 +1,7 @@
 import { Spinner } from "@base/ui/Spinner";
 import { useVoteDetail } from "../model/useVoteDetail";
 import FreeVoteLimitModal from "./FreeVoteLimitModal";
+import PushNotificationPromptModal from "./PushNotificationPromptModal";
 import { VoteContent } from "./VoteContent";
 import VoteFooter from "./VoteFooter";
 import { VoteHeader } from "./VoteHeader";
@@ -25,6 +26,8 @@ export function VoteDetailPage({ voteId }: { voteId: string }) {
     participateMutation,
     isFreeVoteLimitModalOpen,
     setIsFreeVoteLimitModalOpen,
+    isPushPromptOpen,
+    handlePushPromptDismiss,
   } = useVoteDetail(voteId);
 
   if (isInitialLoading) {
@@ -88,6 +91,7 @@ export function VoteDetailPage({ voteId }: { voteId: string }) {
       {hasFooter && <VoteFooter voteId={voteId} />}
 
       <FreeVoteLimitModal isOpen={isFreeVoteLimitModalOpen} onClose={() => setIsFreeVoteLimitModalOpen(false)} />
+      <PushNotificationPromptModal isOpen={isPushPromptOpen} onClose={handlePushPromptDismiss} />
     </div>
   );
 }
