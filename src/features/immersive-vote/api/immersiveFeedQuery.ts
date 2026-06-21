@@ -16,6 +16,7 @@ export const immersiveFeedQueryOptions = () =>
         .post<ImmersiveFeedResponse>("/api/immersive-votes/next", { excludeIds: [], size: 10 })
         .then((r) => r.data),
     staleTime: 1000 * 60 * 2,
+    refetchOnMount: "always",
   });
 
 export const fetchNextImmersiveFeed = (excludeIds: number[]): Promise<ImmersiveFeedResponse> =>
