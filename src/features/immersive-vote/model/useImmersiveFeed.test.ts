@@ -60,7 +60,7 @@ describe("useImmersiveFeed", () => {
   });
 
   describe("피드 항목 필터링", () => {
-    it("초기 피드에서 이미 참여한 투표와 종료된 투표를 제외한다", async () => {
+    it("초기 피드에서 종료된 투표만 제외하고 이미 참여한 진행중 투표는 포함한다", async () => {
       mockInitialFn.mockResolvedValue({
         items: [
           makeVote(1),
@@ -75,10 +75,10 @@ describe("useImmersiveFeed", () => {
         wrapper: createWrapper(queryClient),
       });
 
-      await waitFor(() => expect(result.current.votes.map((vote) => vote.voteId)).toEqual([1]));
+      await waitFor(() => expect(result.current.votes.map((vote) => vote.voteId)).toEqual([1, 2]));
     });
 
-    it("추가 피드에서도 이미 참여한 투표와 종료된 투표를 제외한다", async () => {
+    it("추가 피드에서도 종료된 투표만 제외하고 이미 참여한 진행중 투표는 포함한다", async () => {
       const initialVotes = [makeVote(1), makeVote(2), makeVote(3), makeVote(4), makeVote(5)];
       const nextVotes = [
         makeVote(6, { myVote: { voted: true, selectedOptionId: 60 } }),
@@ -111,7 +111,7 @@ describe("useImmersiveFeed", () => {
         });
       }
 
-      await waitFor(() => expect(result.current.votes.map((vote) => vote.voteId)).toEqual([1, 2, 3, 4, 5, 8]));
+      await waitFor(() => expect(result.current.votes.map((vote) => vote.voteId)).toEqual([1, 2, 3, 4, 5, 6, 8]));
       expect(mockFetchNext.mock.calls[0]?.[0]).toEqual(expect.arrayContaining([1, 2, 3, 4, 5]));
 
       vi.spyOn(Date, "now").mockRestore();
