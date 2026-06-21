@@ -24,6 +24,8 @@ export function VoteInsightSection({
   participantCount,
 }: VoteInsightSectionProps) {
   const isGuest = voteUserType === "guest";
+  const hasAiInsightContent = Boolean(aiInsight.headline || aiInsight.body);
+  const shouldShowAiInsight = !isGuest && (aiInsight.available || hasAiInsightContent);
 
   return (
     <>
@@ -76,15 +78,15 @@ export function VoteInsightSection({
                 </div>
               </div>
 
-              {aiInsight.available && (
+              {shouldShowAiInsight && (
                 <div className="px-4 py-5 rounded-lg mt-10 bg-grey-divider">
                   <div className="flex items-center gap-2">
                     <img src="/assets/icons/ai.svg" alt="" />
                     <span className="text-body-m">AI 인사이트</span>
                   </div>
 
-                  <p className="mt-5">{aiInsight.headline}</p>
-                  <p className="mt-2">{aiInsight.body}</p>
+                  {aiInsight.headline && <p className="mt-5">{aiInsight.headline}</p>}
+                  {aiInsight.body && <p className="mt-2">{aiInsight.body}</p>}
 
                   <div className="bg-grey-stroke rounded-lg p-[10px] mt-5 flex items-start gap-2">
                     <img src="/assets/icons/info.svg" alt="" />
