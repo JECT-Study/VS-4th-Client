@@ -169,7 +169,7 @@ export function UserProfileBottomSheet({
 
       <div
         ref={sheetRef}
-        className="absolute bottom-0 left-0 right-0 flex flex-col rounded-t-2xl shadow-[0_-4px_25px_rgba(0,0,0,0.15)] touch-none select-none"
+        className="absolute bottom-0 left-2 right-2 flex flex-col rounded-t-2xl shadow-[0_-4px_25px_rgba(0,0,0,0.15)] touch-none select-none"
         style={sheetStyle}
       >
         <div
@@ -228,11 +228,17 @@ function ProfileSheetContent({ theme, profile, onVoteClick }: ProfileSheetConten
           </span>
         </div>
 
-        <ul className="flex flex-col px-5 pb-5 space-y-6">
-          {votes.map((vote) => (
-            <ProfileVoteCard key={vote.voteId} theme={theme} vote={vote} onClick={onVoteClick} />
-          ))}
-        </ul>
+        {votes.length === 0 ? (
+          <div className="text-title-m text-grey-purple flex items-center justify-center py-10">
+            참여한 투표가 없습니다
+          </div>
+        ) : (
+          <ul className="flex flex-col px-5 pb-5 space-y-6">
+            {votes.map((vote) => (
+              <ProfileVoteCard key={vote.voteId} theme={theme} vote={vote} onClick={onVoteClick} />
+            ))}
+          </ul>
+        )}
       </div>
     </div>
   );
