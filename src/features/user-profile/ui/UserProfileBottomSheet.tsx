@@ -287,7 +287,7 @@ function ProfileVoteCard({ theme, vote, onClick }: ProfileVoteCardProps) {
 function CheckIcon({ color }: { color: string }): ReactNode {
   return (
     <svg width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
-      <path d="M3.5 8L7 11.5L12.5 5" stroke={color} stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round" />
+      <path d="M3.5 8L7 11.5L12.5 5" stroke={color} strokeWidth="1.4" strokeLinecap="round" strokeLinejoin="round" />
     </svg>
   );
 }
@@ -295,7 +295,7 @@ function CheckIcon({ color }: { color: string }): ReactNode {
 function ChevronRightIcon({ color }: { color: string }): ReactNode {
   return (
     <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
-      <path d="M8 20L16 12L8 4" stroke={color} stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" />
+      <path d="M8 20L16 12L8 4" stroke={color} strokeWidth="1.7" strokeLinecap="round" strokeLinejoin="round" />
     </svg>
   );
 }
