@@ -33,9 +33,9 @@ const isEligibleFeedVote = (vote: ImmersiveFeedItem) => vote.status !== "ENDED";
 
 const filterEligibleFeedVotes = (items: ImmersiveFeedItem[]) => items.filter(isEligibleFeedVote);
 
-export function useImmersiveFeed() {
+export function useImmersiveFeed(startVoteId?: number) {
   const queryClient = useQueryClient();
-  const { data: initialData, isError } = useQuery(immersiveFeedQueryOptions());
+  const { data: initialData, isError } = useQuery(immersiveFeedQueryOptions(startVoteId));
 
   const [votes, setVotes] = useState<ImmersiveFeedItem[]>([]);
   const [trackIndex, setTrackIndex] = useState(0);
