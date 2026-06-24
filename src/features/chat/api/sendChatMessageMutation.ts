@@ -49,6 +49,7 @@ export const useSendChatMessageMutation = (voteId: number) => {
         messageId: tempId,
         content,
         sentAt: new Date().toISOString(),
+        senderId: myPrevious?.senderId ?? -1,
         senderNickname: myPrevious?.senderNickname ?? "",
         senderProfileIcon: myPrevious?.senderProfileIcon ?? "",
         senderVoteOption: myPrevious?.senderVoteOption ?? "A",
