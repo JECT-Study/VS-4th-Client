@@ -7,6 +7,7 @@ export default {
         "h-l": ["26px", { lineHeight: "34px", fontWeight: "600" }],
         "h-m": ["24px", { lineHeight: "32px", fontWeight: "600" }],
         "h-s": ["22px", { lineHeight: "30px", fontWeight: "600" }],
+        "title-l": ["20px", { lineHeight: "28px", fontWeight: "600" }],
         "title-m": ["18px", { lineHeight: "24px", fontWeight: "600" }],
         "title-s": ["18px", { lineHeight: "26px", fontWeight: "500" }],
         "body-m": ["16px", { lineHeight: "24px", fontWeight: "600" }],
