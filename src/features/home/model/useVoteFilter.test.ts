@@ -33,7 +33,7 @@ describe("useVoteFilter", () => {
     const { result, unmount } = renderHook(() => useVoteFilter());
 
     act(() => {
-      result.current.toggleExcludeEnded();
+      result.current.changeExcludeEnded(false);
     });
 
     unmount();

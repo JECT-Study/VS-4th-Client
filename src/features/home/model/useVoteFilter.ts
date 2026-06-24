@@ -53,11 +53,11 @@ export function useVoteFilter() {
     });
   };
 
-  const toggleExcludeEnded = () => {
-    setFilter((prev) => {
+  const changeExcludeEnded = (excludeEnded: boolean) => {
+    setFilter(() => {
       const next = {
         sortType: DEFAULT_SORT_TYPE,
-        excludeEnded: !prev.excludeEnded,
+        excludeEnded,
       };
       saveFilter(next);
       return next;
@@ -68,6 +68,6 @@ export function useVoteFilter() {
     sortType: filter.sortType,
     setSortType,
     excludeEnded: filter.excludeEnded,
-    toggleExcludeEnded,
+    changeExcludeEnded,
   };
 }
