@@ -1,11 +1,17 @@
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useLayoutEffect, useRef, useState } from "react";
 import type { ChatSelectedOption } from "../model/chatVoteOption";
+import type { ChatReplyTarget } from "../model/types";
+import { ChatReplyPreview } from "./ChatReplyPreview";
 import { ChatSelectedOptionBadge } from "./ChatSelectedOptionBadge";
 
 interface ChatInputBarProps {
   disabled?: boolean;
   placeholder?: string;
   selectedOption?: ChatSelectedOption | null;
+  replyTarget?: ChatReplyTarget | null;
+  focusSignal?: number;
+  onCancelReply?: () => void;
+  onReplyTargetClick?: (messageId: number) => void;
   onSubmit?: (message: string) => void;
 }
 
@@ -13,6 +19,10 @@ export function ChatInputBar({
   disabled = false,
   placeholder = "메시지를 입력하세요.",
   selectedOption,
+  replyTarget,
+  focusSignal = 0,
+  onCancelReply,
+  onReplyTargetClick,
   onSubmit,
 }: ChatInputBarProps) {
   const [message, setMessage] = useState("");
@@ -25,6 +35,11 @@ export function ChatInputBar({
     el.style.height = "auto";
     el.style.height = `${el.scrollHeight}px`;
   }, [message]);
+
+  useLayoutEffect(() => {
+    if (focusSignal === 0) return;
+    textareaRef.current?.focus();
+  }, [focusSignal]);
 
   const handleSubmit = () => {
     const trimmedMessage = message.trim();
@@ -39,6 +54,11 @@ export function ChatInputBar({
 
   return (
     <div className="fixed bottom-0 z-20 flex w-full max-w-md flex-col gap-2 px-5 pt-3 pb-[calc(12px+env(safe-area-inset-bottom))] -translate-x-1/2 bg-white border-t left-1/2 border-grey-stroke">
+      <ChatReplyPreview
+        replyTarget={replyTarget ?? null}
+        onCancel={onCancelReply ?? (() => {})}
+        onClick={onReplyTargetClick}
+      />
       <ChatSelectedOptionBadge selectedOption={selectedOption ?? null} />
 
       <div className="flex items-end gap-2">

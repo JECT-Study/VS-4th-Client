@@ -198,3 +198,18 @@
 .hs-scroll::-webkit-scrollbar {
   display: none;
 }
+
+.chat-message-highlight {
+  border-radius: 16px;
+  animation: chat-message-highlight 1200ms ease-out;
+}
+
+@keyframes chat-message-highlight {
+  0%,
+  55% {
+    background-color: rgba(112, 74, 248, 0.1);
+  }
+  100% {
+    background-color: transparent;
+  }
+}

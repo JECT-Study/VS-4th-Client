@@ -18,6 +18,8 @@ export interface ChatListResponse {
   chats: ChatListItemResponse[];
 }
 
+export type SenderVoteOption = "A" | "B" | null;
+
 export interface ChatRoomHeaderResponse {
   voteId: number;
   title: string;
@@ -26,6 +28,7 @@ export interface ChatRoomHeaderResponse {
   optionA: string;
   optionB: string;
   endAt: string;
+  myVoteOption: SenderVoteOption;
 }
 
 export interface ChatGaugeResponse {
@@ -34,7 +37,24 @@ export interface ChatGaugeResponse {
   participantCount: number;
 }
 
-export type SenderVoteOption = "A" | "B" | null;
+export type ChatMessageReactionType = "THUMBS_UP" | "THUMBS_DOWN";
+
+export interface ChatMessageReactionSummary {
+  THUMBS_UP: number;
+  THUMBS_DOWN: number;
+}
+
+export interface ChatReplyTarget {
+  messageId: number;
+  senderNickname: string;
+  content: string;
+}
+
+export interface ChatMessageReplyTo {
+  messageId: number;
+  senderNickname: string;
+  contentPreview: string;
+}
 
 export interface ChatMessageResponse {
   messageId: number;
@@ -45,6 +65,21 @@ export interface ChatMessageResponse {
   senderProfileIcon: string;
   senderVoteOption: SenderVoteOption;
   isMine: boolean;
+  replyTo?: ChatMessageReplyTo | null;
+  reactions?: Partial<ChatMessageReactionSummary>;
+  myReaction?: ChatMessageReactionType | null;
+}
+
+export interface ChatReactionResponse {
+  messageId: number;
+  reactions: Partial<ChatMessageReactionSummary>;
+  myReaction: ChatMessageReactionType | null;
+}
+
+export interface ChatReactionUpdatedEvent {
+  event: "REACTION_UPDATED";
+  messageId: number;
+  reactions: Partial<ChatMessageReactionSummary>;
 }
 
 export interface ChatMessagesResponse {

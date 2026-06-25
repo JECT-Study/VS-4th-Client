@@ -8,13 +8,16 @@ import { ChatSelectedOptionBadge } from "./ChatSelectedOptionBadge";
 import { VoteSummaryCard } from "./VoteSummaryCard";
 
 import { useChatGaugeQuery } from "../api/chatGaugeQuery";
+import { useReactChatMessageMutation } from "../api/chatMessageReactionMutation";
 import { useInfiniteChatMessagesQuery } from "../api/chatMessagesQuery";
 import { useChatRoomHeaderQuery } from "../api/chatRoomHeaderQuery";
 import { useSendChatMessageMutation } from "../api/sendChatMessageMutation";
+import { scrollToChatMessage } from "../lib/scrollToChatMessage";
 import { sortChatMessagesAscending } from "../lib/sortChatMessages";
+import { resolveChatSelectedOption } from "../model/chatVoteOption";
+import type { ChatMessageReactionType, ChatMessageResponse, ChatReplyTarget } from "../model/types";
 import { useChatWebSocket } from "../model/useChatWebSocket";
 import { useMarkLatestChatAsRead } from "../model/useMarkLatestChatAsRead";
-import { useMyChatVoteOption } from "../model/useMyChatVoteOption";
 
 const LOAD_MORE_THRESHOLD_PX = 120;
 const SCROLL_BUTTON_THRESHOLD_PX = 180;
@@ -32,11 +35,7 @@ function ChatRoomContent() {
   const search = useSearch({ from: "/chat/$chatRoomId" });
   const voteId = Number(params.chatRoomId);
   const { data: header, isLoading: isHeaderLoading, isError: isHeaderError } = useChatRoomHeaderQuery(voteId);
-  const { selectedOption, isLoading: isMyVoteLoading } = useMyChatVoteOption(
-    voteId,
-    header?.optionA ?? "",
-    header?.optionB ?? "",
-  );
+  const selectedOption = useMemo(() => resolveChatSelectedOption(header), [header]);
 
   const {
     data: gauge,
@@ -57,6 +56,7 @@ function ChatRoomContent() {
   } = useInfiniteChatMessagesQuery(voteId);
 
   const sendMessageMutation = useSendChatMessageMutation(voteId);
+  const reactMessageMutation = useReactChatMessageMutation(voteId);
   const markAsRead = useMarkLatestChatAsRead(voteId);
 
   const messages = useMemo(() => {
@@ -80,6 +80,8 @@ function ChatRoomContent() {
   const isFetchingOlderMessagesRef = useRef(false);
   const bottomRef = useRef<HTMLDivElement>(null);
   const [showScrollButton, setShowScrollButton] = useState(false);
+  const [replyTarget, setReplyTarget] = useState<ChatReplyTarget | null>(null);
+  const [inputFocusSignal, setInputFocusSignal] = useState(0);
 
   useEffect(() => {
     const updateScrollState = () => {
@@ -155,7 +157,7 @@ function ChatRoomContent() {
 
   useChatWebSocket(voteId);
 
-  const isLoading = isHeaderLoading || isGaugeLoading || isMessagesLoading || isMyVoteLoading;
+  const isLoading = isHeaderLoading || isGaugeLoading || isMessagesLoading;
   const isError = isHeaderError || isGaugeError || isMessagesError;
 
   if (isLoading) {
@@ -178,8 +180,20 @@ function ChatRoomContent() {
   const backTab = search.tab === "ENDED" || search.tab === "ONGOING" ? search.tab : header.status;
 
   const handleSubmitMessage = (message: string) => {
-    sendMessageMutation.mutate(message);
+    sendMessageMutation.mutate({ content: message, replyTo: replyTarget });
+    setReplyTarget(null);
   };
+
+  const handleReaction = (message: ChatMessageResponse, reaction: ChatMessageReactionType) => {
+    reactMessageMutation.mutate({ message, reaction });
+  };
+
+  const handleReply = (nextReplyTarget: ChatReplyTarget) => {
+    setReplyTarget(nextReplyTarget);
+    setInputFocusSignal((current) => current + 1);
+  };
+
+  const bottomReservedHeight = (selectedOption ? 96 : 68) + (replyTarget ? 72 : 0);
 
   return (
     <main className="flex flex-col min-h-[100dvh] bg-white">
@@ -187,14 +201,17 @@ function ChatRoomContent() {
 
       <VoteSummaryCard header={header} gauge={gauge} />
 
-      <ChatMessageList messages={messages} optionA={header.optionA} optionB={header.optionB} />
+      <ChatMessageList
+        messages={messages}
+        optionA={header.optionA}
+        optionB={header.optionB}
+        onReaction={handleReaction}
+        onReply={handleReply}
+      />
 
       <div
-        className={
-          selectedOption
-            ? "h-[calc(96px+env(safe-area-inset-bottom))] shrink-0"
-            : "h-[calc(68px+env(safe-area-inset-bottom))] shrink-0"
-        }
+        className="shrink-0"
+        style={{ height: `calc(${bottomReservedHeight}px + env(safe-area-inset-bottom))` }}
         aria-hidden="true"
       />
       <div ref={bottomRef} />
@@ -203,7 +220,7 @@ function ChatRoomContent() {
         <button
           type="button"
           className="fixed z-20 flex items-center justify-center w-12 h-12 text-grey-black -translate-x-1/2 bg-white border rounded-full shadow-[0_6px_20px_rgba(19,19,19,0.12)] left-[calc(50%+144px)] border-grey-stroke"
-          style={{ bottom: `calc(${selectedOption ? 104 : 76}px + env(safe-area-inset-bottom))` }}
+          style={{ bottom: `calc(${bottomReservedHeight + 8}px + env(safe-area-inset-bottom))` }}
           onClick={handleScrollToBottom}
           aria-label="최신 메시지로 이동"
         >
@@ -225,6 +242,10 @@ function ChatRoomContent() {
         <ChatInputBar
           disabled={sendMessageMutation.isPending}
           selectedOption={selectedOption}
+          replyTarget={replyTarget}
+          focusSignal={inputFocusSignal}
+          onCancelReply={() => setReplyTarget(null)}
+          onReplyTargetClick={scrollToChatMessage}
           onSubmit={handleSubmitMessage}
         />
       )}
