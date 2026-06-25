@@ -1,16 +1,28 @@
 import { apiClient } from "@base/api/client";
-import type { VoteDetail } from "@features/votes/model/types";
 import type { InfiniteData } from "@tanstack/react-query";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
-import { resolveMyChatVoteOption } from "../model/chatVoteOption";
 import { addPending, consumePending } from "../model/pendingOutgoingMessages";
-import type { ChatMessageResponse, ChatMessagesResponse } from "../model/types";
+import type {
+  ChatMessageResponse,
+  ChatMessagesResponse,
+  ChatReplyTarget,
+  ChatRoomHeaderResponse,
+} from "../model/types";
 import { markLatestChatAsRead } from "../model/useMarkLatestChatAsRead";
 import { chatInfiniteMessagesQueryKey, chatMessagesQueryKey } from "./chatMessagesQuery";
+import { chatRoomHeaderQueryKey } from "./chatRoomHeaderQuery";
+
+export interface SendChatMessageVariables {
+  content: string;
+  replyTo?: ChatReplyTarget | null;
+}
 
 // 1. API 호출 함수 (전송)
-export const sendChatMessageMutation = async (voteId: number, content: string) => {
-  const { data } = await apiClient.post<ChatMessageResponse>(`/api/chats/${voteId}/messages`, { content });
+export const sendChatMessageMutation = async (voteId: number, { content, replyTo }: SendChatMessageVariables) => {
+  const { data } = await apiClient.post<ChatMessageResponse>(`/api/chats/${voteId}/messages`, {
+    content,
+    replyToMessageId: replyTo?.messageId,
+  });
   return data;
 };
 
@@ -24,9 +36,9 @@ export const useSendChatMessageMutation = (voteId: number) => {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: (content: string) => sendChatMessageMutation(voteId, content),
+    mutationFn: (variables: SendChatMessageVariables) => sendChatMessageMutation(voteId, variables),
 
-    onMutate: async (content) => {
+    onMutate: async ({ content, replyTo }) => {
       addPending(voteId, content);
 
       await Promise.all([
@@ -45,8 +57,7 @@ export const useSendChatMessageMutation = (voteId: number) => {
         ...(infiniteSnapshot?.pages.flatMap((p) => p.messages) ?? []),
       ];
       const myPrevious = [...allMessages].reverse().find((m) => m.isMine);
-      const voteDetail = queryClient.getQueryData<VoteDetail>(["votes", String(voteId)]);
-      const myVoteOption = resolveMyChatVoteOption(voteDetail);
+      const header = queryClient.getQueryData<ChatRoomHeaderResponse>(chatRoomHeaderQueryKey(voteId));
 
       const tempId = -Date.now();
       const tempMessage: ChatMessageResponse = {
@@ -56,8 +67,17 @@ export const useSendChatMessageMutation = (voteId: number) => {
         senderId: myPrevious?.senderId ?? -1,
         senderNickname: myPrevious?.senderNickname ?? "",
         senderProfileIcon: myPrevious?.senderProfileIcon ?? "",
-        senderVoteOption: myVoteOption ?? myPrevious?.senderVoteOption ?? "A",
+        senderVoteOption: header?.myVoteOption ?? myPrevious?.senderVoteOption ?? null,
         isMine: true,
+        replyTo: replyTo
+          ? {
+              messageId: replyTo.messageId,
+              senderNickname: replyTo.senderNickname,
+              contentPreview: replyTo.content,
+            }
+          : null,
+        reactions: {},
+        myReaction: null,
       };
 
       queryClient.setQueryData<ChatMessagesResponse>(chatMessagesQueryKey(voteId), (oldData) => {
@@ -81,7 +101,7 @@ export const useSendChatMessageMutation = (voteId: number) => {
       return { tempId };
     },
 
-    onSuccess: async (data, _content, context) => {
+    onSuccess: async (data, _variables, context) => {
       // 임시 메시지를 서버에서 받은 실제 메시지(isMine: true)로 교체합니다.
       queryClient.setQueryData<ChatMessagesResponse>(chatMessagesQueryKey(voteId), (oldData) => {
         if (!oldData) return oldData;
@@ -138,7 +158,7 @@ export const useSendChatMessageMutation = (voteId: number) => {
       queryClient.invalidateQueries({ queryKey: ["chats"] });
     },
 
-    onError: (_error, _content, context) => {
+    onError: (_error, _variables, context) => {
       // 전송 실패 시 낙관적 메시지를 롤백합니다.
       queryClient.setQueryData<ChatMessagesResponse>(chatMessagesQueryKey(voteId), (oldData) => {
         if (!oldData || !context?.tempId) return oldData;
@@ -160,9 +180,9 @@ export const useSendChatMessageMutation = (voteId: number) => {
       );
     },
 
-    onSettled: (_data, _error, content) => {
+    onSettled: (_data, _error, variables) => {
       // WebSocket이 아직 소비하지 않은 pending 항목을 정리합니다.
-      consumePending(voteId, content);
+      consumePending(voteId, variables.content);
     },
   });
 };

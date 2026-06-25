@@ -3,9 +3,19 @@ import type { InfiniteData } from "@tanstack/react-query";
 import { useQueryClient } from "@tanstack/react-query";
 import { useEffect } from "react";
 import { chatInfiniteMessagesQueryKey, chatMessagesQueryKey } from "../api/chatMessagesQuery";
-import type { ChatMessageResponse, ChatMessagesResponse } from "../model/types";
+import { applyChatReactionCountsToCache } from "./chatMessageCache";
 import { consumePending } from "./pendingOutgoingMessages";
+import type { ChatMessageResponse, ChatMessagesResponse, ChatReactionUpdatedEvent } from "./types";
 import { useMarkLatestChatAsRead } from "./useMarkLatestChatAsRead";
+
+function isReactionUpdatedEvent(payload: unknown): payload is ChatReactionUpdatedEvent {
+  return (
+    typeof payload === "object" &&
+    payload !== null &&
+    "event" in payload &&
+    (payload as { event?: unknown }).event === "REACTION_UPDATED"
+  );
+}
 
 export function useChatWebSocket(voteId: number) {
   const queryClient = useQueryClient();
@@ -20,7 +30,14 @@ export function useChatWebSocket(voteId: number) {
       // [구독 1] 새 메시지 수신
       client.subscribe(`/topic/chat/${voteId}`, (message) => {
         try {
-          const newMessage: ChatMessageResponse = JSON.parse(message.body);
+          const payload: ChatMessageResponse | ChatReactionUpdatedEvent = JSON.parse(message.body);
+
+          if (isReactionUpdatedEvent(payload)) {
+            applyChatReactionCountsToCache(queryClient, voteId, payload.messageId, payload.reactions);
+            return;
+          }
+
+          const newMessage = payload;
 
           // VoteDetail 캐시의 commentCount를 +1 (자신이 보낸 메시지 포함)
           queryClient.setQueryData(["votes", String(voteId)], (old: { commentCount: number } | undefined) =>

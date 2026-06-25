@@ -53,6 +53,7 @@ export const mockChatRoomHeader: ChatRoomHeaderResponse = {
   optionA: "오른다",
   optionB: "떨어진다",
   endAt: "2026-05-21T23:59:59Z",
+  myVoteOption: "A",
 };
 
 // 4. 채팅방 상세 - 게이지 바 정보 (ChatGaugeResponse 규격 적용)
