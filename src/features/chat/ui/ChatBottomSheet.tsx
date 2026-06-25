@@ -12,6 +12,8 @@ import { formatTimeLabel } from "../lib/formatChatTime";
 import type { ChatMessageResponse } from "../model/types";
 import { useChatWebSocket } from "../model/useChatWebSocket";
 import { useMarkLatestChatAsRead } from "../model/useMarkLatestChatAsRead";
+import { useMyChatVoteOption } from "../model/useMyChatVoteOption";
+import { ChatSelectedOptionBadge } from "./ChatSelectedOptionBadge";
 
 const SCROLL_BUTTON_THRESHOLD_PX = 100;
 const LOAD_MORE_THRESHOLD_PX = 50;
@@ -167,6 +169,7 @@ function ChatContent({ voteId, t, isDark, onClose }: ChatContentProps) {
   const isEnded = header?.status === "ENDED";
   const optionA = header?.optionA ?? "";
   const optionB = header?.optionB ?? "";
+  const { selectedOption } = useMyChatVoteOption(voteId, optionA, optionB);
 
   return (
     <div className="flex flex-col h-full">
@@ -211,11 +214,15 @@ function ChatContent({ voteId, t, isDark, onClose }: ChatContentProps) {
 
       <div className={`shrink-0 ${t.inputContainer}`}>
         {isEnded ? (
-          <p className="py-4 text-center text-label-m text-grey-dark">투표가 종료되어 채팅이 마감되었어요.</p>
+          <>
+            <ChatSelectedOptionBadge selectedOption={selectedOption} className="px-5 pt-3" />
+            <p className="py-4 text-center text-label-m text-grey-dark">투표가 종료되어 채팅이 마감되었어요.</p>
+          </>
         ) : (
           <MessageInput
             t={t}
             disabled={sendMessageMutation.isPending}
+            selectedOption={selectedOption}
             onSubmit={(message) => sendMessageMutation.mutate(message)}
           />
         )}
@@ -403,10 +410,11 @@ function MessageItem({ message, optionA, optionB, t, onProfileClick }: MessageIt
 interface MessageInputProps {
   t: Theme;
   disabled: boolean;
+  selectedOption: ReturnType<typeof useMyChatVoteOption>["selectedOption"];
   onSubmit: (message: string) => void;
 }
 
-function MessageInput({ t, disabled, onSubmit }: MessageInputProps) {
+function MessageInput({ t, disabled, selectedOption, onSubmit }: MessageInputProps) {
   const [message, setMessage] = useState("");
   const textareaRef = useRef<HTMLTextAreaElement>(null);
 
@@ -426,34 +434,35 @@ function MessageInput({ t, disabled, onSubmit }: MessageInputProps) {
   };
 
   return (
-    <div
-      className="flex items-end gap-2 px-5 pt-2"
-      style={{ paddingBottom: "calc(env(safe-area-inset-bottom, 0px) + 8px)" }}
-    >
-      <textarea
-        ref={textareaRef}
-        rows={1}
-        value={message}
-        disabled={disabled}
-        placeholder={t.placeholder}
-        onChange={(e) => setMessage(e.target.value)}
-        onKeyDown={(e) => {
-          if (e.key === "Enter" && !e.shiftKey && !e.nativeEvent.isComposing) {
-            e.preventDefault();
-            handleSubmit();
-          }
-        }}
-        className={`flex-1 min-w-0 px-4 py-2 rounded-2xl outline-none text-body-s resize-none overflow-y-auto max-h-28 disabled:text-grey-disabled ${t.input}`}
-      />
-      <button
-        type="button"
-        disabled={disabled || message.trim().length === 0}
-        onClick={handleSubmit}
-        className="flex items-center justify-center text-white rounded-full h-10 w-10 shrink-0 bg-primary disabled:bg-grey-disabled transition-colors"
-        aria-label="메시지 전송"
-      >
-        <img src="/assets/icons/send.svg" alt="" />
-      </button>
+    <div className="px-5 pt-2" style={{ paddingBottom: "calc(env(safe-area-inset-bottom, 0px) + 8px)" }}>
+      <ChatSelectedOptionBadge selectedOption={selectedOption} className="mb-2" />
+
+      <div className="flex items-end gap-2">
+        <textarea
+          ref={textareaRef}
+          rows={1}
+          value={message}
+          disabled={disabled}
+          placeholder={t.placeholder}
+          onChange={(e) => setMessage(e.target.value)}
+          onKeyDown={(e) => {
+            if (e.key === "Enter" && !e.shiftKey && !e.nativeEvent.isComposing) {
+              e.preventDefault();
+              handleSubmit();
+            }
+          }}
+          className={`flex-1 min-w-0 px-4 py-2 rounded-2xl outline-none text-body-s resize-none overflow-y-auto max-h-28 disabled:text-grey-disabled ${t.input}`}
+        />
+        <button
+          type="button"
+          disabled={disabled || message.trim().length === 0}
+          onClick={handleSubmit}
+          className="flex items-center justify-center text-white rounded-full h-10 w-10 shrink-0 bg-primary disabled:bg-grey-disabled transition-colors"
+          aria-label="메시지 전송"
+        >
+          <img src="/assets/icons/send.svg" alt="" />
+        </button>
+      </div>
     </div>
   );
 }

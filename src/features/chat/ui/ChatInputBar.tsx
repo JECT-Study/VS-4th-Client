@@ -1,12 +1,20 @@
 import { useEffect, useRef, useState } from "react";
+import type { ChatSelectedOption } from "../model/chatVoteOption";
+import { ChatSelectedOptionBadge } from "./ChatSelectedOptionBadge";
 
 interface ChatInputBarProps {
   disabled?: boolean;
   placeholder?: string;
+  selectedOption?: ChatSelectedOption | null;
   onSubmit?: (message: string) => void;
 }
 
-export function ChatInputBar({ disabled = false, placeholder = "메시지를 입력하세요.", onSubmit }: ChatInputBarProps) {
+export function ChatInputBar({
+  disabled = false,
+  placeholder = "메시지를 입력하세요.",
+  selectedOption,
+  onSubmit,
+}: ChatInputBarProps) {
   const [message, setMessage] = useState("");
   const textareaRef = useRef<HTMLTextAreaElement>(null);
 
@@ -30,33 +38,36 @@ export function ChatInputBar({ disabled = false, placeholder = "메시지를 입
   };
 
   return (
-    // 👇 핵심 수정: py-3 제거 -> pt-3 및 pb-[calc(12px+env(safe-area-inset-bottom))] 적용
-    <div className="fixed bottom-0 z-20 flex items-end w-full max-w-md gap-2 px-5 pt-3 pb-[calc(12px+env(safe-area-inset-bottom))] -translate-x-1/2 bg-white border-t left-1/2 border-grey-stroke">
-      <textarea
-        ref={textareaRef}
-        rows={1}
-        value={message}
-        disabled={disabled}
-        placeholder={placeholder}
-        onChange={(event) => setMessage(event.target.value)}
-        onKeyDown={(event) => {
-          if (event.key === "Enter" && !event.shiftKey && !event.nativeEvent.isComposing) {
-            event.preventDefault();
-            handleSubmit();
-          }
-        }}
-        className="flex-1 min-w-0 px-4 py-2.5 rounded-2xl outline-none bg-grey-chat text-label-m text-grey-black placeholder:text-grey-disabled disabled:text-grey-disabled resize-none overflow-y-auto max-h-28"
-      />
+    <div className="fixed bottom-0 z-20 flex w-full max-w-md flex-col gap-2 px-5 pt-3 pb-[calc(12px+env(safe-area-inset-bottom))] -translate-x-1/2 bg-white border-t left-1/2 border-grey-stroke">
+      <ChatSelectedOptionBadge selectedOption={selectedOption ?? null} />
 
-      <button
-        type="button"
-        disabled={disabled || message.trim().length === 0}
-        onClick={handleSubmit}
-        className="flex items-center justify-center text-white rounded-full h-11 w-11 shrink-0 bg-primary disabled:bg-grey-disabled"
-        aria-label="메시지 전송"
-      >
-        <img src="/assets/icons/send.svg" alt="" className="w-5 h-5" />
-      </button>
+      <div className="flex items-end gap-2">
+        <textarea
+          ref={textareaRef}
+          rows={1}
+          value={message}
+          disabled={disabled}
+          placeholder={placeholder}
+          onChange={(event) => setMessage(event.target.value)}
+          onKeyDown={(event) => {
+            if (event.key === "Enter" && !event.shiftKey && !event.nativeEvent.isComposing) {
+              event.preventDefault();
+              handleSubmit();
+            }
+          }}
+          className="flex-1 min-w-0 px-4 py-2.5 rounded-2xl outline-none bg-grey-chat text-label-m text-grey-black placeholder:text-grey-disabled disabled:text-grey-disabled resize-none overflow-y-auto max-h-28"
+        />
+
+        <button
+          type="button"
+          disabled={disabled || message.trim().length === 0}
+          onClick={handleSubmit}
+          className="flex items-center justify-center text-white rounded-full h-11 w-11 shrink-0 bg-primary disabled:bg-grey-disabled"
+          aria-label="메시지 전송"
+        >
+          <img src="/assets/icons/send.svg" alt="" className="w-5 h-5" />
+        </button>
+      </div>
     </div>
   );
 }

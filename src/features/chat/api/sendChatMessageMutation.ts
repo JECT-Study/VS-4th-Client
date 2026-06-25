@@ -1,6 +1,8 @@
 import { apiClient } from "@base/api/client";
+import type { VoteDetail } from "@features/votes/model/types";
 import type { InfiniteData } from "@tanstack/react-query";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { resolveMyChatVoteOption } from "../model/chatVoteOption";
 import { addPending, consumePending } from "../model/pendingOutgoingMessages";
 import type { ChatMessageResponse, ChatMessagesResponse } from "../model/types";
 import { markLatestChatAsRead } from "../model/useMarkLatestChatAsRead";
@@ -43,6 +45,8 @@ export const useSendChatMessageMutation = (voteId: number) => {
         ...(infiniteSnapshot?.pages.flatMap((p) => p.messages) ?? []),
       ];
       const myPrevious = [...allMessages].reverse().find((m) => m.isMine);
+      const voteDetail = queryClient.getQueryData<VoteDetail>(["votes", String(voteId)]);
+      const myVoteOption = resolveMyChatVoteOption(voteDetail);
 
       const tempId = -Date.now();
       const tempMessage: ChatMessageResponse = {
@@ -52,7 +56,7 @@ export const useSendChatMessageMutation = (voteId: number) => {
         senderId: myPrevious?.senderId ?? -1,
         senderNickname: myPrevious?.senderNickname ?? "",
         senderProfileIcon: myPrevious?.senderProfileIcon ?? "",
-        senderVoteOption: myPrevious?.senderVoteOption ?? "A",
+        senderVoteOption: myVoteOption ?? myPrevious?.senderVoteOption ?? "A",
         isMine: true,
       };
 

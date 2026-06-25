@@ -4,6 +4,7 @@ import { ChatAccessGate } from "./ChatAccessRequiredPage";
 import { ChatInputBar } from "./ChatInputBar";
 import { ChatMessageList } from "./ChatMessageList";
 import { ChatRoomHeader } from "./ChatRoomHeader";
+import { ChatSelectedOptionBadge } from "./ChatSelectedOptionBadge";
 import { VoteSummaryCard } from "./VoteSummaryCard";
 
 import { useChatGaugeQuery } from "../api/chatGaugeQuery";
@@ -13,6 +14,7 @@ import { useSendChatMessageMutation } from "../api/sendChatMessageMutation";
 import { sortChatMessagesAscending } from "../lib/sortChatMessages";
 import { useChatWebSocket } from "../model/useChatWebSocket";
 import { useMarkLatestChatAsRead } from "../model/useMarkLatestChatAsRead";
+import { useMyChatVoteOption } from "../model/useMyChatVoteOption";
 
 const LOAD_MORE_THRESHOLD_PX = 120;
 const SCROLL_BUTTON_THRESHOLD_PX = 180;
@@ -30,6 +32,11 @@ function ChatRoomContent() {
   const search = useSearch({ from: "/chat/$chatRoomId" });
   const voteId = Number(params.chatRoomId);
   const { data: header, isLoading: isHeaderLoading, isError: isHeaderError } = useChatRoomHeaderQuery(voteId);
+  const { selectedOption, isLoading: isMyVoteLoading } = useMyChatVoteOption(
+    voteId,
+    header?.optionA ?? "",
+    header?.optionB ?? "",
+  );
 
   const {
     data: gauge,
@@ -148,7 +155,7 @@ function ChatRoomContent() {
 
   useChatWebSocket(voteId);
 
-  const isLoading = isHeaderLoading || isGaugeLoading || isMessagesLoading;
+  const isLoading = isHeaderLoading || isGaugeLoading || isMessagesLoading || isMyVoteLoading;
   const isError = isHeaderError || isGaugeError || isMessagesError;
 
   if (isLoading) {
@@ -182,14 +189,21 @@ function ChatRoomContent() {
 
       <ChatMessageList messages={messages} optionA={header.optionA} optionB={header.optionB} />
 
-      {/* 👇 하단 여백을 원래대로 돌려서 불필요한 공백 제거 */}
-      <div className="h-[calc(68px+env(safe-area-inset-bottom))] shrink-0" aria-hidden="true" />
+      <div
+        className={
+          selectedOption
+            ? "h-[calc(96px+env(safe-area-inset-bottom))] shrink-0"
+            : "h-[calc(68px+env(safe-area-inset-bottom))] shrink-0"
+        }
+        aria-hidden="true"
+      />
       <div ref={bottomRef} />
 
       {showScrollButton && (
         <button
           type="button"
-          className="fixed z-20 flex items-center justify-center w-12 h-12 text-grey-black -translate-x-1/2 bg-white border rounded-full shadow-[0_6px_20px_rgba(19,19,19,0.12)] bottom-[calc(76px+env(safe-area-inset-bottom))] left-[calc(50%+144px)] border-grey-stroke"
+          className="fixed z-20 flex items-center justify-center w-12 h-12 text-grey-black -translate-x-1/2 bg-white border rounded-full shadow-[0_6px_20px_rgba(19,19,19,0.12)] left-[calc(50%+144px)] border-grey-stroke"
+          style={{ bottom: `calc(${selectedOption ? 104 : 76}px + env(safe-area-inset-bottom))` }}
           onClick={handleScrollToBottom}
           aria-label="최신 메시지로 이동"
         >
@@ -199,15 +213,20 @@ function ChatRoomContent() {
 
       {isEnded ? (
         <div
-          className="fixed w-full text-center bottom-0 text-label-m text-grey-dark bg-white pt-[18px] max-w-md"
+          className="fixed bottom-0 left-1/2 w-full max-w-md -translate-x-1/2 bg-white border-t border-grey-stroke"
           style={{
             paddingBottom: "calc(env(safe-area-inset-bottom, 0px) + 18px)",
           }}
         >
-          투표가 종료되어 채팅이 마감되었어요.
+          <ChatSelectedOptionBadge selectedOption={selectedOption} className="px-5 pt-3" />
+          <p className="pt-3 text-center text-label-m text-grey-dark">투표가 종료되어 채팅이 마감되었어요.</p>
         </div>
       ) : (
-        <ChatInputBar disabled={sendMessageMutation.isPending} onSubmit={handleSubmitMessage} />
+        <ChatInputBar
+          disabled={sendMessageMutation.isPending}
+          selectedOption={selectedOption}
+          onSubmit={handleSubmitMessage}
+        />
       )}
     </main>
   );
