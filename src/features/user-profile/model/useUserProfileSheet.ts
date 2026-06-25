@@ -71,7 +71,13 @@ export function useUserProfileSheet({ originSurface, onLanding }: UseUserProfile
 
       // 진행중 + 몰입형 → 몰입형 투표, 그 외(진행중 일반형 / 종료) → 일반형 투표 상세(결과 포함)
       if (isOngoing && originSurface === "immersive") {
-        navigate({ to: "/immersive-votes", search: { startVoteId: vote.voteId } });
+        // startVoteSeq로 매 선택을 구분 → 같은 투표를 다시 눌러도 해당 투표로 이동한다.
+        // replace로 재선택 토큰이 히스토리에 쌓이지 않게 한다(주소·뒤로가기 정리).
+        navigate({
+          to: "/immersive-votes",
+          search: { startVoteId: vote.voteId, startVoteSeq: Date.now() },
+          replace: true,
+        });
         return;
       }
       navigate({ to: "/votes/$voteId", params: { voteId: String(vote.voteId) } });

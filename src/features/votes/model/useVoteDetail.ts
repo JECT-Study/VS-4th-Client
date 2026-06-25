@@ -55,7 +55,11 @@ export function useVoteDetail(voteId: string) {
   });
 
   const [isFreeVoteLimitModalOpen, setIsFreeVoteLimitModalOpen] = useState(false);
-  const { isOpen: isPushPromptOpen, checkAndShow: checkAndShowPushPrompt, handleDismiss: handlePushPromptDismiss } = useNotificationPrompt();
+  const {
+    isOpen: isPushPromptOpen,
+    checkAndShow: checkAndShowPushPrompt,
+    handleDismiss: handlePushPromptDismiss,
+  } = useNotificationPrompt();
 
   const isInitialLoading = isVoteDetailLoading || isUserLoading || (isEnded && isVoteResultLoading);
 

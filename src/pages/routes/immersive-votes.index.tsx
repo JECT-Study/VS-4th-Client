@@ -4,8 +4,10 @@ import { voteDetailQueryOptions } from "@features/votes/api/voteDetailQuery";
 import { createFileRoute, isRedirect, redirect } from "@tanstack/react-router";
 
 export const Route = createFileRoute("/immersive-votes/")({
-  validateSearch: (search) => ({
+  validateSearch: (search): { startVoteId?: number; startVoteSeq?: number } => ({
     startVoteId: search.startVoteId != null ? Number(search.startVoteId) : undefined,
+    // 같은 startVoteId를 다시 선택해도 내비게이션이 변화로 인식되게 하는 재선택 토큰
+    startVoteSeq: search.startVoteSeq != null ? Number(search.startVoteSeq) : undefined,
   }),
   loaderDeps: ({ search: { startVoteId } }) => ({ startVoteId }),
   loader: async ({ context: { queryClient }, deps: { startVoteId } }) => {

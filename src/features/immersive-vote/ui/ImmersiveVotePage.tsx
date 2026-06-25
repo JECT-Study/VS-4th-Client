@@ -4,7 +4,7 @@ import { ImmersiveVoteCard } from "./ImmersiveVoteCard";
 import { ImmersiveVoteErrorPage } from "./ImmersiveVoteErrorPage";
 
 export function ImmersiveVotePage() {
-  const { startVoteId } = useSearch({ from: "/immersive-votes/" });
+  const { startVoteId, startVoteSeq } = useSearch({ from: "/immersive-votes/" });
   const {
     displayedVotes,
     currentVote,
@@ -17,7 +17,7 @@ export function ImmersiveVotePage() {
     trackStyle,
     isLoading,
     isError,
-  } = useImmersiveFeed(startVoteId);
+  } = useImmersiveFeed(startVoteId, startVoteSeq);
 
   if (isError) {
     return <ImmersiveVoteErrorPage />;
