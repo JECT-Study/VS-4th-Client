@@ -5,14 +5,21 @@ import { UserProfileBottomSheet } from "@features/user-profile/ui/UserProfileBot
 import { useQueryClient } from "@tanstack/react-query";
 import clsx from "clsx";
 import { useEffect, useLayoutEffect, useRef, useState } from "react";
+import { useReactChatMessageMutation } from "../api/chatMessageReactionMutation";
 import { chatInfiniteMessagesQueryKey, useInfiniteChatMessagesQuery } from "../api/chatMessagesQuery";
 import { useChatRoomHeaderQuery } from "../api/chatRoomHeaderQuery";
 import { useSendChatMessageMutation } from "../api/sendChatMessageMutation";
 import { formatTimeLabel } from "../lib/formatChatTime";
-import type { ChatMessageResponse } from "../model/types";
+import { scrollToChatMessage } from "../lib/scrollToChatMessage";
+import { getChatMessageReactionState } from "../model/chatMessageReaction";
+import { type ChatSelectedOption, resolveChatSelectedOption } from "../model/chatVoteOption";
+import type { ChatMessageReactionType, ChatMessageResponse, ChatReplyTarget } from "../model/types";
 import { useChatWebSocket } from "../model/useChatWebSocket";
 import { useMarkLatestChatAsRead } from "../model/useMarkLatestChatAsRead";
-import { useMyChatVoteOption } from "../model/useMyChatVoteOption";
+import { ChatMessageContextMenu } from "./ChatMessageContextMenu";
+import { ChatMessageReactionBar } from "./ChatMessageReactionBar";
+import { ChatMessageReplySnippet } from "./ChatMessageReplySnippet";
+import { ChatReplyPreview } from "./ChatReplyPreview";
 import { ChatSelectedOptionBadge } from "./ChatSelectedOptionBadge";
 
 const SCROLL_BUTTON_THRESHOLD_PX = 100;
@@ -99,6 +106,7 @@ function ChatContent({ voteId, t, isDark, onClose }: ChatContentProps) {
     queryClient.invalidateQueries({ queryKey: chatInfiniteMessagesQueryKey(voteId) });
   }, [voteId, queryClient]);
   const sendMessageMutation = useSendChatMessageMutation(voteId);
+  const reactMessageMutation = useReactChatMessageMutation(voteId);
   useChatWebSocket(voteId);
 
   const scrollContainerRef = useRef<HTMLDivElement>(null);
@@ -107,6 +115,8 @@ function ChatContent({ voteId, t, isDark, onClose }: ChatContentProps) {
   const prevCountRef = useRef(0);
   const prevScrollHeightRef = useRef(0);
   const [showScrollButton, setShowScrollButton] = useState(false);
+  const [replyTarget, setReplyTarget] = useState<ChatReplyTarget | null>(null);
+  const [inputFocusSignal, setInputFocusSignal] = useState(0);
 
   // pages[0] = 최신 페이지, pages[n] = 오래된 페이지 / 각 페이지 내 messages는 getChatMessages에서 이미 오름차순 정렬됨
   const allMessages =
@@ -165,11 +175,25 @@ function ChatContent({ voteId, t, isDark, onClose }: ChatContentProps) {
     isAtBottomRef.current = true;
   };
 
+  const handleReaction = (message: ChatMessageResponse, reaction: ChatMessageReactionType) => {
+    reactMessageMutation.mutate({ message, reaction });
+  };
+
+  const handleReply = (nextReplyTarget: ChatReplyTarget) => {
+    setReplyTarget(nextReplyTarget);
+    setInputFocusSignal((current) => current + 1);
+  };
+
+  const handleSubmitMessage = (message: string) => {
+    sendMessageMutation.mutate({ content: message, replyTo: replyTarget });
+    setReplyTarget(null);
+  };
+
   const isLoaded = !!data;
   const isEnded = header?.status === "ENDED";
   const optionA = header?.optionA ?? "";
   const optionB = header?.optionB ?? "";
-  const { selectedOption } = useMyChatVoteOption(voteId, optionA, optionB);
+  const selectedOption = resolveChatSelectedOption(header);
 
   return (
     <div className="flex flex-col h-full">
@@ -186,6 +210,8 @@ function ChatContent({ voteId, t, isDark, onClose }: ChatContentProps) {
               t,
               isFetchingNextPage,
               profileSheet.openProfile,
+              handleReaction,
+              handleReply,
             )}
             <div ref={bottomRef} />
           </div>
@@ -223,7 +249,12 @@ function ChatContent({ voteId, t, isDark, onClose }: ChatContentProps) {
             t={t}
             disabled={sendMessageMutation.isPending}
             selectedOption={selectedOption}
-            onSubmit={(message) => sendMessageMutation.mutate(message)}
+            replyTarget={replyTarget}
+            focusSignal={inputFocusSignal}
+            isDark={isDark}
+            onCancelReply={() => setReplyTarget(null)}
+            onReplyTargetClick={scrollToChatMessage}
+            onSubmit={handleSubmitMessage}
           />
         )}
       </div>
@@ -247,6 +278,8 @@ function renderMessageArea(
   t: Theme,
   isFetchingMore: boolean,
   onProfileClick: (userId: number | undefined) => void,
+  onReaction: (message: ChatMessageResponse, reaction: ChatMessageReactionType) => void,
+  onReply: (replyTarget: ChatReplyTarget) => void,
 ) {
   if (!isLoaded) {
     return (
@@ -266,6 +299,8 @@ function renderMessageArea(
       t={t}
       isFetchingMore={isFetchingMore}
       onProfileClick={onProfileClick}
+      onReaction={onReaction}
+      onReply={onReply}
     />
   );
 }
@@ -296,27 +331,86 @@ interface MessageListProps {
   t: Theme;
   isFetchingMore: boolean;
   onProfileClick: (userId: number | undefined) => void;
+  onReaction: (message: ChatMessageResponse, reaction: ChatMessageReactionType) => void;
+  onReply: (replyTarget: ChatReplyTarget) => void;
 }
 
-function MessageList({ messages, optionA, optionB, t, isFetchingMore, onProfileClick }: MessageListProps) {
+interface ContextMenuTarget {
+  message: ChatMessageResponse;
+  anchorRect: DOMRect;
+}
+
+const LONG_PRESS_MS = 500;
+
+function MessageList({
+  messages,
+  optionA,
+  optionB,
+  t,
+  isFetchingMore,
+  onProfileClick,
+  onReaction,
+  onReply,
+}: MessageListProps) {
+  const longPressTimerRef = useRef<number | null>(null);
+  const [contextMenuTarget, setContextMenuTarget] = useState<ContextMenuTarget | null>(null);
+
+  const clearLongPressTimer = () => {
+    if (longPressTimerRef.current == null) return;
+    window.clearTimeout(longPressTimerRef.current);
+    longPressTimerRef.current = null;
+  };
+
+  const startLongPress = (message: ChatMessageResponse, element: HTMLElement) => {
+    if (message.isMine) return;
+
+    clearLongPressTimer();
+    longPressTimerRef.current = window.setTimeout(() => {
+      setContextMenuTarget({ message, anchorRect: element.getBoundingClientRect() });
+      longPressTimerRef.current = null;
+    }, LONG_PRESS_MS);
+  };
+
+  const closeContextMenu = () => setContextMenuTarget(null);
+
   return (
-    <section className="px-5 py-4 space-y-4">
-      {isFetchingMore && (
-        <div className="flex justify-center py-2">
-          <p className={`text-label-s ${t.time}`}>이전 메시지 불러오는 중...</p>
-        </div>
-      )}
-      {messages.map((message) => (
-        <MessageItem
-          key={message.messageId}
-          message={message}
-          optionA={optionA}
-          optionB={optionB}
-          t={t}
-          onProfileClick={onProfileClick}
+    <>
+      <section className="px-5 py-4 space-y-4">
+        {isFetchingMore && (
+          <div className="flex justify-center py-2">
+            <p className={`text-label-s ${t.time}`}>이전 메시지 불러오는 중...</p>
+          </div>
+        )}
+        {messages.map((message) => (
+          <MessageItem
+            key={message.messageId}
+            message={message}
+            optionA={optionA}
+            optionB={optionB}
+            t={t}
+            reactionState={getChatMessageReactionState(message)}
+            onProfileClick={onProfileClick}
+            onStartLongPress={startLongPress}
+            onCancelLongPress={clearLongPressTimer}
+          />
+        ))}
+      </section>
+
+      {contextMenuTarget && (
+        <ChatMessageContextMenu
+          anchorRect={contextMenuTarget.anchorRect}
+          onClose={closeContextMenu}
+          onReact={(reaction) => onReaction(contextMenuTarget.message, reaction)}
+          onReply={() =>
+            onReply({
+              messageId: contextMenuTarget.message.messageId,
+              senderNickname: contextMenuTarget.message.senderNickname,
+              content: contextMenuTarget.message.content,
+            })
+          }
         />
-      ))}
-    </section>
+      )}
+    </>
   );
 }
 
@@ -327,10 +421,22 @@ interface MessageItemProps {
   optionA: string;
   optionB: string;
   t: Theme;
+  reactionState: ReturnType<typeof getChatMessageReactionState>;
   onProfileClick: (userId: number | undefined) => void;
+  onStartLongPress: (message: ChatMessageResponse, element: HTMLElement) => void;
+  onCancelLongPress: () => void;
 }
 
-function MessageItem({ message, optionA, optionB, t, onProfileClick }: MessageItemProps) {
+function MessageItem({
+  message,
+  optionA,
+  optionB,
+  t,
+  reactionState,
+  onProfileClick,
+  onStartLongPress,
+  onCancelLongPress,
+}: MessageItemProps) {
   const isOptionA = message.senderVoteOption === "A";
   const optionLabel = isOptionA ? optionA : optionB;
   const optionTextColor = isOptionA ? "text-secondary" : "text-primary";
@@ -346,7 +452,7 @@ function MessageItem({ message, optionA, optionB, t, onProfileClick }: MessageIt
 
   if (message.isMine) {
     return (
-      <div className="flex justify-end">
+      <div className="flex justify-end px-1 py-1" data-chat-message-id={message.messageId}>
         <div className="max-w-[75%]">
           <div className="flex justify-end gap-1 mb-2">
             <span className={clsx("text-label-m", t.senderNickname)}>{displayName}</span>
@@ -356,19 +462,23 @@ function MessageItem({ message, optionA, optionB, t, onProfileClick }: MessageIt
           </div>
           <div className="flex items-end gap-2 justify-end">
             <span className={`text-label-s ${t.time}`}>{formatTimeLabel(message.sentAt)}</span>
-            <p
-              className={`px-[14px] py-3 rounded-tl-2xl rounded-bl-2xl rounded-br-2xl rounded-tr-md text-body-s ${t.myBubble}`}
-            >
-              {message.content}
-            </p>
+            <div className={`overflow-hidden rounded-tl-2xl rounded-bl-2xl rounded-br-2xl rounded-tr-md ${t.myBubble}`}>
+              <ChatMessageReplySnippet
+                replyTo={message.replyTo}
+                isDark={t === THEME.dark}
+                onClick={scrollToChatMessage}
+              />
+              <p className="px-[14px] py-3 text-body-s">{message.content}</p>
+            </div>
           </div>
+          <ChatMessageReactionBar reactionState={reactionState} align="right" />
         </div>
       </div>
     );
   }
 
   return (
-    <div className="flex gap-2">
+    <div className="flex gap-2 px-1 py-1" data-chat-message-id={message.messageId}>
       <button
         type="button"
         className="flex h-10 w-10 shrink-0"
@@ -393,13 +503,24 @@ function MessageItem({ message, optionA, optionB, t, onProfileClick }: MessageIt
           )}
         </div>
         <div className="flex items-end gap-2">
-          <p
-            className={`px-[14px] py-3 rounded-tl-md rounded-bl-2xl rounded-br-2xl rounded-tr-2xl text-body-s ${t.otherBubble}`}
+          <div
+            className={`overflow-hidden rounded-tl-md rounded-bl-2xl rounded-br-2xl rounded-tr-2xl ${t.otherBubble}`}
+            onPointerDown={(event) => onStartLongPress(message, event.currentTarget)}
+            onPointerUp={onCancelLongPress}
+            onPointerCancel={onCancelLongPress}
+            onPointerLeave={onCancelLongPress}
+            onContextMenu={(event) => event.preventDefault()}
           >
-            {message.content}
-          </p>
+            <ChatMessageReplySnippet
+              replyTo={message.replyTo}
+              isDark={t === THEME.dark}
+              onClick={scrollToChatMessage}
+            />
+            <p className="px-[14px] py-3 text-body-s">{message.content}</p>
+          </div>
           <span className={`text-label-s ${t.time}`}>{formatTimeLabel(message.sentAt)}</span>
         </div>
+        <ChatMessageReactionBar reactionState={reactionState} align="left" />
       </div>
     </div>
   );
@@ -410,11 +531,26 @@ function MessageItem({ message, optionA, optionB, t, onProfileClick }: MessageIt
 interface MessageInputProps {
   t: Theme;
   disabled: boolean;
-  selectedOption: ReturnType<typeof useMyChatVoteOption>["selectedOption"];
+  selectedOption: ChatSelectedOption | null;
+  replyTarget: ChatReplyTarget | null;
+  focusSignal: number;
+  isDark: boolean;
+  onCancelReply: () => void;
+  onReplyTargetClick: (messageId: number) => void;
   onSubmit: (message: string) => void;
 }
 
-function MessageInput({ t, disabled, selectedOption, onSubmit }: MessageInputProps) {
+function MessageInput({
+  t,
+  disabled,
+  selectedOption,
+  replyTarget,
+  focusSignal,
+  isDark,
+  onCancelReply,
+  onReplyTargetClick,
+  onSubmit,
+}: MessageInputProps) {
   const [message, setMessage] = useState("");
   const textareaRef = useRef<HTMLTextAreaElement>(null);
 
@@ -426,6 +562,11 @@ function MessageInput({ t, disabled, selectedOption, onSubmit }: MessageInputPro
     el.style.height = `${el.scrollHeight}px`;
   }, [message]);
 
+  useLayoutEffect(() => {
+    if (focusSignal === 0) return;
+    textareaRef.current?.focus();
+  }, [focusSignal]);
+
   const handleSubmit = () => {
     const trimmed = message.trim();
     if (!trimmed || disabled) return;
@@ -435,6 +576,12 @@ function MessageInput({ t, disabled, selectedOption, onSubmit }: MessageInputPro
 
   return (
     <div className="px-5 pt-2" style={{ paddingBottom: "calc(env(safe-area-inset-bottom, 0px) + 8px)" }}>
+      <ChatReplyPreview
+        replyTarget={replyTarget}
+        isDark={isDark}
+        onCancel={onCancelReply}
+        onClick={onReplyTargetClick}
+      />
       <ChatSelectedOptionBadge selectedOption={selectedOption} className="mb-2" />
 
       <div className="flex items-end gap-2">

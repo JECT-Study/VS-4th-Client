@@ -2,18 +2,53 @@ import { PROFILE_COLOR } from "@features/signup/config/profileColors";
 import { useUserProfileSheet } from "@features/user-profile/model/useUserProfileSheet";
 import { UserProfileBottomSheet } from "@features/user-profile/ui/UserProfileBottomSheet";
 import clsx from "clsx";
+import { useRef, useState } from "react";
 import { formatTimeLabel } from "../lib/formatChatTime";
-import type { ChatMessageResponse } from "../model/types";
+import { scrollToChatMessage } from "../lib/scrollToChatMessage";
+import { getChatMessageReactionState } from "../model/chatMessageReaction";
+import type { ChatMessageReactionType, ChatMessageResponse, ChatReplyTarget } from "../model/types";
+import { ChatMessageContextMenu } from "./ChatMessageContextMenu";
+import { ChatMessageReactionBar } from "./ChatMessageReactionBar";
+import { ChatMessageReplySnippet } from "./ChatMessageReplySnippet";
 
 interface ChatMessageListProps {
   messages: ChatMessageResponse[];
   optionA: string;
   optionB: string;
+  onReaction: (message: ChatMessageResponse, reaction: ChatMessageReactionType) => void;
+  onReply: (replyTarget: ChatReplyTarget) => void;
 }
 
-export function ChatMessageList({ messages, optionA, optionB }: ChatMessageListProps) {
+interface ContextMenuTarget {
+  message: ChatMessageResponse;
+  anchorRect: DOMRect;
+}
+
+const LONG_PRESS_MS = 500;
+
+export function ChatMessageList({ messages, optionA, optionB, onReaction, onReply }: ChatMessageListProps) {
   // 일반형 투표 풀페이지 채팅 → 라이트 모드 / 일반형 랜딩
   const profileSheet = useUserProfileSheet({ originSurface: "general" });
+  const longPressTimerRef = useRef<number | null>(null);
+  const [contextMenuTarget, setContextMenuTarget] = useState<ContextMenuTarget | null>(null);
+
+  const clearLongPressTimer = () => {
+    if (longPressTimerRef.current == null) return;
+    window.clearTimeout(longPressTimerRef.current);
+    longPressTimerRef.current = null;
+  };
+
+  const startLongPress = (message: ChatMessageResponse, element: HTMLElement) => {
+    if (message.isMine) return;
+
+    clearLongPressTimer();
+    longPressTimerRef.current = window.setTimeout(() => {
+      setContextMenuTarget({ message, anchorRect: element.getBoundingClientRect() });
+      longPressTimerRef.current = null;
+    }, LONG_PRESS_MS);
+  };
+
+  const closeContextMenu = () => setContextMenuTarget(null);
 
   if (messages.length === 0) {
     return (
@@ -33,6 +68,7 @@ export function ChatMessageList({ messages, optionA, optionB }: ChatMessageListP
           const isOptionA = message.senderVoteOption === "A";
           const optionLabel = isOptionA ? optionA : optionB;
           const optionTextColor = isOptionA ? "text-secondary" : "text-primary";
+          const reactionState = getChatMessageReactionState(message);
 
           // "알 수 없음" 처리 및 표시 이름 설정
           const isUnknownUser = message.senderNickname === "알 수 없음" || !message.senderProfileIcon;
@@ -42,7 +78,11 @@ export function ChatMessageList({ messages, optionA, optionB }: ChatMessageListP
 
           if (message.isMine) {
             return (
-              <div key={message.messageId} className="flex justify-end">
+              <div
+                key={message.messageId}
+                className="flex justify-end px-1 py-1"
+                data-chat-message-id={message.messageId}
+              >
                 <div className="max-w-[75%]">
                   <div className="flex justify-end gap-1 mb-1 text-label-s">
                     <span className="text-grey-dark">{displayName}</span>
@@ -53,17 +93,19 @@ export function ChatMessageList({ messages, optionA, optionB }: ChatMessageListP
 
                   <div className="flex items-end justify-end gap-2">
                     <span className="text-label-s text-grey-light">{formatTimeLabel(message.sentAt)}</span>
-                    <p className="px-4 py-3 bg-white border rounded-2xl border-grey-stroke text-label-m text-grey-black">
-                      {message.content}
-                    </p>
+                    <div className="overflow-hidden bg-white border rounded-2xl border-grey-stroke text-grey-black">
+                      <ChatMessageReplySnippet replyTo={message.replyTo} onClick={scrollToChatMessage} />
+                      <p className="px-4 py-3 text-label-m">{message.content}</p>
+                    </div>
                   </div>
+                  <ChatMessageReactionBar reactionState={reactionState} align="right" />
                 </div>
               </div>
             );
           }
 
           return (
-            <div key={message.messageId} className="flex gap-3">
+            <div key={message.messageId} className="flex gap-3 px-1 py-1" data-chat-message-id={message.messageId}>
               <button
                 type="button"
                 className="flex w-10 h-10 shrink-0"
@@ -97,14 +139,40 @@ export function ChatMessageList({ messages, optionA, optionB }: ChatMessageListP
                 </div>
 
                 <div className="flex items-end gap-2">
-                  <p className="px-4 py-3 rounded-2xl bg-grey-chat text-label-m text-grey-black">{message.content}</p>
+                  <div
+                    className="overflow-hidden rounded-2xl bg-grey-chat text-grey-black"
+                    onPointerDown={(event) => startLongPress(message, event.currentTarget)}
+                    onPointerUp={clearLongPressTimer}
+                    onPointerCancel={clearLongPressTimer}
+                    onPointerLeave={clearLongPressTimer}
+                    onContextMenu={(event) => event.preventDefault()}
+                  >
+                    <ChatMessageReplySnippet replyTo={message.replyTo} onClick={scrollToChatMessage} />
+                    <p className="px-4 py-3 text-label-m">{message.content}</p>
+                  </div>
                   <span className="text-label-s text-grey-light">{formatTimeLabel(message.sentAt)}</span>
                 </div>
+                <ChatMessageReactionBar reactionState={reactionState} align="left" />
               </div>
             </div>
           );
         })}
       </section>
+
+      {contextMenuTarget && (
+        <ChatMessageContextMenu
+          anchorRect={contextMenuTarget.anchorRect}
+          onClose={closeContextMenu}
+          onReact={(reaction) => onReaction(contextMenuTarget.message, reaction)}
+          onReply={() =>
+            onReply({
+              messageId: contextMenuTarget.message.messageId,
+              senderNickname: contextMenuTarget.message.senderNickname,
+              content: contextMenuTarget.message.content,
+            })
+          }
+        />
+      )}
 
       <UserProfileBottomSheet
         isOpen={profileSheet.isOpen}
