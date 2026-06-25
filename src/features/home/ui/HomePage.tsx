@@ -20,7 +20,7 @@ export function HomePage() {
   const { isVisible, scrollToTop } = useScrollTopButton();
   const [isNotificationAuthModalOpen, setIsNotificationAuthModalOpen] = useState(false);
   const navigate = useNavigate();
-  const { sortType, setSortType, excludeEnded, toggleExcludeEnded } = useVoteFilter();
+  const { sortType, setSortType, excludeEnded, changeExcludeEnded } = useVoteFilter();
 
   const { data: votesData, hasNextPage, fetchNextPage } = useHomeVotesQuery(sortType, excludeEnded);
   const { data: recommendationsData } = useHomeRecommendationsQuery();
@@ -65,7 +65,7 @@ export function HomePage() {
           sortType={sortType}
           excludeEnded={excludeEnded}
           onChangeSortType={setSortType}
-          onToggleExcludeEnded={toggleExcludeEnded}
+          onChangeExcludeEnded={changeExcludeEnded}
         />
 
         <VoteFeedList

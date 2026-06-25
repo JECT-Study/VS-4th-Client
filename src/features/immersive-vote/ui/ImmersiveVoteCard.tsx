@@ -29,7 +29,11 @@ export function ImmersiveVoteCard({ vote, updateVote }: ImmersiveVoteCardProps) 
   const [isChatAuthOpen, setIsChatAuthOpen] = useState(false);
   const [isChatOpen, setIsChatOpen] = useState(false);
   const [isFreeVoteLimitModalOpen, setIsFreeVoteLimitModalOpen] = useState(false);
-  const { isOpen: isPushPromptOpen, checkAndShow: checkAndShowPushPrompt, handleDismiss: handlePushPromptDismiss } = useNotificationPrompt();
+  const {
+    isOpen: isPushPromptOpen,
+    checkAndShow: checkAndShowPushPrompt,
+    handleDismiss: handlePushPromptDismiss,
+  } = useNotificationPrompt();
 
   const { emojiList, floatingEmojis, handleOptionClick, handleEmojiClick, removeFloatingEmoji } = useImmersiveVote(
     vote,

@@ -1,5 +1,7 @@
 import { DynamicBottomSheet } from "@base/ui/DynamicBottomSheet";
 import { PROFILE_COLOR } from "@features/signup/config/profileColors";
+import { useUserProfileSheet } from "@features/user-profile/model/useUserProfileSheet";
+import { UserProfileBottomSheet } from "@features/user-profile/ui/UserProfileBottomSheet";
 import { useQueryClient } from "@tanstack/react-query";
 import clsx from "clsx";
 import { useEffect, useLayoutEffect, useRef, useState } from "react";
@@ -63,7 +65,7 @@ export function ChatBottomSheet({ isOpen, onClose, voteId, isDark = false }: Cha
   const t = isDark ? THEME.dark : THEME.light;
   return (
     <DynamicBottomSheet isOpen={isOpen} onClose={onClose} defaultHeight={70} maxHeight={90} className={t.sheet}>
-      {isOpen && <ChatContent voteId={voteId} t={t} />}
+      {isOpen && <ChatContent voteId={voteId} t={t} isDark={isDark} onClose={onClose} />}
     </DynamicBottomSheet>
   );
 }
@@ -73,10 +75,18 @@ export function ChatBottomSheet({ isOpen, onClose, voteId, isDark = false }: Cha
 interface ChatContentProps {
   voteId: number;
   t: Theme;
+  isDark: boolean;
+  onClose: () => void;
 }
 
-function ChatContent({ voteId, t }: ChatContentProps) {
+function ChatContent({ voteId, t, isDark, onClose }: ChatContentProps) {
   const queryClient = useQueryClient();
+  // "몰입형만 다크" 규칙에 따라 다크 채팅 = 몰입형 화면으로 간주 (랜딩 분기 기준)
+  // 투표 카드 탭으로 랜딩 시 이 채팅 바텀시트(onClose)도 함께 닫는다.
+  const profileSheet = useUserProfileSheet({
+    originSurface: isDark ? "immersive" : "general",
+    onLanding: onClose,
+  });
   const { data: header } = useChatRoomHeaderQuery(voteId);
   const { data, fetchNextPage, hasNextPage, isFetchingNextPage } = useInfiniteChatMessagesQuery(voteId);
 
@@ -165,7 +175,15 @@ function ChatContent({ voteId, t }: ChatContentProps) {
       <div className="relative flex-1 min-h-0">
         <div ref={scrollContainerRef} onScroll={handleScroll} className="h-full overflow-y-auto overscroll-contain">
           <div className={clsx("flex min-h-full flex-col", messagesCount > 0 ? "justify-end" : "justify-center")}>
-            {renderMessageArea(isLoaded, allMessages, optionA, optionB, t, isFetchingNextPage)}
+            {renderMessageArea(
+              isLoaded,
+              allMessages,
+              optionA,
+              optionB,
+              t,
+              isFetchingNextPage,
+              profileSheet.openProfile,
+            )}
             <div ref={bottomRef} />
           </div>
         </div>
@@ -202,6 +220,14 @@ function ChatContent({ voteId, t }: ChatContentProps) {
           />
         )}
       </div>
+
+      <UserProfileBottomSheet
+        isOpen={profileSheet.isOpen}
+        onClose={profileSheet.close}
+        profile={profileSheet.profile}
+        isDark={isDark}
+        onVoteClick={profileSheet.handleVoteClick}
+      />
     </div>
   );
 }
@@ -213,6 +239,7 @@ function renderMessageArea(
   optionB: string,
   t: Theme,
   isFetchingMore: boolean,
+  onProfileClick: (userId: number | undefined) => void,
 ) {
   if (!isLoaded) {
     return (
@@ -224,7 +251,16 @@ function renderMessageArea(
   if (messages.length === 0) {
     return <EmptyState t={t} />;
   }
-  return <MessageList messages={messages} optionA={optionA} optionB={optionB} t={t} isFetchingMore={isFetchingMore} />;
+  return (
+    <MessageList
+      messages={messages}
+      optionA={optionA}
+      optionB={optionB}
+      t={t}
+      isFetchingMore={isFetchingMore}
+      onProfileClick={onProfileClick}
+    />
+  );
 }
 
 // ---
@@ -252,9 +288,10 @@ interface MessageListProps {
   optionB: string;
   t: Theme;
   isFetchingMore: boolean;
+  onProfileClick: (userId: number | undefined) => void;
 }
 
-function MessageList({ messages, optionA, optionB, t, isFetchingMore }: MessageListProps) {
+function MessageList({ messages, optionA, optionB, t, isFetchingMore, onProfileClick }: MessageListProps) {
   return (
     <section className="px-5 py-4 space-y-4">
       {isFetchingMore && (
@@ -263,7 +300,14 @@ function MessageList({ messages, optionA, optionB, t, isFetchingMore }: MessageL
         </div>
       )}
       {messages.map((message) => (
-        <MessageItem key={message.messageId} message={message} optionA={optionA} optionB={optionB} t={t} />
+        <MessageItem
+          key={message.messageId}
+          message={message}
+          optionA={optionA}
+          optionB={optionB}
+          t={t}
+          onProfileClick={onProfileClick}
+        />
       ))}
     </section>
   );
@@ -276,17 +320,22 @@ interface MessageItemProps {
   optionA: string;
   optionB: string;
   t: Theme;
+  onProfileClick: (userId: number | undefined) => void;
 }
 
-function MessageItem({ message, optionA, optionB, t }: MessageItemProps) {
+function MessageItem({ message, optionA, optionB, t, onProfileClick }: MessageItemProps) {
   const isOptionA = message.senderVoteOption === "A";
   const optionLabel = isOptionA ? optionA : optionB;
   const optionTextColor = isOptionA ? "text-secondary" : "text-primary";
   const isUnknownUser = message.senderNickname === UNKNOWN_USER_NICKNAME || !message.senderProfileIcon;
-  const displayName = message.senderNickname === UNKNOWN_USER_NICKNAME ? UNKNOWN_USER_DISPLAY_NAME : message.senderNickname;
+  const displayName =
+    message.senderNickname === UNKNOWN_USER_NICKNAME ? UNKNOWN_USER_DISPLAY_NAME : message.senderNickname;
   const profileImage = isUnknownUser
     ? DEFAULT_PROFILE_IMAGE
     : PROFILE_COLOR[message.senderProfileIcon as keyof typeof PROFILE_COLOR];
+  // 프로필 진입 가능: 타인 메시지이면서 식별 가능한 유저
+  const canOpenProfile = !isUnknownUser;
+  const handleProfileClick = () => onProfileClick(message.senderId);
 
   if (message.isMine) {
     return (
@@ -313,12 +362,25 @@ function MessageItem({ message, optionA, optionB, t }: MessageItemProps) {
 
   return (
     <div className="flex gap-2">
-      <div className="flex h-10 w-10 shrink-0">
+      <button
+        type="button"
+        className="flex h-10 w-10 shrink-0"
+        onClick={handleProfileClick}
+        disabled={!canOpenProfile}
+        aria-label={`${displayName} 프로필 보기`}
+      >
         <img src={profileImage} alt="" className="object-cover w-full h-full rounded-full bg-gray-200" />
-      </div>
+      </button>
       <div className="max-w-[75%]">
         <div className="flex gap-1 mb-2">
-          <span className={clsx("text-label-m", t.senderNickname)}>{displayName}</span>
+          <button
+            type="button"
+            className={clsx("text-label-m", t.senderNickname)}
+            onClick={handleProfileClick}
+            disabled={!canOpenProfile}
+          >
+            {displayName}
+          </button>
           {message.senderVoteOption && (
             <span className={clsx("text-label-l max-w-[116px] truncate", optionTextColor)}>{optionLabel}</span>
           )}

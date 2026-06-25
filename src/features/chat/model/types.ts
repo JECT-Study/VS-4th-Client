@@ -40,6 +40,7 @@ export interface ChatMessageResponse {
   messageId: number;
   content: string;
   sentAt: string;
+  senderId: number;
   senderNickname: string;
   senderProfileIcon: string;
   senderVoteOption: SenderVoteOption;

@@ -71,6 +71,7 @@ export const mockChatMessages: ChatMessagesResponse = {
       messageId: 1,
       content: "저는 내릴 거라고 봐요 정부에서 물가 안정화 정책 많이 내놓고 있잖나요",
       sentAt: "14:15",
+      senderId: 45,
       senderNickname: "초원 위의 말_45",
       senderProfileIcon: "default-icon.png",
       senderVoteOption: "B", // 떨어진다 (Option B)
@@ -80,6 +81,7 @@ export const mockChatMessages: ChatMessagesResponse = {
       messageId: 2,
       content: "맞아요 국제 유가도 계속 오르는 추세고",
       sentAt: "14:16",
+      senderId: 764,
       senderNickname: "초원 위의 양_764",
       senderProfileIcon: "default-icon.png",
       senderVoteOption: "A", // 오른다 (Option A)
@@ -89,6 +91,7 @@ export const mockChatMessages: ChatMessagesResponse = {
       messageId: 4,
       content: "그래도 희망을 가져봐요!",
       sentAt: "14:17",
+      senderId: 1,
       senderNickname: "나",
       senderProfileIcon: "my-icon.png",
       senderVoteOption: "A",

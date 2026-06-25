@@ -8,12 +8,16 @@ export interface ImmersiveFeedResponse {
 
 export const immersiveFeedQueryKey = ["immersive-votes", "feed"] as const;
 
-export const immersiveFeedQueryOptions = () =>
+export const immersiveFeedQueryOptions = (startVoteId?: number) =>
   queryOptions<ImmersiveFeedResponse>({
-    queryKey: immersiveFeedQueryKey,
+    queryKey: startVoteId != null ? [...immersiveFeedQueryKey, startVoteId] : immersiveFeedQueryKey,
     queryFn: () =>
       apiClient
-        .post<ImmersiveFeedResponse>("/api/immersive-votes/next", { excludeIds: [], size: 10 })
+        .post<ImmersiveFeedResponse>("/api/immersive-votes/next", {
+          excludeIds: [],
+          size: 10,
+          ...(startVoteId != null ? { startVoteId } : {}),
+        })
         .then((r) => r.data),
     staleTime: 1000 * 60 * 2,
     refetchOnMount: "always",

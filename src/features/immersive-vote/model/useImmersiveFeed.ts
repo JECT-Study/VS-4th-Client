@@ -33,9 +33,9 @@ const isEligibleFeedVote = (vote: ImmersiveFeedItem) => vote.status !== "ENDED";
 
 const filterEligibleFeedVotes = (items: ImmersiveFeedItem[]) => items.filter(isEligibleFeedVote);
 
-export function useImmersiveFeed() {
+export function useImmersiveFeed(startVoteId?: number, startVoteSeq?: number) {
   const queryClient = useQueryClient();
-  const { data: initialData, isError } = useQuery(immersiveFeedQueryOptions());
+  const { data: initialData, isError } = useQuery(immersiveFeedQueryOptions(startVoteId));
 
   const [votes, setVotes] = useState<ImmersiveFeedItem[]>([]);
   const [trackIndex, setTrackIndex] = useState(0);
@@ -47,6 +47,7 @@ export function useImmersiveFeed() {
   const seenIdsRef = useRef<Set<number>>(new Set());
   const isFetchingMore = useRef(false);
   const isExhaustedRef = useRef(false);
+  const needsSeedRef = useRef(true);
   const containerRef = useRef<HTMLElement | null>(null);
 
   useEffect(() => {
@@ -65,8 +66,31 @@ export function useImmersiveFeed() {
     };
   }, []);
 
+  // startVoteId(피드 identity)가 바뀔 때만 새 피드로 1회 재시드하도록 표시한다.
+  // (startVoteSeq만 바뀐 같은 투표 재선택에는 재시드하지 않아 프리페치분을 보존)
+  // biome-ignore lint/correctness/useExhaustiveDependencies: startVoteId 변경을 트리거로 사용
   useEffect(() => {
-    if (!initialData) return;
+    needsSeedRef.current = true;
+  }, [startVoteId]);
+
+  // startVoteId 변경 또는 같은 투표 재선택(startVoteSeq) 시 캐러셀을
+  // startVoteId 투표(시드 시 맨 앞 = index 0)로 되돌린다.
+  // 이때 트랜지션을 잠시 꺼서 현재 위치에서 0으로 되감기는 애니메이션이
+  // 보이지 않게 즉시 점프시키고, 다음 프레임에 다시 켠다.
+  // biome-ignore lint/correctness/useExhaustiveDependencies: startVoteId/startVoteSeq 변경을 트리거로 사용
+  useEffect(() => {
+    // 이미 맨 위면 되감을 게 없다(최초 마운트 포함) → 트랜지션을 건드리지 않는다.
+    if (trackIndexRef.current === 0) return;
+    setIsTransitionEnabled(false);
+    setTrackIndex(0);
+    window.requestAnimationFrame(() => {
+      window.requestAnimationFrame(() => setIsTransitionEnabled(true));
+    });
+  }, [startVoteId, startVoteSeq]);
+
+  useEffect(() => {
+    if (!initialData || !needsSeedRef.current) return;
+    needsSeedRef.current = false;
     const initialItems = initialData.items ?? [];
     setVotes(filterEligibleFeedVotes(initialItems));
     seenIdsRef.current = new Set(initialItems.map((v) => v.voteId));
@@ -246,7 +270,10 @@ export function useImmersiveFeed() {
     handleTrackTransitionEnd,
     trackClassName,
     trackStyle,
-    isLoading: !initialData,
+    // 최초 로딩에만 스피너를 노출한다. 이미 피드가 있는 상태에서의 refetch
+    // (startVoteId 진입 등)에는 <main>을 언마운트하지 않아 wheel/touch 리스너가
+    // 떨어져 나간 옛 노드에 묶이는 문제를 막는다.
+    isLoading: !initialData && feedLength === 0,
     isError,
   };
 }

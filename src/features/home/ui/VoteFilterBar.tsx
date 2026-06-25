@@ -7,7 +7,7 @@ interface VoteFilterBarProps {
   sortType: VoteSortType;
   excludeEnded: boolean;
   onChangeSortType: (sortType: VoteSortType) => void;
-  onToggleExcludeEnded: () => void;
+  onChangeExcludeEnded: (excludeEnded: boolean) => void;
 }
 
 const SORT_OPTIONS: SortOption<VoteSortType>[] = [
@@ -16,25 +16,30 @@ const SORT_OPTIONS: SortOption<VoteSortType>[] = [
   { label: "인기순", value: "POPULAR" },
 ];
 
-export function VoteFilterBar({ sortType, excludeEnded, onChangeSortType, onToggleExcludeEnded }: VoteFilterBarProps) {
+export function VoteFilterBar({ sortType, excludeEnded, onChangeSortType, onChangeExcludeEnded }: VoteFilterBarProps) {
   return (
     <div className="flex items-center justify-between gap-3 mb-3">
-      <button
-        type="button"
-        onClick={onToggleExcludeEnded}
-        className={clsx("flex items-center gap-1 text-label-m", excludeEnded ? "text-grey-black" : "text-grey-light")}
-      >
-        <svg width="14" height="9" viewBox="0 0 14 9" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
-          <path
-            d="M0.75 3.65L5.35 8.15L12.75 0.75"
-            stroke="currentColor"
-            strokeWidth="1.5"
-            strokeLinecap="round"
-            strokeLinejoin="round"
-          />
-        </svg>
-        <span>종료된 투표 제외</span>
-      </button>
+      <div className="flex items-center gap-3">
+        <button
+          type="button"
+          onClick={() => onChangeExcludeEnded(false)}
+          className={clsx("flex items-center gap-1 text-body-s", excludeEnded ? "text-grey-light" : "text-grey-black")}
+        >
+          {!excludeEnded && <img src="/assets/icons/check-s.svg" alt="" />}
+          <span>전체</span>
+        </button>
+
+        <hr className="w-px h-5 bg-grey-stroke" />
+
+        <button
+          type="button"
+          onClick={() => onChangeExcludeEnded(true)}
+          className={clsx("flex items-center gap-1 text-body-s", excludeEnded ? "text-grey-black" : "text-grey-light")}
+        >
+          {excludeEnded && <img src="/assets/icons/check-s.svg" alt="" />}
+          <span>진행 중</span>
+        </button>
+      </div>
 
       <SortDropdown
         options={SORT_OPTIONS.filter(({ value }) => excludeEnded || value !== "ENDING_SOON")}
