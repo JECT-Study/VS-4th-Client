@@ -1,4 +1,5 @@
 import clsx from "clsx";
+import { createPortal } from "react-dom";
 import type { ChatMessageReactionType } from "../model/types";
 
 interface ChatMessageContextMenuProps {
@@ -66,8 +67,8 @@ export function ChatMessageContextMenu({
     onClose();
   };
 
-  return (
-    <div className="fixed inset-0 z-40" onContextMenu={(event) => event.preventDefault()} role="presentation">
+  const menu = (
+    <div className="fixed inset-0 z-[70]" onContextMenu={(event) => event.preventDefault()} role="presentation">
       <button type="button" className="absolute inset-0 bg-black/20" onClick={onClose} aria-label="메뉴 닫기" />
       <div
         className={clsx(
@@ -107,4 +108,6 @@ export function ChatMessageContextMenu({
       </div>
     </div>
   );
+
+  return createPortal(menu, document.body);
 }
