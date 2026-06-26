@@ -1,18 +1,26 @@
+import clsx from "clsx";
 import type { ChatMessageReactionType } from "../model/types";
 
 interface ChatMessageContextMenuProps {
   anchorRect: DOMRect;
+  isDark?: boolean;
   onClose: () => void;
   onReact: (reaction: ChatMessageReactionType) => void;
   onReply: () => void;
 }
 
-const MENU_WIDTH = 312;
-const MENU_HEIGHT = 64;
+const MENU_WIDTH = 244;
+const MENU_HEIGHT = 52;
 const MENU_GAP = 8;
 const VIEWPORT_PADDING = 16;
 
-export function ChatMessageContextMenu({ anchorRect, onClose, onReact, onReply }: ChatMessageContextMenuProps) {
+export function ChatMessageContextMenu({
+  anchorRect,
+  isDark = false,
+  onClose,
+  onReact,
+  onReply,
+}: ChatMessageContextMenuProps) {
   const viewportWidth = window.innerWidth;
   const viewportHeight = window.innerHeight;
   const width = Math.min(MENU_WIDTH, viewportWidth - VIEWPORT_PADDING * 2);
@@ -40,13 +48,16 @@ export function ChatMessageContextMenu({ anchorRect, onClose, onReact, onReply }
     <div className="fixed inset-0 z-40" onContextMenu={(event) => event.preventDefault()} role="presentation">
       <button type="button" className="absolute inset-0 bg-black/20" onClick={onClose} aria-label="메뉴 닫기" />
       <div
-        className="fixed flex h-16 items-center rounded-full bg-white px-4 shadow-[0_8px_24px_rgba(19,19,19,0.18)]"
-        style={{ top, left, width }}
+        className={clsx(
+          "fixed flex items-center rounded-full px-3 shadow-[0_8px_24px_rgba(19,19,19,0.18)]",
+          isDark ? "bg-[#303236]" : "bg-white",
+        )}
+        style={{ top, left, width, height: MENU_HEIGHT }}
         role="menu"
       >
         <button
           type="button"
-          className="flex h-12 flex-1 items-center justify-center text-[28px]"
+          className="flex h-10 flex-1 items-center justify-center text-[24px] leading-none"
           onClick={() => handleReact("THUMBS_UP")}
           aria-label="좋아요"
         >
@@ -54,16 +65,19 @@ export function ChatMessageContextMenu({ anchorRect, onClose, onReact, onReply }
         </button>
         <button
           type="button"
-          className="flex h-12 flex-1 items-center justify-center text-[28px]"
+          className="flex h-10 flex-1 items-center justify-center text-[24px] leading-none"
           onClick={() => handleReact("THUMBS_DOWN")}
           aria-label="싫어요"
         >
           👎
         </button>
-        <div className="mx-2 h-8 w-px bg-grey-stroke" />
+        <div className={clsx("mx-2 h-7 w-px", isDark ? "bg-[#55585E]" : "bg-grey-stroke")} />
         <button
           type="button"
-          className="flex h-12 flex-[1.25] items-center justify-center whitespace-nowrap text-body-m text-grey-black"
+          className={clsx(
+            "flex h-10 flex-[1.05] items-center justify-center whitespace-nowrap text-label-l",
+            isDark ? "text-white" : "text-grey-black",
+          )}
           onClick={handleReply}
         >
           답장

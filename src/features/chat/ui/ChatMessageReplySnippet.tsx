@@ -15,10 +15,11 @@ export function ChatMessageReplySnippet({ replyTo, isDark = false, onClick }: Ch
       type="button"
       className={clsx(
         "block w-full min-w-0 border-b px-4 py-2 text-left",
+        "select-none [-webkit-touch-callout:none] [-webkit-user-select:none]",
         isDark ? "border-[#434346] bg-[#25272A]" : "border-grey-stroke bg-grey-divider",
       )}
       onClick={() => onClick?.(replyTo.messageId)}
-      onPointerDown={(event) => event.stopPropagation()}
+      onContextMenu={(event) => event.preventDefault()}
     >
       <p className={clsx("truncate text-label-s", isDark ? "text-grey-disabled" : "text-grey-light")}>
         {replyTo.senderNickname}에게 답장

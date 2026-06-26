@@ -1,5 +1,9 @@
 import { showToast } from "@base/ui/Toast";
 import { userQueryOptions } from "@features/auth/api/userQuery";
+import { chatInfiniteMessagesQueryKey, chatMessagesQueryKey } from "@features/chat/api/chatMessagesQuery";
+import { chatRoomHeaderQueryKey } from "@features/chat/api/chatRoomHeaderQuery";
+import { resolveChatVoteOptionFromOptionId } from "@features/chat/model/chatVoteOption";
+import type { ChatRoomHeaderResponse } from "@features/chat/model/types";
 import { useNotificationPrompt } from "@features/notification/model/useNotificationPrompt";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { isAxiosError } from "axios";
@@ -38,6 +42,22 @@ export function useVoteDetail(voteId: string) {
   const { data, isLoading: isVoteDetailLoading } = useQuery(voteDetailQueryOptions(voteId));
   const queryClient = useQueryClient();
   const queryKey = ["votes", voteId];
+  const numericVoteId = Number(voteId);
+
+  const syncChatVoteOption = (selectedOptionId: number | null) => {
+    const optionIds = data?.options.map((option) => option.optionId) ?? [];
+    const myVoteOption = resolveChatVoteOptionFromOptionId(optionIds, selectedOptionId);
+
+    queryClient.setQueryData<ChatRoomHeaderResponse>(chatRoomHeaderQueryKey(numericVoteId), (old) =>
+      old ? { ...old, myVoteOption } : old,
+    );
+  };
+
+  const invalidateChatVoteState = () => {
+    queryClient.invalidateQueries({ queryKey: chatRoomHeaderQueryKey(numericVoteId) });
+    queryClient.invalidateQueries({ queryKey: chatMessagesQueryKey(numericVoteId) });
+    queryClient.invalidateQueries({ queryKey: chatInfiniteMessagesQueryKey(numericVoteId) });
+  };
 
   const isEnded = data?.status === "ENDED";
 
@@ -73,6 +93,7 @@ export function useVoteDetail(voteId: string) {
       queryClient.setQueryData<VoteDetail>(queryKey, (old) =>
         old ? { ...old, myVote: { voted: true, selectedOptionId: optionId } } : old,
       );
+      syncChatVoteOption(optionId);
       return { previous };
     },
     onSuccess: (response) => {
@@ -93,10 +114,12 @@ export function useVoteDetail(voteId: string) {
         );
       }
       queryClient.invalidateQueries({ queryKey: ["me", "participated-votes"] });
+      invalidateChatVoteState();
       if (user) checkAndShowPushPrompt();
     },
     onError: (_err, _optionId, context) => {
       if (context?.previous) queryClient.setQueryData(queryKey, context.previous);
+      syncChatVoteOption(context?.previous?.myVote.selectedOptionId ?? null);
       if (isAxiosError(_err) && _err.response?.data?.code === "VOTE_FREE_LIMIT_EXCEEDED") {
         setIsFreeVoteLimitModalOpen(true);
       }
@@ -108,6 +131,8 @@ export function useVoteDetail(voteId: string) {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey });
       queryClient.invalidateQueries({ queryKey: ["me", "participated-votes"] });
+      syncChatVoteOption(null);
+      invalidateChatVoteState();
     },
   });
 

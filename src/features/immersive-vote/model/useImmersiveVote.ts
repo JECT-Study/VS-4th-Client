@@ -1,5 +1,9 @@
 import { showToast } from "@base/ui/Toast";
 import { userQueryOptions } from "@features/auth/api/userQuery";
+import { chatInfiniteMessagesQueryKey, chatMessagesQueryKey } from "@features/chat/api/chatMessagesQuery";
+import { chatRoomHeaderQueryKey } from "@features/chat/api/chatRoomHeaderQuery";
+import { resolveChatVoteOptionFromOptionId } from "@features/chat/model/chatVoteOption";
+import type { ChatRoomHeaderResponse } from "@features/chat/model/types";
 import { type FreeVotesResponse, freeVotesQueryKey, freeVotesQueryOptions } from "@features/votes/api/freeVotesQuery";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { isAxiosError } from "axios";
@@ -20,6 +24,24 @@ export function useImmersiveVote(
   const { data: user } = useQuery(userQueryOptions());
   const isGuest = user === null;
   const queryClient = useQueryClient();
+  const optionIds = useMemo(() => vote.options.map((option) => option.optionId), [vote.options]);
+
+  const syncChatVoteOption = useCallback(
+    (selectedOptionId: number | null) => {
+      const myVoteOption = resolveChatVoteOptionFromOptionId(optionIds, selectedOptionId);
+
+      queryClient.setQueryData<ChatRoomHeaderResponse>(chatRoomHeaderQueryKey(vote.voteId), (old) =>
+        old ? { ...old, myVoteOption } : old,
+      );
+    },
+    [optionIds, queryClient, vote.voteId],
+  );
+
+  const invalidateChatVoteState = useCallback(() => {
+    queryClient.invalidateQueries({ queryKey: chatRoomHeaderQueryKey(vote.voteId) });
+    queryClient.invalidateQueries({ queryKey: chatMessagesQueryKey(vote.voteId) });
+    queryClient.invalidateQueries({ queryKey: chatInfiniteMessagesQueryKey(vote.voteId) });
+  }, [queryClient, vote.voteId]);
 
   const { data: freeVotesData } = useQuery({
     ...freeVotesQueryOptions(),
@@ -46,6 +68,7 @@ export function useImmersiveVote(
         participantCount: vote.participantCount,
       };
       const isCancel = vote.myVote.selectedOptionId === optionId;
+      syncChatVoteOption(isCancel ? null : optionId);
       updateVote(vote.voteId, (current) => {
         if (isCancel) {
           return {
@@ -72,6 +95,7 @@ export function useImmersiveVote(
           selectedOptionId: response.selectedOptionId,
         },
       }));
+      syncChatVoteOption(response.selectedOptionId);
       if (
         isGuest &&
         response.action === "VOTED" &&
@@ -87,6 +111,7 @@ export function useImmersiveVote(
         );
       }
       queryClient.invalidateQueries({ queryKey: ["me", "participated-votes"] });
+      invalidateChatVoteState();
       if (!isGuest && response.action === "VOTED") onVoteSuccess?.();
     },
     onError: (err, _optionId, snapshot) => {
@@ -97,7 +122,9 @@ export function useImmersiveVote(
           options: snapshot.options,
           participantCount: snapshot.participantCount,
         }));
+        syncChatVoteOption(snapshot.myVote.selectedOptionId);
       }
+      invalidateChatVoteState();
       if (isAxiosError(err)) {
         if (err.response?.data?.code === "VOTE_FREE_LIMIT_EXCEEDED") {
           onFreeVoteLimitExceeded();
