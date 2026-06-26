@@ -14,6 +14,30 @@ const MENU_HEIGHT = 52;
 const MENU_GAP = 8;
 const VIEWPORT_PADDING = 16;
 
+const getVisibleViewport = () => {
+  const viewport = window.visualViewport;
+
+  if (!viewport) {
+    return {
+      left: 0,
+      top: 0,
+      right: window.innerWidth,
+      bottom: window.innerHeight,
+      width: window.innerWidth,
+      height: window.innerHeight,
+    };
+  }
+
+  return {
+    left: viewport.offsetLeft,
+    top: viewport.offsetTop,
+    right: viewport.offsetLeft + viewport.width,
+    bottom: viewport.offsetTop + viewport.height,
+    width: viewport.width,
+    height: viewport.height,
+  };
+};
+
 export function ChatMessageContextMenu({
   anchorRect,
   isDark = false,
@@ -21,18 +45,16 @@ export function ChatMessageContextMenu({
   onReact,
   onReply,
 }: ChatMessageContextMenuProps) {
-  const viewportWidth = window.innerWidth;
-  const viewportHeight = window.innerHeight;
-  const width = Math.min(MENU_WIDTH, viewportWidth - VIEWPORT_PADDING * 2);
-  const left = Math.min(
-    Math.max(anchorRect.left + anchorRect.width / 2 - width / 2, VIEWPORT_PADDING),
-    viewportWidth - VIEWPORT_PADDING - width,
-  );
+  const visibleViewport = getVisibleViewport();
+  const width = Math.min(MENU_WIDTH, visibleViewport.width - VIEWPORT_PADDING * 2);
+  const minLeft = visibleViewport.left + VIEWPORT_PADDING;
+  const maxLeft = visibleViewport.right - VIEWPORT_PADDING - width;
+  const minTop = visibleViewport.top + VIEWPORT_PADDING;
+  const maxBottom = visibleViewport.bottom - VIEWPORT_PADDING;
+  const left = Math.min(Math.max(anchorRect.left + anchorRect.width / 2 - width / 2, minLeft), maxLeft);
   const preferredTop = anchorRect.bottom + MENU_GAP;
   const top =
-    preferredTop + MENU_HEIGHT <= viewportHeight - VIEWPORT_PADDING
-      ? preferredTop
-      : Math.max(VIEWPORT_PADDING, anchorRect.top - MENU_HEIGHT - MENU_GAP);
+    preferredTop + MENU_HEIGHT <= maxBottom ? preferredTop : Math.max(minTop, anchorRect.top - MENU_HEIGHT - MENU_GAP);
 
   const handleReact = (reaction: ChatMessageReactionType) => {
     onReact(reaction);
