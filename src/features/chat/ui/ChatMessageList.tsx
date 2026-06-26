@@ -27,6 +27,17 @@ interface ContextMenuTarget {
 const LONG_PRESS_MS = 500;
 const MESSAGE_TOUCH_CLASS = "select-none [-webkit-touch-callout:none] [-webkit-user-select:none]";
 
+const blurActiveTextInput = () => {
+  const activeElement = document.activeElement;
+  if (
+    activeElement instanceof HTMLInputElement ||
+    activeElement instanceof HTMLTextAreaElement ||
+    (activeElement instanceof HTMLElement && activeElement.isContentEditable)
+  ) {
+    activeElement.blur();
+  }
+};
+
 export function ChatMessageList({ messages, optionA, optionB, onReaction, onReply }: ChatMessageListProps) {
   // 일반형 투표 풀페이지 채팅 → 라이트 모드 / 일반형 랜딩
   const profileSheet = useUserProfileSheet({ originSurface: "general" });
@@ -44,6 +55,7 @@ export function ChatMessageList({ messages, optionA, optionB, onReaction, onRepl
 
     clearLongPressTimer();
     longPressTimerRef.current = window.setTimeout(() => {
+      blurActiveTextInput();
       setContextMenuTarget({ message, anchorRect: element.getBoundingClientRect() });
       longPressTimerRef.current = null;
     }, LONG_PRESS_MS);

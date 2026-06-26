@@ -344,6 +344,17 @@ interface ContextMenuTarget {
 const LONG_PRESS_MS = 500;
 const MESSAGE_TOUCH_CLASS = "select-none [-webkit-touch-callout:none] [-webkit-user-select:none]";
 
+const blurActiveTextInput = () => {
+  const activeElement = document.activeElement;
+  if (
+    activeElement instanceof HTMLInputElement ||
+    activeElement instanceof HTMLTextAreaElement ||
+    (activeElement instanceof HTMLElement && activeElement.isContentEditable)
+  ) {
+    activeElement.blur();
+  }
+};
+
 function MessageList({
   messages,
   optionA,
@@ -368,6 +379,7 @@ function MessageList({
 
     clearLongPressTimer();
     longPressTimerRef.current = window.setTimeout(() => {
+      blurActiveTextInput();
       setContextMenuTarget({ message, anchorRect: element.getBoundingClientRect() });
       longPressTimerRef.current = null;
     }, LONG_PRESS_MS);
