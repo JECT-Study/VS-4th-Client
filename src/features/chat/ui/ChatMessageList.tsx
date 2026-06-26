@@ -25,6 +25,7 @@ interface ContextMenuTarget {
 }
 
 const LONG_PRESS_MS = 500;
+const MESSAGE_TOUCH_CLASS = "select-none [-webkit-touch-callout:none] [-webkit-user-select:none]";
 
 export function ChatMessageList({ messages, optionA, optionB, onReaction, onReply }: ChatMessageListProps) {
   // 일반형 투표 풀페이지 채팅 → 라이트 모드 / 일반형 랜딩
@@ -93,7 +94,12 @@ export function ChatMessageList({ messages, optionA, optionB, onReaction, onRepl
 
                   <div className="flex items-end justify-end gap-2">
                     <span className="text-label-s text-grey-light">{formatTimeLabel(message.sentAt)}</span>
-                    <div className="overflow-hidden bg-white border rounded-2xl border-grey-stroke text-grey-black">
+                    <div
+                      className={clsx(
+                        "overflow-hidden bg-white border rounded-2xl border-grey-stroke text-grey-black",
+                        MESSAGE_TOUCH_CLASS,
+                      )}
+                    >
                       <ChatMessageReplySnippet replyTo={message.replyTo} onClick={scrollToChatMessage} />
                       <p className="px-4 py-3 text-label-m">{message.content}</p>
                     </div>
@@ -140,7 +146,7 @@ export function ChatMessageList({ messages, optionA, optionB, onReaction, onRepl
 
                 <div className="flex items-end gap-2">
                   <div
-                    className="overflow-hidden rounded-2xl bg-grey-chat text-grey-black"
+                    className={clsx("overflow-hidden rounded-2xl bg-grey-chat text-grey-black", MESSAGE_TOUCH_CLASS)}
                     onPointerDown={(event) => startLongPress(message, event.currentTarget)}
                     onPointerUp={clearLongPressTimer}
                     onPointerCancel={clearLongPressTimer}

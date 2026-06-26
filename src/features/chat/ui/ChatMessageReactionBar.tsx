@@ -4,6 +4,7 @@ import { type ChatMessageReactionState, formatChatReactionCount } from "../model
 interface ChatMessageReactionBarProps {
   reactionState: ChatMessageReactionState;
   align: "left" | "right";
+  isDark?: boolean;
 }
 
 const REACTION_ITEMS = [
@@ -11,7 +12,7 @@ const REACTION_ITEMS = [
   { type: "THUMBS_DOWN", emoji: "👎" },
 ] as const;
 
-export function ChatMessageReactionBar({ reactionState, align }: ChatMessageReactionBarProps) {
+export function ChatMessageReactionBar({ reactionState, align, isDark = false }: ChatMessageReactionBarProps) {
   const visibleReactions = REACTION_ITEMS.filter((item) => reactionState[item.type] > 0);
 
   if (visibleReactions.length === 0) return null;
@@ -25,11 +26,19 @@ export function ChatMessageReactionBar({ reactionState, align }: ChatMessageReac
           <span
             key={item.type}
             className={clsx(
-              "inline-flex h-8 min-w-14 items-center justify-center gap-1 rounded-full px-3 text-label-l",
-              isMine ? "bg-primary-100 text-grey-black" : "bg-grey-divider text-grey-black",
+              "inline-flex h-7 min-w-12 select-none items-center justify-center gap-1 rounded-full px-2.5 text-label-m",
+              isDark
+                ? isMine
+                  ? "bg-primary text-white"
+                  : "border border-[#565A60] bg-[#2E3034] text-[#E8E8EA]"
+                : isMine
+                  ? "bg-primary-100 text-grey-black"
+                  : "bg-grey-divider text-grey-black",
             )}
           >
-            <span aria-hidden="true">{item.emoji}</span>
+            <span aria-hidden="true" className="text-[18px] leading-none opacity-90">
+              {item.emoji}
+            </span>
             <span>{formatChatReactionCount(reactionState[item.type])}</span>
           </span>
         );

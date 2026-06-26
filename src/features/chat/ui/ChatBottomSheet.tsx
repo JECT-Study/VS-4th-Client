@@ -7,7 +7,7 @@ import clsx from "clsx";
 import { useEffect, useLayoutEffect, useRef, useState } from "react";
 import { useReactChatMessageMutation } from "../api/chatMessageReactionMutation";
 import { chatInfiniteMessagesQueryKey, useInfiniteChatMessagesQuery } from "../api/chatMessagesQuery";
-import { useChatRoomHeaderQuery } from "../api/chatRoomHeaderQuery";
+import { chatRoomHeaderQueryKey, useChatRoomHeaderQuery } from "../api/chatRoomHeaderQuery";
 import { useSendChatMessageMutation } from "../api/sendChatMessageMutation";
 import { formatTimeLabel } from "../lib/formatChatTime";
 import { scrollToChatMessage } from "../lib/scrollToChatMessage";
@@ -103,6 +103,7 @@ function ChatContent({ voteId, t, isDark, onClose }: ChatContentProps) {
   // VoteDetail: commentCount 갱신 / messages: senderVoteOption 변경 반영
   useEffect(() => {
     queryClient.invalidateQueries({ queryKey: ["votes", String(voteId)] });
+    queryClient.invalidateQueries({ queryKey: chatRoomHeaderQueryKey(voteId) });
     queryClient.invalidateQueries({ queryKey: chatInfiniteMessagesQueryKey(voteId) });
   }, [voteId, queryClient]);
   const sendMessageMutation = useSendChatMessageMutation(voteId);
@@ -341,6 +342,7 @@ interface ContextMenuTarget {
 }
 
 const LONG_PRESS_MS = 500;
+const MESSAGE_TOUCH_CLASS = "select-none [-webkit-touch-callout:none] [-webkit-user-select:none]";
 
 function MessageList({
   messages,
@@ -399,6 +401,7 @@ function MessageList({
       {contextMenuTarget && (
         <ChatMessageContextMenu
           anchorRect={contextMenuTarget.anchorRect}
+          isDark={t === THEME.dark}
           onClose={closeContextMenu}
           onReact={(reaction) => onReaction(contextMenuTarget.message, reaction)}
           onReply={() =>
@@ -462,7 +465,12 @@ function MessageItem({
           </div>
           <div className="flex items-end gap-2 justify-end">
             <span className={`text-label-s ${t.time}`}>{formatTimeLabel(message.sentAt)}</span>
-            <div className={`overflow-hidden rounded-tl-2xl rounded-bl-2xl rounded-br-2xl rounded-tr-md ${t.myBubble}`}>
+            <div
+              className={clsx(
+                `overflow-hidden rounded-tl-2xl rounded-bl-2xl rounded-br-2xl rounded-tr-md ${t.myBubble}`,
+                MESSAGE_TOUCH_CLASS,
+              )}
+            >
               <ChatMessageReplySnippet
                 replyTo={message.replyTo}
                 isDark={t === THEME.dark}
@@ -471,7 +479,7 @@ function MessageItem({
               <p className="px-[14px] py-3 text-body-s">{message.content}</p>
             </div>
           </div>
-          <ChatMessageReactionBar reactionState={reactionState} align="right" />
+          <ChatMessageReactionBar reactionState={reactionState} align="right" isDark={t === THEME.dark} />
         </div>
       </div>
     );
@@ -504,7 +512,10 @@ function MessageItem({
         </div>
         <div className="flex items-end gap-2">
           <div
-            className={`overflow-hidden rounded-tl-md rounded-bl-2xl rounded-br-2xl rounded-tr-2xl ${t.otherBubble}`}
+            className={clsx(
+              `overflow-hidden rounded-tl-md rounded-bl-2xl rounded-br-2xl rounded-tr-2xl ${t.otherBubble}`,
+              MESSAGE_TOUCH_CLASS,
+            )}
             onPointerDown={(event) => onStartLongPress(message, event.currentTarget)}
             onPointerUp={onCancelLongPress}
             onPointerCancel={onCancelLongPress}
@@ -520,7 +531,7 @@ function MessageItem({
           </div>
           <span className={`text-label-s ${t.time}`}>{formatTimeLabel(message.sentAt)}</span>
         </div>
-        <ChatMessageReactionBar reactionState={reactionState} align="left" />
+        <ChatMessageReactionBar reactionState={reactionState} align="left" isDark={t === THEME.dark} />
       </div>
     </div>
   );
