@@ -36,7 +36,7 @@ export function VoteInsightSection({
 
         <div className="mt-10">
           {shouldShowAiInsight && (
-            <div className="px-4 py-5 rounded-lg bg-grey-divider">
+            <div className="px-4 py-5 rounded-lg bg-grey-divider mb-10">
               <div className="flex items-center gap-2">
                 <img src="/assets/icons/ai.svg" alt="" />
                 <span className="text-body-m">AI 인사이트</span>
@@ -55,7 +55,7 @@ export function VoteInsightSection({
             </div>
           )}
 
-          <div className="mt-10">
+          <div>
             {voteUserType === "member-voted" && <span className="text-body-s text-grey-light">나의 선택</span>}
 
             <div className="mt-5 flex flex-col gap-2">
