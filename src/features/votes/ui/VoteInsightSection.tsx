@@ -35,7 +35,27 @@ export function VoteInsightSection({
         <h2 className="text-h-s text-grey-dark">분석 인사이트</h2>
 
         <div className="mt-10">
-          <div>
+          {shouldShowAiInsight && (
+            <div className="px-4 py-5 rounded-lg bg-grey-divider">
+              <div className="flex items-center gap-2">
+                <img src="/assets/icons/ai.svg" alt="" />
+                <span className="text-body-m">AI 인사이트</span>
+              </div>
+
+              {aiInsight.headline && <p className="mt-5">{aiInsight.headline}</p>}
+              {aiInsight.body && <p className="mt-2">{aiInsight.body}</p>}
+
+              <div className="bg-grey-stroke rounded-lg p-[10px] mt-5 flex items-start gap-2">
+                <img src="/assets/icons/info.svg" alt="" />
+                <p className="text-label-m text-grey-light">
+                  AI 인사이트는 투표 데이터를 기반으로 자동 생성된 분석이에요. 개인의 가치관과 다를 수 있으니 참고만
+                  해주세요.
+                </p>
+              </div>
+            </div>
+          )}
+
+          <div className="mt-10">
             {voteUserType === "member-voted" && <span className="text-body-s text-grey-light">나의 선택</span>}
 
             <div className="mt-5 flex flex-col gap-2">
@@ -77,26 +97,6 @@ export function VoteInsightSection({
                   <AgeBarChart groups={ageGroups} />
                 </div>
               </div>
-
-              {shouldShowAiInsight && (
-                <div className="px-4 py-5 rounded-lg mt-10 bg-grey-divider">
-                  <div className="flex items-center gap-2">
-                    <img src="/assets/icons/ai.svg" alt="" />
-                    <span className="text-body-m">AI 인사이트</span>
-                  </div>
-
-                  {aiInsight.headline && <p className="mt-5">{aiInsight.headline}</p>}
-                  {aiInsight.body && <p className="mt-2">{aiInsight.body}</p>}
-
-                  <div className="bg-grey-stroke rounded-lg p-[10px] mt-5 flex items-start gap-2">
-                    <img src="/assets/icons/info.svg" alt="" />
-                    <p className="text-label-m text-grey-light">
-                      AI 인사이트는 투표 데이터를 기반으로 자동 생성된 분석이에요. 개인의 가치관과 다를 수 있으니 참고만
-                      해주세요.
-                    </p>
-                  </div>
-                </div>
-              )}
             </div>
 
             {isGuest && (

@@ -42,7 +42,7 @@ export function VoteFilterBar({ sortType, excludeEnded, onChangeSortType, onChan
       </div>
 
       <SortDropdown
-        options={SORT_OPTIONS.filter(({ value }) => excludeEnded || value !== "ENDING_SOON")}
+        options={SORT_OPTIONS}
         value={sortType}
         onChange={onChangeSortType}
       />
