@@ -3,7 +3,7 @@ import type { VoteSortType } from "./home.ts";
 
 const HOME_VOTE_FILTER_STORAGE_KEY = "homeVoteFilter";
 const DEFAULT_SORT_TYPE: VoteSortType = "LATEST";
-const DEFAULT_EXCLUDE_ENDED = true;
+const DEFAULT_EXCLUDE_ENDED = false;
 
 interface HomeVoteFilterState {
   sortType: VoteSortType;
