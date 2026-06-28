@@ -29,8 +29,8 @@ export function ChatMessageReactionBar({ reactionState, align, isDark = false }:
               "inline-flex h-7 min-w-12 select-none items-center justify-center gap-1 rounded-full px-2.5 text-label-m",
               isDark
                 ? isMine
-                  ? "bg-primary text-white"
-                  : "border border-[#565A60] bg-[#2E3034] text-[#E8E8EA]"
+                  ? "bg-[#434346] text-white"
+                  : "bg-[#2A2C2F] text-white"
                 : isMine
                   ? "bg-primary-100 text-grey-black"
                   : "bg-grey-divider text-grey-black",
