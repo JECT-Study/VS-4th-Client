@@ -29,9 +29,19 @@ function isInsideScrollable(target: Element | null, boundary: Element): boolean 
   return false;
 }
 
-const isEligibleFeedVote = (vote: ImmersiveFeedItem) => vote.status !== "ENDED";
+const isEligibleFeedVote = (vote: ImmersiveFeedItem) => vote.status !== "ENDED" && vote.myVote?.voted !== true;
 
 const filterEligibleFeedVotes = (items: ImmersiveFeedItem[]) => items.filter(isEligibleFeedVote);
+
+const filterNewEligibleFeedVotes = (items: ImmersiveFeedItem[], seenIds: Set<number>) => {
+  const nextSeenIds = new Set(seenIds);
+
+  return filterEligibleFeedVotes(items).filter((vote) => {
+    if (nextSeenIds.has(vote.voteId)) return false;
+    nextSeenIds.add(vote.voteId);
+    return true;
+  });
+};
 
 export function useImmersiveFeed(startVoteId?: number, startVoteSeq?: number) {
   const queryClient = useQueryClient();
@@ -92,7 +102,14 @@ export function useImmersiveFeed(startVoteId?: number, startVoteSeq?: number) {
     if (!initialData || !needsSeedRef.current) return;
     needsSeedRef.current = false;
     const initialItems = initialData.items ?? [];
-    setVotes(filterEligibleFeedVotes(initialItems));
+    const initialSeenIds = new Set<number>();
+    const eligibleInitialItems = filterEligibleFeedVotes(initialItems).filter((vote) => {
+      if (initialSeenIds.has(vote.voteId)) return false;
+      initialSeenIds.add(vote.voteId);
+      return true;
+    });
+
+    setVotes(eligibleInitialItems);
     seenIdsRef.current = new Set(initialItems.map((v) => v.voteId));
     isExhaustedRef.current = false;
   }, [initialData]);
@@ -116,24 +133,13 @@ export function useImmersiveFeed(startVoteId?: number, startVoteSeq?: number) {
     fetchNextImmersiveFeed(excludeIds)
       .then((result) => {
         const newItems = result.items ?? [];
+        const eligibleNewItems = filterNewEligibleFeedVotes(newItems, seenIdsRef.current);
         for (const vote of newItems) seenIdsRef.current.add(vote.voteId);
 
         if (newItems.length === 0) {
-          seenIdsRef.current = new Set();
-          return fetchNextImmersiveFeed([]).then((retry) => {
-            const retryItems = retry.items ?? [];
-            for (const vote of retryItems) seenIdsRef.current.add(vote.voteId);
-
-            if (retryItems.length === 0) {
-              isExhaustedRef.current = true;
-              return;
-            }
-            const eligibleRetryItems = filterEligibleFeedVotes(retryItems);
-            if (eligibleRetryItems.length === 0) return;
-            setVotes((prev) => [...prev, ...eligibleRetryItems]);
-          });
+          isExhaustedRef.current = true;
+          return;
         }
-        const eligibleNewItems = filterEligibleFeedVotes(newItems);
         if (eligibleNewItems.length === 0) return;
         setVotes((prev) => [...prev, ...eligibleNewItems]);
       })

@@ -60,13 +60,27 @@ describe("useImmersiveFeed", () => {
   });
 
   describe("피드 항목 필터링", () => {
-    it("초기 피드에서 종료된 투표만 제외하고 이미 참여한 진행중 투표는 포함한다", async () => {
+    it("초기 피드에서 종료된 투표와 이미 참여한 투표를 제외한다", async () => {
       mockInitialFn.mockResolvedValue({
         items: [
           makeVote(1),
           makeVote(2, { myVote: { voted: true, selectedOptionId: 20 } }),
           makeVote(3, { status: "ENDED" }),
         ],
+      });
+      mockFetchNext.mockResolvedValue({ items: [] });
+
+      const queryClient = createTestQueryClient();
+      const { result } = renderHook(() => useImmersiveFeed(), {
+        wrapper: createWrapper(queryClient),
+      });
+
+      await waitFor(() => expect(result.current.votes.map((vote) => vote.voteId)).toEqual([1]));
+    });
+
+    it("초기 피드에서 같은 voteId가 중복으로 내려오면 한 번만 표시한다", async () => {
+      mockInitialFn.mockResolvedValue({
+        items: [makeVote(1), makeVote(1), makeVote(2)],
       });
       mockFetchNext.mockResolvedValue({ items: [] });
 
@@ -92,11 +106,13 @@ describe("useImmersiveFeed", () => {
       await waitFor(() => expect(result.current.votes.map((vote) => vote.voteId)).toEqual([1, 2]));
     });
 
-    it("추가 피드에서도 종료된 투표만 제외하고 이미 참여한 진행중 투표는 포함한다", async () => {
+    it("추가 피드에서도 종료된 투표, 이미 참여한 투표, 이전에 노출된 투표를 제외한다", async () => {
       const initialVotes = [makeVote(1), makeVote(2), makeVote(3), makeVote(4), makeVote(5)];
       const nextVotes = [
         makeVote(6, { myVote: { voted: true, selectedOptionId: 60 } }),
         makeVote(7, { status: "ENDED" }),
+        makeVote(2),
+        makeVote(8),
         makeVote(8),
       ];
 
@@ -125,7 +141,7 @@ describe("useImmersiveFeed", () => {
         });
       }
 
-      await waitFor(() => expect(result.current.votes.map((vote) => vote.voteId)).toEqual([1, 2, 3, 4, 5, 6, 8]));
+      await waitFor(() => expect(result.current.votes.map((vote) => vote.voteId)).toEqual([1, 2, 3, 4, 5, 8]));
       expect(mockFetchNext.mock.calls[0]?.[0]).toEqual(expect.arrayContaining([1, 2, 3, 4, 5]));
 
       vi.spyOn(Date, "now").mockRestore();
@@ -328,14 +344,11 @@ describe("useImmersiveFeed", () => {
       vi.spyOn(Date, "now").mockRestore();
     });
 
-    it("빈 items 반환 시 seenIds를 초기화하고 excludeIds: []로 재요청한다", async () => {
+    it("빈 items 반환 시 소진 상태로 처리하고 이전 투표를 재요청하지 않는다", async () => {
       const initialVotes = [makeVote(1), makeVote(2), makeVote(3), makeVote(4), makeVote(5)];
-      const cycleVotes = [makeVote(1), makeVote(2)];
 
       mockInitialFn.mockResolvedValue({ items: initialVotes });
-      mockFetchNext
-        .mockResolvedValueOnce({ items: [] }) // 소진 응답
-        .mockResolvedValueOnce({ items: cycleVotes }); // 초기화 후 재요청
+      mockFetchNext.mockResolvedValueOnce({ items: [] });
 
       let now = 0;
       vi.spyOn(Date, "now").mockImplementation(() => {
@@ -359,12 +372,19 @@ describe("useImmersiveFeed", () => {
         });
       }
 
-      // 소진 → seenIds 초기화 → excludeIds: []로 재요청 → cycleVotes 추가됨
-      await waitFor(() => expect(result.current.votes).toHaveLength(7));
+      await waitFor(() => expect(mockFetchNext).toHaveBeenCalledTimes(1));
+      expect(result.current.votes.map((vote) => vote.voteId)).toEqual([1, 2, 3, 4, 5]);
 
-      // 첫 번째 호출: seenIds, 두 번째 호출: [] (재요청)
-      expect(mockFetchNext.mock.calls).toHaveLength(2);
-      expect(mockFetchNext.mock.calls[1]?.[0]).toEqual([]);
+      for (let i = 0; i < 3; i++) {
+        act(() => {
+          result.current.handleTouchStart({ touches: [{ clientY: 200 }] } as never);
+        });
+        act(() => {
+          result.current.handleTouchEnd({ changedTouches: [{ clientY: 0 }] } as never);
+        });
+      }
+
+      expect(mockFetchNext).toHaveBeenCalledTimes(1);
 
       vi.spyOn(Date, "now").mockRestore();
     });
