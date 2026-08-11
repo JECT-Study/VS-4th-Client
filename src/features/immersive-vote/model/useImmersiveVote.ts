@@ -63,25 +63,19 @@ export function useImmersiveVote(
     mutationFn: (optionId: number) => immersiveParticipate(vote.voteId, optionId),
     onMutate: (optionId) => {
       const snapshot = {
-        myVote: vote.myVote,
-        options: vote.options,
         participantCount: vote.participantCount,
+        selectedOptionId: vote.myVote.selectedOptionId,
       };
       const isCancel = vote.myVote.selectedOptionId === optionId;
       syncChatVoteOption(isCancel ? null : optionId);
       updateVote(vote.voteId, (current) => {
-        if (isCancel) {
-          return {
-            ...current,
-            options: current.options.map((o) => ({ ...o, voteCount: null, ratio: null })),
-            myVote: { voted: false, selectedOptionId: null },
-            participantCount: Math.max(0, current.participantCount - 1),
-          };
-        }
         return {
           ...current,
-          myVote: { voted: true, selectedOptionId: optionId },
-          participantCount: current.myVote.voted ? current.participantCount : current.participantCount + 1,
+          participantCount: isCancel
+            ? Math.max(0, current.participantCount - 1)
+            : current.myVote.voted
+              ? current.participantCount
+              : current.participantCount + 1,
         };
       });
       return snapshot;
@@ -118,11 +112,9 @@ export function useImmersiveVote(
       if (snapshot) {
         updateVote(vote.voteId, (current) => ({
           ...current,
-          myVote: snapshot.myVote,
-          options: snapshot.options,
           participantCount: snapshot.participantCount,
         }));
-        syncChatVoteOption(snapshot.myVote.selectedOptionId);
+        syncChatVoteOption(snapshot.selectedOptionId);
       }
       invalidateChatVoteState();
       if (isAxiosError(err)) {
