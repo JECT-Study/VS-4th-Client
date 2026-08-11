@@ -59,6 +59,33 @@ describe("useImmersiveFeed", () => {
     vi.clearAllMocks();
   });
 
+  describe("A/B 시안 선택", () => {
+    it("피드 응답의 B variant를 그대로 사용한다", async () => {
+      mockInitialFn.mockResolvedValue({ items: [makeVote(1)], variant: "B" });
+      mockFetchNext.mockResolvedValue({ items: [] });
+
+      const queryClient = createTestQueryClient();
+      const { result } = renderHook(() => useImmersiveFeed(), {
+        wrapper: createWrapper(queryClient),
+      });
+
+      await waitFor(() => expect(result.current.variant).toBe("B"));
+    });
+
+    it("variant가 없으면 기본 A안을 사용한다", async () => {
+      mockInitialFn.mockResolvedValue({ items: [makeVote(1)] });
+      mockFetchNext.mockResolvedValue({ items: [] });
+
+      const queryClient = createTestQueryClient();
+      const { result } = renderHook(() => useImmersiveFeed(), {
+        wrapper: createWrapper(queryClient),
+      });
+
+      await waitFor(() => expect(result.current.votes).toHaveLength(1));
+      expect(result.current.variant).toBe("A");
+    });
+  });
+
   describe("피드 항목 필터링", () => {
     it("초기 피드에서 종료된 투표와 이미 참여한 투표를 제외한다", async () => {
       mockInitialFn.mockResolvedValue({

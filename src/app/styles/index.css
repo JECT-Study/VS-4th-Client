@@ -189,6 +189,31 @@
   animation: float-emoji var(--float-duration-ms) ease-out forwards;
 }
 
+@keyframes immersive-swipe-hint-sharpen {
+  0% {
+    color: rgb(231 229 235 / 58%);
+  }
+  42% {
+    color: #e7e5eb;
+  }
+  68% {
+    color: rgb(231 229 235 / 78%);
+  }
+  100% {
+    color: #e7e5eb;
+  }
+}
+
+.animate-immersive-swipe-hint {
+  animation: immersive-swipe-hint-sharpen 400ms ease-out 100ms 1 both;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .animate-immersive-swipe-hint {
+    animation: none;
+  }
+}
+
 /* HorizontalScroll: 스크롤바 숨김 + iOS 모멘텀 스크롤 */
 .hs-scroll {
   -ms-overflow-style: none;

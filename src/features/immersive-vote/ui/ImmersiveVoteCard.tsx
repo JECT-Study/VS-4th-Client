@@ -6,7 +6,8 @@ import ChatAuthRequiredModal from "@features/votes/ui/ChatAuthRequiredModal";
 import FreeVoteLimitModal from "@features/votes/ui/FreeVoteLimitModal";
 import PushNotificationPromptModal from "@features/votes/ui/PushNotificationPromptModal";
 import { useQuery } from "@tanstack/react-query";
-import { useCallback, useRef, useState } from "react";
+import { useCallback, useLayoutEffect, useRef, useState } from "react";
+import type { ImmersiveVoteVariant } from "../api/immersiveFeedQuery";
 import type { FloatingEmojiOrigin, ImmersiveFeedItem } from "../model/types";
 import { useImmersiveVote } from "../model/useImmersiveVote";
 import { useImmersiveVoteLive } from "../model/useImmersiveVoteLive";
@@ -15,20 +16,34 @@ import { FloatingEmojiContainer } from "./FloatingEmojiContainer";
 import { ImmersiveShareModal } from "./ImmersiveShareModal";
 import { ImmersiveVoteOptions } from "./ImmersiveVoteOptions";
 import { ImmersiveVoteTimer } from "./ImmersiveVoteTimer";
-import { VoteContentSection } from "./VoteContentSection";
+import { SwipeNextVoteHint } from "./SwipeNextVoteHint";
+import { VoteContentSection, VoteTitle } from "./VoteContentSection";
 
 interface ImmersiveVoteCardProps {
   vote: ImmersiveFeedItem;
+  variant: ImmersiveVoteVariant;
   updateVote: (voteId: number, updater: (vote: ImmersiveFeedItem) => ImmersiveFeedItem) => void;
+  isSwipeHintVisible: boolean;
 }
 
-export function ImmersiveVoteCard({ vote, updateVote }: ImmersiveVoteCardProps) {
+const DEFAULT_VARIANT_A_STACK_HEIGHT = 248;
+const MEDIA_OPTION_GAP = "clamp(12px, 2dvh, 24px)";
+const VARIANT_A_MEDIA_MAX_HEIGHT = "min(125vw, max(420px, calc(100dvh - 480px)), 820px)";
+const VARIANT_B_MEDIA_MIN_HEIGHT = "min(75vw, 336px, 38dvh)";
+const VARIANT_B_MEDIA_MAX_HEIGHT = "min(125vw, 820px)";
+
+export function ImmersiveVoteCard({ vote, variant, updateVote, isSwipeHintVisible }: ImmersiveVoteCardProps) {
   const cardRef = useRef<HTMLElement>(null);
+  const actionRailRef = useRef<HTMLDivElement>(null);
+  const variantAStackRef = useRef<HTMLDivElement>(null);
   const [isImageLoaded, setIsImageLoaded] = useState(true);
+  const [isContentExpanded, setIsContentExpanded] = useState(false);
+  const [variantACollapsedStackHeight, setVariantACollapsedStackHeight] = useState(DEFAULT_VARIANT_A_STACK_HEIGHT);
   const [isShareOpen, setIsShareOpen] = useState(false);
   const [isChatAuthOpen, setIsChatAuthOpen] = useState(false);
   const [isChatOpen, setIsChatOpen] = useState(false);
   const [isFreeVoteLimitModalOpen, setIsFreeVoteLimitModalOpen] = useState(false);
+  const isActionRailDisabled = isContentExpanded;
   const {
     isOpen: isPushPromptOpen,
     checkAndShow: checkAndShowPushPrompt,
@@ -44,6 +59,27 @@ export function ImmersiveVoteCard({ vote, updateVote }: ImmersiveVoteCardProps) 
   useImmersiveVoteLive(vote, updateVote);
 
   const { data: user } = useQuery(userQueryOptions());
+
+  useLayoutEffect(() => {
+    actionRailRef.current?.toggleAttribute("inert", isActionRailDisabled);
+  }, [isActionRailDisabled]);
+
+  useLayoutEffect(() => {
+    const stack = variantAStackRef.current;
+    if (variant !== "A" || isContentExpanded || !stack) return;
+
+    const updateStackHeight = () => {
+      const nextHeight = Math.ceil(stack.getBoundingClientRect().height);
+      if (nextHeight > 0) {
+        setVariantACollapsedStackHeight((currentHeight) => (currentHeight === nextHeight ? currentHeight : nextHeight));
+      }
+    };
+
+    updateStackHeight();
+    const observer = new ResizeObserver(updateStackHeight);
+    observer.observe(stack);
+    return () => observer.disconnect();
+  }, [isContentExpanded, variant]);
 
   const openChat = () => {
     if (user === null) {
@@ -70,40 +106,72 @@ export function ImmersiveVoteCard({ vote, updateVote }: ImmersiveVoteCardProps) 
     };
   }, []);
 
-  return (
-    <article ref={cardRef} className="relative h-dvh overflow-hidden bg-grey-black pb-16 text-white">
-      {vote.imageUrl && isImageLoaded && (
+  const voteTitle = <VoteTitle title={vote.title} />;
+  const voteOptions = <ImmersiveVoteOptions vote={vote} onOptionClick={handleOptionClick} />;
+  const voteContentControls = (
+    <div className="relative z-10 flex min-h-0 flex-col">
+      <VoteContentSection
+        content={vote.content}
+        isExpanded={isContentExpanded}
+        onExpandedChange={setIsContentExpanded}
+      />
+      <div className="mt-2 shrink-0">
+        <ImmersiveVoteTimer endAt={vote.endAt} />
+      </div>
+    </div>
+  );
+
+  const variantAContent = (
+    <div className={`absolute inset-0 flex min-h-0 flex-col justify-end ${isContentExpanded ? "z-40" : "z-10"}`}>
+      <div
+        className={`pointer-events-none absolute inset-0 bg-gradient-to-b from-black/0 via-black/80 to-black/[0.85] transition-opacity duration-300 ${
+          isContentExpanded ? "opacity-100" : "opacity-0"
+        }`}
+        aria-hidden
+      />
+      <div ref={variantAStackRef} className="relative z-10 flex min-h-0 shrink-0 flex-col pb-[clamp(12px,2.8dvh,24px)]">
+        <div className="relative z-20 flex h-[124px] shrink-0 items-start pt-6">{voteOptions}</div>
+        <div className="flex min-h-0 flex-col pt-5">{voteContentControls}</div>
+      </div>
+    </div>
+  );
+
+  const variantBContent = (
+    <div
+      className={`absolute inset-0 flex min-h-0 flex-col justify-end pb-[clamp(12px,2.8dvh,28px)] pt-3 ${
+        isContentExpanded ? "z-40" : "z-10"
+      }`}
+    >
+      <div
+        className={`pointer-events-none absolute inset-0 bg-gradient-to-b from-black/0 via-black/80 to-black/[0.85] transition-opacity duration-300 ${
+          isContentExpanded ? "opacity-100" : "opacity-0"
+        }`}
+        aria-hidden
+      />
+      {voteContentControls}
+    </div>
+  );
+
+  const voteMediaContent = (
+    <>
+      {vote.imageUrl && isImageLoaded ? (
         <img
           src={vote.imageUrl}
           alt=""
-          className="absolute inset-0 h-full w-full scale-110 object-cover opacity-65 blur-md"
+          className="h-full w-full object-cover"
           onError={() => setIsImageLoaded(false)}
-          aria-hidden
         />
+      ) : (
+        <div className="h-full w-full bg-[#A3A3A3]" />
       )}
-      <div className="absolute inset-0 bg-gradient-to-b from-black/65" />
 
-      <div className="relative z-10 flex flex-col items-center justify-start py-6">
-        <ImmersiveVoteTimer endAt={vote.endAt} />
-        <div className="mt-5 w-full">
-          <VoteContentSection title={vote.title} content={vote.content} />
-        </div>
-      </div>
-
-      <div className="absolute left-0 right-0">
-        {vote.imageUrl && isImageLoaded ? (
-          <img
-            src={vote.imageUrl}
-            alt=""
-            className="w-full aspect-square object-cover"
-            onError={() => setIsImageLoaded(false)}
-          />
-        ) : (
-          <div className="w-full aspect-square bg-[#A3A3A3]" />
-        )}
-      </div>
-
-      <div className="absolute top-1/2 -translate-y-1/4 inset-y-0 right-3 z-30 flex flex-col items-center justify-center gap-5 h-fit">
+      <div
+        ref={actionRailRef}
+        className={`absolute inset-y-0 right-2 z-30 flex h-full flex-col items-center justify-end gap-5 ${
+          isActionRailDisabled ? "pointer-events-none" : ""
+        }`}
+        aria-hidden={isActionRailDisabled}
+      >
         <EmojiReactionButton
           emojiList={emojiList}
           totalCount={vote.emojiSummary.total}
@@ -111,7 +179,7 @@ export function ImmersiveVoteCard({ vote, updateVote }: ImmersiveVoteCardProps) 
           onEmojiClick={handleEmojiClick}
         />
 
-        <button type="button" className="flex flex-col items-center gap-1 w-12 h-12 justify-center" onClick={openChat}>
+        <button type="button" className="flex h-12 w-12 flex-col items-center justify-center gap-1" onClick={openChat}>
           <span className="flex h-9 w-9 items-center justify-center">
             <img
               src="/assets/icons/chat-reels-big.svg"
@@ -131,14 +199,66 @@ export function ImmersiveVoteCard({ vote, updateVote }: ImmersiveVoteCardProps) 
           <img src="/assets/icons/share-big.svg" alt="" className="h-7 w-7 drop-shadow-[0_0_5px_rgba(0,0,0,0.4)]" />
         </button>
       </div>
+    </>
+  );
 
-      <div className="absolute bottom-[106px] left-0 right-0 z-20">
-        <ImmersiveVoteOptions vote={vote} onOptionClick={handleOptionClick} />
+  const variantAMedia = (
+    <div
+      className="absolute inset-x-0 w-full overflow-hidden"
+      style={{
+        bottom: `calc(${variantACollapsedStackHeight}px + ${MEDIA_OPTION_GAP})`,
+        height: `clamp(220px, calc(100% - ${variantACollapsedStackHeight}px - ${MEDIA_OPTION_GAP}), ${VARIANT_A_MEDIA_MAX_HEIGHT})`,
+      }}
+    >
+      {voteMediaContent}
+    </div>
+  );
+
+  const variantBMedia = (
+    <div
+      className="relative w-full shrink-0 overflow-hidden"
+      style={{
+        height: `clamp(${VARIANT_B_MEDIA_MIN_HEIGHT}, calc(100dvh - 520px), ${VARIANT_B_MEDIA_MAX_HEIGHT})`,
+      }}
+    >
+      {voteMediaContent}
+    </div>
+  );
+
+  return (
+    <article ref={cardRef} className="relative h-dvh overflow-hidden bg-grey-black pb-16 text-white">
+      {vote.imageUrl && isImageLoaded && (
+        <img
+          src={vote.imageUrl}
+          alt=""
+          className="absolute inset-0 h-full w-full scale-110 object-cover opacity-65 blur-md"
+          onError={() => setIsImageLoaded(false)}
+          aria-hidden
+        />
+      )}
+      <div className="absolute inset-0 bg-gradient-to-b from-black/65" />
+
+      <div className="relative z-10 flex h-[calc(100dvh-4rem)] flex-col">
+        {variant === "A" ? (
+          <div className="relative flex h-full flex-col" data-immersive-variant="A">
+            <div className="flex pt-[50px] shrink-0 items-end justify-center pb-6">{voteTitle}</div>
+            <div className="relative min-h-0 flex-1">
+              {variantAMedia}
+              {variantAContent}
+            </div>
+          </div>
+        ) : (
+          <div className="relative flex h-full flex-col" data-immersive-variant="B">
+            <div className="flex pt-[50px] shrink-0 items-end justify-center pb-5">{voteTitle}</div>
+            <div className="flex h-[137px] shrink-0 items-start pt-1.5">{voteOptions}</div>
+            <div className="relative min-h-0 flex-1">
+              {variantBMedia}
+              {variantBContent}
+            </div>
+          </div>
+        )}
+        <SwipeNextVoteHint isVisible={isSwipeHintVisible} />
       </div>
-
-      <p className="absolute bottom-[74px] left-0 right-0 z-20 text-center text-label-s text-[#F7EFED]">
-        스와이프해서 다음 투표 보기
-      </p>
 
       <FloatingEmojiContainer floatingEmojis={floatingEmojis} onAnimationEnd={removeFloatingEmoji} />
 

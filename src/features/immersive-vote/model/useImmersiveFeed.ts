@@ -3,6 +3,7 @@ import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { type TouchEvent, useCallback, useEffect, useRef, useState } from "react";
 import {
   type ImmersiveFeedResponse,
+  type ImmersiveVoteVariant,
   fetchNextImmersiveFeed,
   immersiveFeedQueryKey,
   immersiveFeedQueryOptions,
@@ -263,6 +264,7 @@ export function useImmersiveFeed(startVoteId?: number, startVoteSeq?: number) {
   };
 
   const trackClassName = isTransitionEnabled ? "transition-transform duration-500 ease-out" : "";
+  const variant: ImmersiveVoteVariant = initialData?.variant === "B" ? "B" : "A";
 
   return {
     votes,
@@ -276,6 +278,7 @@ export function useImmersiveFeed(startVoteId?: number, startVoteSeq?: number) {
     handleTrackTransitionEnd,
     trackClassName,
     trackStyle,
+    variant,
     // 최초 로딩에만 스피너를 노출한다. 이미 피드가 있는 상태에서의 refetch
     // (startVoteId 진입 등)에는 <main>을 언마운트하지 않아 wheel/touch 리스너가
     // 떨어져 나간 옛 노드에 묶이는 문제를 막는다.
