@@ -1,0 +1,32 @@
+{
+  "hooks": {
+    "PostToolUse": [
+      {
+        "matcher": "Write|Edit",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "{ read -r json; f=$(echo \"$json\" | jq -r '.tool_input.file_path // .tool_response.filePath'); [ -z \"$f\" ] && exit 0; result=$(pnpm biome check --files-ignore-unknown=true \"$f\" 2>&1); [ $? -eq 0 ] && exit 0; jq -n --arg f \"$f\" --arg r \"$result\" '{\"hookSpecificOutput\":{\"hookEventName\":\"PostToolUse\",\"additionalContext\":(\"Biome lint error in \" + $f + \":\\n\" + $r)}}'; } 2>/dev/null || true",
+            "timeout": 15,
+            "statusMessage": "Biome lint 검사 중..."
+          }
+        ]
+      }
+    ],
+    "Stop": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "result=$(pnpm tsc -b --noEmit 2>&1); [ -z \"$result\" ] && exit 0; echo \"$result\"; exit 2",
+            "timeout": 60,
+            "asyncRewake": true,
+            "statusMessage": "TypeScript 타입 검사 중...",
+            "rewakeMessage": "TypeScript 타입 에러가 발견되었습니다. 수정이 필요합니다:\n",
+            "rewakeSummary": "TypeScript 에러 발견"
+          }
+        ]
+      }
+    ]
+  }
+}

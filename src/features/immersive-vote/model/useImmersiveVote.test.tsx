@@ -178,6 +178,42 @@ describe("useImmersiveVote", () => {
     expect(result.current.vote.participantCount).toBe(initialVote.participantCount);
   });
 
+  it("API 응답 전에는 선택 결과와 비율을 추측해서 표시하지 않는다", async () => {
+    const queryClient = createTestQueryClient();
+    seedMember(queryClient);
+    let resolveParticipate: ((value: unknown) => void) | undefined;
+    mockImmersiveParticipate.mockImplementation(
+      () =>
+        new Promise((resolve) => {
+          resolveParticipate = resolve;
+        }),
+    );
+    const initialVote = makeVote();
+    const { result } = renderUseImmersiveVote(queryClient, initialVote);
+
+    act(() => result.current.handleOptionClick(10));
+
+    await waitFor(() => expect(mockImmersiveParticipate).toHaveBeenCalledWith(101, 10));
+    expect(result.current.vote.myVote).toEqual(initialVote.myVote);
+    expect(result.current.vote.options).toEqual(initialVote.options);
+
+    act(() => {
+      resolveParticipate?.({
+        voteId: 101,
+        action: "VOTED",
+        selectedOptionId: 10,
+        options: [
+          { optionId: 10, label: "옵션 A", voteCount: 4, ratio: 40 },
+          { optionId: 11, label: "옵션 B", voteCount: 6, ratio: 60 },
+        ],
+        remainingFreeVotes: null,
+      });
+    });
+
+    await waitFor(() => expect(result.current.vote.myVote.selectedOptionId).toBe(10));
+    expect(result.current.vote.options.map((option) => option.ratio)).toEqual([40, 60]);
+  });
+
   it("이모지 실패 시 optimistic 변경을 롤백하고 실패 토스트를 띄운다", async () => {
     const queryClient = createTestQueryClient();
     seedMember(queryClient);

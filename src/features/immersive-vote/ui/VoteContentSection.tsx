@@ -1,81 +1,68 @@
-import { useLayoutEffect, useRef, useState } from "react";
+import { type KeyboardEvent, useLayoutEffect, useRef, useState } from "react";
 
 interface VoteContentSectionProps {
-  title: string;
   content: string;
+  isExpanded: boolean;
+  onExpandedChange: (isExpanded: boolean) => void;
 }
 
-export function VoteContentSection({ title, content }: VoteContentSectionProps) {
-  const [isExpanded, setIsExpanded] = useState(false);
-  const [isTruncated, setIsTruncated] = useState(false);
-  const [showFade, setShowFade] = useState(false);
+export function VoteTitle({ title }: { title: string }) {
+  return <h1 className="line-clamp-3 px-5 text-center text-h-m text-grey-divider">{title}</h1>;
+}
+
+export function VoteContentSection({ content, isExpanded, onExpandedChange }: VoteContentSectionProps) {
+  const [isExpandable, setIsExpandable] = useState(false);
   const pRef = useRef<HTMLParagraphElement>(null);
 
   useLayoutEffect(() => {
     const el = pRef.current;
     if (!el) return;
 
-    const checkTruncation = () => {
-      if (isExpanded) {
-        setShowFade(el.scrollHeight > el.clientHeight);
-      } else {
-        setIsTruncated(el.scrollHeight > el.clientHeight);
-        setShowFade(false);
-      }
+    const checkExpandable = () => {
+      if (!isExpanded) setIsExpandable(el.scrollHeight > el.clientHeight + 1);
     };
 
-    checkTruncation();
+    checkExpandable();
 
-    const observer = new ResizeObserver(checkTruncation);
+    const observer = new ResizeObserver(checkExpandable);
     observer.observe(el);
     return () => observer.disconnect();
   }, [isExpanded]);
 
-  const handleScroll = () => {
-    const el = pRef.current;
-    if (!el) return;
-    setShowFade(el.scrollTop + el.clientHeight < el.scrollHeight);
+  useLayoutEffect(() => {
+    if (!isExpanded && pRef.current) pRef.current.scrollTop = 0;
+  }, [isExpanded]);
+
+  const canToggle = isExpandable || isExpanded;
+  const handleToggle = () => {
+    if (canToggle) onExpandedChange(!isExpanded);
   };
 
-  const showToggleButton = isTruncated || isExpanded;
+  const handleKeyDown = (event: KeyboardEvent<HTMLElement>) => {
+    if (!canToggle || (event.key !== "Enter" && event.key !== " ")) return;
+    event.preventDefault();
+    onExpandedChange(!isExpanded);
+  };
 
   return (
-    <section className="relative px-5 text-center">
-      <h1 className="text-h-l text-grey-divider line-clamp-3">{title}</h1>
-      <div className="relative mt-3 h-[72px] overflow-visible">
-        <div className="absolute inset-x-0 top-0 z-10">
-          <p
-            ref={pRef}
-            onScroll={handleScroll}
-            className={`text-body-s text-grey-disabled ${isExpanded ? "max-h-[120px] overflow-y-auto hs-scroll" : "line-clamp-2"}`}
-            style={
-              isExpanded && showFade
-                ? {
-                    WebkitMaskImage: "linear-gradient(to bottom, black 87.5%, transparent 100%)",
-                    maskImage: "linear-gradient(to bottom, black 87.5%, transparent 100%)",
-                  }
-                : undefined
-            }
-          >
-            {content}
-          </p>
-          {showToggleButton && (
-            <button
-              type="button"
-              className="ml-auto mt-2 flex items-center gap-1 text-label-s text-grey-purple"
-              onClick={() => setIsExpanded((prev) => !prev)}
-            >
-              {isExpanded ? "접어두기" : "전체보기"}
-              <img
-                src="/assets/icons/dropdown-arrow.svg"
-                alt=""
-                aria-hidden
-                className={`${isExpanded ? "rotate-180" : ""}`}
-              />
-            </button>
-          )}
-        </div>
-      </div>
+    <section
+      className={`relative min-h-0 px-5 text-left ${isExpanded ? "flex flex-col" : ""} ${
+        canToggle ? "cursor-pointer" : ""
+      }`}
+      onClick={handleToggle}
+      onKeyDown={handleKeyDown}
+      role={canToggle ? "button" : undefined}
+      tabIndex={canToggle ? 0 : undefined}
+      aria-expanded={canToggle ? isExpanded : undefined}
+    >
+      <p
+        ref={pRef}
+        className={`min-h-7 text-body-s text-grey-disabled transition-[max-height] duration-300 ${
+          isExpanded ? "max-h-[168px] shrink overflow-y-auto hs-scroll" : "max-h-12 line-clamp-2"
+        }`}
+      >
+        {content}
+      </p>
     </section>
   );
 }

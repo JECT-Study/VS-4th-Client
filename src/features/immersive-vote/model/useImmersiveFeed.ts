@@ -3,6 +3,7 @@ import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { type TouchEvent, useCallback, useEffect, useRef, useState } from "react";
 import {
   type ImmersiveFeedResponse,
+  type ImmersiveVoteVariant,
   fetchNextImmersiveFeed,
   immersiveFeedQueryKey,
   immersiveFeedQueryOptions,
@@ -14,6 +15,7 @@ import {
   WHEEL_NAVIGATION_COOLDOWN_MS,
   WHEEL_NAVIGATION_THRESHOLD,
 } from "../config/constants";
+import { pinVariant, readPinnedVariant } from "./immersiveVoteVariant";
 import type { ImmersiveFeedItem } from "./types";
 
 function isInsideScrollable(target: Element | null, boundary: Element): boolean {
@@ -48,6 +50,7 @@ export function useImmersiveFeed(startVoteId?: number, startVoteSeq?: number) {
   const { data: initialData, isError } = useQuery(immersiveFeedQueryOptions(startVoteId));
 
   const [votes, setVotes] = useState<ImmersiveFeedItem[]>([]);
+  const [pinnedVariant, setPinnedVariant] = useState<ImmersiveVoteVariant | undefined>(readPinnedVariant);
   const [trackIndex, setTrackIndex] = useState(0);
   const [isTransitionEnabled, setIsTransitionEnabled] = useState(true);
   const touchStartY = useRef<number | null>(null);
@@ -113,6 +116,13 @@ export function useImmersiveFeed(startVoteId?: number, startVoteSeq?: number) {
     seenIdsRef.current = new Set(initialItems.map((v) => v.voteId));
     isExhaustedRef.current = false;
   }, [initialData]);
+
+  // 최초로 관측한 시안만 고정한다. 이후 응답(딥링크 재조회 등)이 다른 시안을 내려줘도 무시한다.
+  const responseVariant = initialData?.variant;
+  useEffect(() => {
+    if (!responseVariant || pinnedVariant) return;
+    setPinnedVariant(pinVariant(responseVariant));
+  }, [responseVariant, pinnedVariant]);
 
   const feedLength = votes?.length ?? 0;
   const currentIndex = feedLength === 0 ? 0 : ((trackIndex % feedLength) + feedLength) % feedLength;
@@ -263,6 +273,7 @@ export function useImmersiveFeed(startVoteId?: number, startVoteSeq?: number) {
   };
 
   const trackClassName = isTransitionEnabled ? "transition-transform duration-500 ease-out" : "";
+  const variant: ImmersiveVoteVariant = pinnedVariant ?? "A";
 
   return {
     votes,
@@ -276,6 +287,7 @@ export function useImmersiveFeed(startVoteId?: number, startVoteSeq?: number) {
     handleTrackTransitionEnd,
     trackClassName,
     trackStyle,
+    variant,
     // 최초 로딩에만 스피너를 노출한다. 이미 피드가 있는 상태에서의 refetch
     // (startVoteId 진입 등)에는 <main>을 언마운트하지 않아 wheel/touch 리스너가
     // 떨어져 나간 옛 노드에 묶이는 문제를 막는다.

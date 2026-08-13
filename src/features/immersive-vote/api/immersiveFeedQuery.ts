@@ -2,8 +2,11 @@ import { apiClient } from "@base/api/client";
 import { queryOptions } from "@tanstack/react-query";
 import type { ImmersiveFeedItem } from "../model/types";
 
+export type ImmersiveVoteVariant = "A" | "B";
+
 export interface ImmersiveFeedResponse {
   items: ImmersiveFeedItem[];
+  variant?: ImmersiveVoteVariant;
 }
 
 export const immersiveFeedQueryKey = ["immersive-votes", "feed"] as const;

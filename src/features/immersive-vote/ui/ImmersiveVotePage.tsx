@@ -1,5 +1,6 @@
 import { useSearch } from "@tanstack/react-router";
 import { useImmersiveFeed } from "../model/useImmersiveFeed";
+import { useSwipeNextVoteHint } from "../model/useSwipeNextVoteHint";
 import { ImmersiveVoteCard } from "./ImmersiveVoteCard";
 import { ImmersiveVoteErrorPage } from "./ImmersiveVoteErrorPage";
 
@@ -15,9 +16,11 @@ export function ImmersiveVotePage() {
     handleTrackTransitionEnd,
     trackClassName,
     trackStyle,
+    variant,
     isLoading,
     isError,
   } = useImmersiveFeed(startVoteId, startVoteSeq);
+  const isSwipeHintVisible = useSwipeNextVoteHint(currentVote?.myVote.voted === true);
 
   if (isError) {
     return <ImmersiveVoteErrorPage />;
@@ -40,7 +43,13 @@ export function ImmersiveVotePage() {
     >
       <div className={trackClassName} style={trackStyle} onTransitionEnd={handleTrackTransitionEnd}>
         {displayedVotes.map((vote, index) => (
-          <ImmersiveVoteCard key={`${vote.voteId}-${index}`} vote={vote} updateVote={updateVote} />
+          <ImmersiveVoteCard
+            key={`${vote.voteId}-${index}`}
+            vote={vote}
+            variant={variant}
+            updateVote={updateVote}
+            isSwipeHintVisible={isSwipeHintVisible && vote.voteId === currentVote.voteId}
+          />
         ))}
       </div>
     </main>

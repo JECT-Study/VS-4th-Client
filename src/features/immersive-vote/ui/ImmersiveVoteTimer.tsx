@@ -18,9 +18,5 @@ export function ImmersiveVoteTimer({ endAt }: { endAt: string }) {
     return () => window.clearInterval(timer);
   }, [endAt]);
 
-  return (
-    <div className="inline-flex items-center justify-center rounded-xl bg-primary px-4 py-2 text-label-m text-grey-divider">
-      투표 종료까지 {remainingTime}
-    </div>
-  );
+  return <div className="px-5 text-label-m text-primary-light">투표 종료까지 {remainingTime}</div>;
 }
