@@ -57,6 +57,7 @@ function createWrapper(queryClient: QueryClient) {
 describe("useImmersiveFeed", () => {
   beforeEach(() => {
     vi.clearAllMocks();
+    window.sessionStorage.clear();
   });
 
   describe("A/B 시안 선택", () => {
@@ -83,6 +84,40 @@ describe("useImmersiveFeed", () => {
 
       await waitFor(() => expect(result.current.votes).toHaveLength(1));
       expect(result.current.variant).toBe("A");
+    });
+
+    it("한 번 고정된 시안은 이후 응답이 다른 시안을 내려줘도 유지된다", async () => {
+      mockInitialFn.mockResolvedValueOnce({ items: [makeVote(1)], variant: "B" });
+      mockFetchNext.mockResolvedValue({ items: [] });
+
+      const { result, unmount } = renderHook(() => useImmersiveFeed(), {
+        wrapper: createWrapper(createTestQueryClient()),
+      });
+
+      await waitFor(() => expect(result.current.variant).toBe("B"));
+      unmount();
+
+      // startVoteId 딥링크 진입처럼 /next를 다시 호출해 A안이 내려오는 상황
+      mockInitialFn.mockResolvedValue({ items: [makeVote(2)], variant: "A" });
+
+      const { result: remounted } = renderHook(() => useImmersiveFeed(1), {
+        wrapper: createWrapper(createTestQueryClient()),
+      });
+
+      await waitFor(() => expect(remounted.current.votes).toHaveLength(1));
+      expect(remounted.current.variant).toBe("B");
+    });
+
+    it("세션에 고정된 시안이 있으면 응답을 기다리지 않고 그 시안으로 시작한다", () => {
+      window.sessionStorage.setItem("immersiveVoteVariant", "B");
+      mockInitialFn.mockResolvedValue({ items: [makeVote(1)] });
+      mockFetchNext.mockResolvedValue({ items: [] });
+
+      const { result } = renderHook(() => useImmersiveFeed(), {
+        wrapper: createWrapper(createTestQueryClient()),
+      });
+
+      expect(result.current.variant).toBe("B");
     });
   });
 
