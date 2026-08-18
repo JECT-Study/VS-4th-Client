@@ -41,11 +41,7 @@ export function VoteFilterBar({ sortType, excludeEnded, onChangeSortType, onChan
         </button>
       </div>
 
-      <SortDropdown
-        options={SORT_OPTIONS}
-        value={sortType}
-        onChange={onChangeSortType}
-      />
+      <SortDropdown options={SORT_OPTIONS} value={sortType} onChange={onChangeSortType} />
     </div>
   );
 }
