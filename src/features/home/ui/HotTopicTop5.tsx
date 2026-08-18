@@ -3,7 +3,7 @@ import { VoteTimeCountdown } from "./VoteTimeCountdown.tsx";
 
 interface HotTopicTop5Props {
   hotTopics: HotTopicItem[];
-  onClickVote?: (voteId: number) => void;
+  onClickVote?: (voteId: number, rank: number) => void;
 }
 
 function HotTopicMeta({ item }: { item: HotTopicItem }) {
@@ -63,7 +63,7 @@ export function HotTopicTop5({ hotTopics, onClickVote }: HotTopicTop5Props) {
                 <button
                   type="button"
                   key={item.voteId}
-                  onClick={() => onClickVote?.(item.voteId)}
+                  onClick={() => onClickVote?.(item.voteId, item.rank)}
                   className="w-[256px] shrink-0 text-left"
                 >
                   <div className="relative mb-4">
@@ -90,7 +90,7 @@ export function HotTopicTop5({ hotTopics, onClickVote }: HotTopicTop5Props) {
                 <button
                   type="button"
                   key={item.voteId}
-                  onClick={() => onClickVote?.(item.voteId)}
+                  onClick={() => onClickVote?.(item.voteId, item.rank)}
                   className="flex w-full items-start gap-4 text-left"
                 >
                   <span className="text-body-m text-primary">{item.rank}</span>
