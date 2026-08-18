@@ -15,6 +15,12 @@ import {
   WHEEL_NAVIGATION_COOLDOWN_MS,
   WHEEL_NAVIGATION_THRESHOLD,
 } from "../config/constants";
+import {
+  markImmersiveBackground,
+  markImmersiveForeground,
+  resetImmersiveImpressions,
+  trackImmersiveLeave,
+} from "./immersiveImpression";
 import { pinVariant, readPinnedVariant } from "./immersiveVoteVariant";
 import type { ImmersiveFeedItem } from "./types";
 
@@ -58,6 +64,7 @@ export function useImmersiveFeed(startVoteId?: number, startVoteSeq?: number) {
   const trackIndexRef = useRef(0);
   const lastNavigationTime = useRef(0);
   const seenIdsRef = useRef<Set<number>>(new Set());
+  const currentVoteIdRef = useRef<number | null>(null);
   const isFetchingMore = useRef(false);
   const isExhaustedRef = useRef(false);
   const needsSeedRef = useRef(true);
@@ -67,6 +74,30 @@ export function useImmersiveFeed(startVoteId?: number, startVoteSeq?: number) {
     stompClient.activate();
     return () => {
       stompClient.deactivate();
+    };
+  }, []);
+
+  // 아무 행동 없이 콘텐츠를 떠난 경우를 빠짐없이 잡는다.
+  // 스와이프(goToNextVote·goToPrevVote) 외에 페이지 이탈·피드 언마운트도 이탈로 기록해야
+  // "첫 행동 = 이탈" 비율이 실제와 맞는다. 백그라운드 체류 시간은 elapsedMs에서 빼도록 표시만 한다.
+  useEffect(() => {
+    const leaveCurrentVote = (options?: { keepalive?: boolean }) => {
+      if (currentVoteIdRef.current !== null) trackImmersiveLeave(currentVoteIdRef.current, options);
+    };
+    const handlePageHide = () => leaveCurrentVote({ keepalive: true });
+    const handleVisibilityChange = () => {
+      if (document.visibilityState === "hidden") markImmersiveBackground();
+      else markImmersiveForeground();
+    };
+
+    window.addEventListener("pagehide", handlePageHide);
+    document.addEventListener("visibilitychange", handleVisibilityChange);
+    return () => {
+      window.removeEventListener("pagehide", handlePageHide);
+      document.removeEventListener("visibilitychange", handleVisibilityChange);
+      markImmersiveForeground();
+      leaveCurrentVote();
+      resetImmersiveImpressions();
     };
   }, []);
 
@@ -133,6 +164,11 @@ export function useImmersiveFeed(startVoteId?: number, startVoteSeq?: number) {
     trackIndexRef.current = trackIndex;
   }, [trackIndex]);
 
+  // goToNextVote가 currentVote에 의존하면 wheel 리스너가 매 갱신마다 재등록되므로 ref로 읽는다.
+  useEffect(() => {
+    currentVoteIdRef.current = currentVote?.voteId ?? null;
+  }, [currentVote]);
+
   useEffect(() => {
     if (isFetchingMore.current || isExhaustedRef.current) return;
     if (feedLength === 0 || feedLength - currentIndex > PREFETCH_THRESHOLD) return;
@@ -178,6 +214,8 @@ export function useImmersiveFeed(startVoteId?: number, startVoteSeq?: number) {
     if (now - lastNavigationTime.current < WHEEL_NAVIGATION_COOLDOWN_MS) return;
 
     lastNavigationTime.current = now;
+    // 아무 인터랙션 없이 넘어간 경우에만 기록된다(이미 다른 행동을 했으면 무시됨).
+    if (currentVoteIdRef.current !== null) trackImmersiveLeave(currentVoteIdRef.current);
     setIsTransitionEnabled(true);
     setTrackIndex((index) => index + 1);
   }, [feedLength]);
@@ -188,6 +226,8 @@ export function useImmersiveFeed(startVoteId?: number, startVoteSeq?: number) {
     if (now - lastNavigationTime.current < WHEEL_NAVIGATION_COOLDOWN_MS) return;
 
     lastNavigationTime.current = now;
+    // 이전 콘텐츠로 되돌아가는 것도 그 콘텐츠에서는 무인터랙션 이탈이다.
+    if (currentVoteIdRef.current !== null) trackImmersiveLeave(currentVoteIdRef.current);
     setIsTransitionEnabled(true);
     setTrackIndex((index) => index - 1);
   }, [feedLength, currentIndex]);
