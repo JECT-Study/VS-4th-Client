@@ -84,6 +84,16 @@ export const beginImmersiveExposure = (voteId: number, position: number): void =
   });
 };
 
+/**
+ * 이미 마감된 노출을 버리고 새 노출을 연다.
+ * BFCache 복원처럼 이탈을 보낸 상태 그대로 heap이 되살아났을 때 쓴다.
+ * 그냥 두면 firstActionSent가 선 채라 복귀 후의 행동이 전부 유실된다.
+ */
+export const restartImmersiveExposure = (voteId: number, position: number): void => {
+  impressions.delete(voteId);
+  beginImmersiveExposure(voteId, position);
+};
+
 /** 노출 판정(50% 이상 · 1초 이상 연속)을 채웠을 때 호출한다. */
 export const confirmImmersiveImpression = (voteId: number): void => {
   const state = impressions.get(voteId);

@@ -89,11 +89,16 @@ export function useImmersiveFeed(startVoteId?: number, startVoteSeq?: number) {
       if (document.visibilityState === "hidden") markImmersiveBackground();
       else markImmersiveForeground();
     };
+    // BFCache 복원 시 visibilitychange가 오지 않으면 백그라운드 표시가 영영 남아
+    // 이후 노출이 하나도 확정되지 않는다. pageshow로 한 번 더 풀어준다.
+    const handlePageShow = () => markImmersiveForeground();
 
     window.addEventListener("pagehide", handlePageHide);
+    window.addEventListener("pageshow", handlePageShow);
     document.addEventListener("visibilitychange", handleVisibilityChange);
     return () => {
       window.removeEventListener("pagehide", handlePageHide);
+      window.removeEventListener("pageshow", handlePageShow);
       document.removeEventListener("visibilitychange", handleVisibilityChange);
       markImmersiveForeground();
       leaveCurrentVote();
