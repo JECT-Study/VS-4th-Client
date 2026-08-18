@@ -8,7 +8,9 @@ import PushNotificationPromptModal from "@features/votes/ui/PushNotificationProm
 import { useQuery } from "@tanstack/react-query";
 import { useCallback, useLayoutEffect, useRef, useState } from "react";
 import type { ImmersiveVoteVariant } from "../api/immersiveFeedQuery";
+import { trackImmersiveFirstAction } from "../model/immersiveImpression";
 import type { FloatingEmojiOrigin, ImmersiveFeedItem } from "../model/types";
+import { useImmersiveImpression } from "../model/useImmersiveImpression";
 import { useImmersiveVote } from "../model/useImmersiveVote";
 import { useImmersiveVoteLive } from "../model/useImmersiveVoteLive";
 import { EmojiReactionButton } from "./EmojiReactionButton";
@@ -22,6 +24,8 @@ import { VoteContentSection, VoteTitle } from "./VoteContentSection";
 interface ImmersiveVoteCardProps {
   vote: ImmersiveFeedItem;
   variant: ImmersiveVoteVariant;
+  /** 피드 내 순서(0부터). 노출 계측에 함께 보낸다. */
+  position: number;
   updateVote: (voteId: number, updater: (vote: ImmersiveFeedItem) => ImmersiveFeedItem) => void;
   isSwipeHintVisible: boolean;
 }
@@ -32,7 +36,7 @@ const VARIANT_A_MEDIA_MAX_HEIGHT = "min(125vw, max(420px, calc(100dvh - 480px)),
 const VARIANT_B_MEDIA_MIN_HEIGHT = "min(75vw, 336px, 38dvh)";
 const VARIANT_B_MEDIA_MAX_HEIGHT = "min(125vw, 820px)";
 
-export function ImmersiveVoteCard({ vote, variant, updateVote, isSwipeHintVisible }: ImmersiveVoteCardProps) {
+export function ImmersiveVoteCard({ vote, variant, position, updateVote, isSwipeHintVisible }: ImmersiveVoteCardProps) {
   const cardRef = useRef<HTMLElement>(null);
   const actionRailRef = useRef<HTMLDivElement>(null);
   const variantAStackRef = useRef<HTMLDivElement>(null);
@@ -57,6 +61,7 @@ export function ImmersiveVoteCard({ vote, variant, updateVote, isSwipeHintVisibl
     checkAndShowPushPrompt,
   );
   useImmersiveVoteLive(vote, updateVote);
+  useImmersiveImpression(cardRef, vote.voteId, position);
 
   const { data: user } = useQuery(userQueryOptions());
 
@@ -95,6 +100,19 @@ export function ImmersiveVoteCard({ vote, variant, updateVote, isSwipeHintVisibl
     setIsChatOpen(true);
   };
 
+  const handleExpandedChange = useCallback(
+    (isExpanded: boolean) => {
+      if (isExpanded) trackImmersiveFirstAction(vote.voteId, "EXPAND");
+      setIsContentExpanded(isExpanded);
+    },
+    [vote.voteId],
+  );
+
+  const openShare = () => {
+    trackImmersiveFirstAction(vote.voteId, "SHARE");
+    setIsShareOpen(true);
+  };
+
   const getEmojiOrigin = useCallback((triggerElement: HTMLElement): FloatingEmojiOrigin | null => {
     const cardRect = cardRef.current?.getBoundingClientRect();
     if (!cardRect) return null;
@@ -113,7 +131,7 @@ export function ImmersiveVoteCard({ vote, variant, updateVote, isSwipeHintVisibl
       <VoteContentSection
         content={vote.content}
         isExpanded={isContentExpanded}
-        onExpandedChange={setIsContentExpanded}
+        onExpandedChange={handleExpandedChange}
       />
       <div className="mt-2 shrink-0">
         <ImmersiveVoteTimer endAt={vote.endAt} />
@@ -193,7 +211,7 @@ export function ImmersiveVoteCard({ vote, variant, updateVote, isSwipeHintVisibl
         <button
           type="button"
           className="flex h-12 w-12 items-start justify-center"
-          onClick={() => setIsShareOpen(true)}
+          onClick={openShare}
           aria-label="공유하기"
         >
           <img src="/assets/icons/share-big.svg" alt="" className="h-7 w-7 drop-shadow-[0_0_5px_rgba(0,0,0,0.4)]" />
@@ -266,7 +284,13 @@ export function ImmersiveVoteCard({ vote, variant, updateVote, isSwipeHintVisibl
       <ChatAuthRequiredModal isOpen={isChatAuthOpen} onClose={() => setIsChatAuthOpen(false)} />
       <FreeVoteLimitModal isOpen={isFreeVoteLimitModalOpen} onClose={() => setIsFreeVoteLimitModalOpen(false)} />
       <PushNotificationPromptModal isOpen={isPushPromptOpen} onClose={handlePushPromptDismiss} />
-      <ChatBottomSheet isOpen={isChatOpen} onClose={() => setIsChatOpen(false)} voteId={vote.voteId} isDark />
+      <ChatBottomSheet
+        isOpen={isChatOpen}
+        onClose={() => setIsChatOpen(false)}
+        voteId={vote.voteId}
+        isDark
+        onCompose={() => trackImmersiveFirstAction(vote.voteId, "CHAT")}
+      />
     </article>
   );
 }

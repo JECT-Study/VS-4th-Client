@@ -7,6 +7,7 @@ import { ImmersiveVoteErrorPage } from "./ImmersiveVoteErrorPage";
 export function ImmersiveVotePage() {
   const { startVoteId, startVoteSeq } = useSearch({ from: "/immersive-votes/" });
   const {
+    votes,
     displayedVotes,
     currentVote,
     updateVote,
@@ -47,6 +48,8 @@ export function ImmersiveVotePage() {
             key={`${vote.voteId}-${index}`}
             vote={vote}
             variant={variant}
+            // displayedVotes는 무한 캐러셀용으로 피드를 두 번 이어붙인 배열이라 원본 순서로 환산한다.
+            position={index % votes.length}
             updateVote={updateVote}
             isSwipeHintVisible={isSwipeHintVisible && vote.voteId === currentVote.voteId}
           />

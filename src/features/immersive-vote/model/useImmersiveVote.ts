@@ -12,6 +12,7 @@ import { v4 as uuid } from "uuid";
 import { immersiveReactEmoji } from "../api/immersiveVoteEmoji";
 import { immersiveParticipate } from "../api/immersiveVoteParticipate";
 import { EMOJI_ASSETS } from "../config/emojiAssets";
+import { trackImmersiveFirstAction } from "./immersiveImpression";
 import type { EmojiReactionItem, EmojiType, FloatingEmoji, FloatingEmojiOrigin, ImmersiveFeedItem } from "./types";
 
 export function useImmersiveVote(
@@ -190,6 +191,7 @@ export function useImmersiveVote(
 
   const handleOptionClick = useCallback(
     (optionId: number) => {
+      trackImmersiveFirstAction(vote.voteId, "VOTE");
       if (isParticipatePending) return;
       const isNewGuestVote = isGuest && !vote.myVote.voted && vote.myVote.selectedOptionId !== optionId;
       if (isNewGuestVote) {
@@ -202,15 +204,24 @@ export function useImmersiveVote(
       }
       participateMutate(optionId);
     },
-    [isGuest, freeVotesData, onFreeVoteLimitExceeded, isParticipatePending, participateMutate, vote.myVote],
+    [
+      isGuest,
+      freeVotesData,
+      onFreeVoteLimitExceeded,
+      isParticipatePending,
+      participateMutate,
+      vote.myVote,
+      vote.voteId,
+    ],
   );
 
   const handleEmojiClick = useCallback(
     (emoji: EmojiType, origin: FloatingEmojiOrigin | null) => {
+      trackImmersiveFirstAction(vote.voteId, "EMOJI");
       if (isEmojiPending) return;
       emojiMutate({ emoji, origin });
     },
-    [isEmojiPending, emojiMutate],
+    [isEmojiPending, emojiMutate, vote.voteId],
   );
 
   return {

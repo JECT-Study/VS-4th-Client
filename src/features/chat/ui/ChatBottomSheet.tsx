@@ -68,13 +68,15 @@ interface ChatBottomSheetProps {
   onClose: () => void;
   voteId: number;
   isDark?: boolean;
+  /** 사용자가 메시지를 입력하기 시작하거나 전송할 때. 계측용이라 여러 번 호출될 수 있다. */
+  onCompose?: () => void;
 }
 
-export function ChatBottomSheet({ isOpen, onClose, voteId, isDark = false }: ChatBottomSheetProps) {
+export function ChatBottomSheet({ isOpen, onClose, voteId, isDark = false, onCompose }: ChatBottomSheetProps) {
   const t = isDark ? THEME.dark : THEME.light;
   return (
     <DynamicBottomSheet isOpen={isOpen} onClose={onClose} defaultHeight={70} maxHeight={90} className={t.sheet}>
-      {isOpen && <ChatContent voteId={voteId} t={t} isDark={isDark} onClose={onClose} />}
+      {isOpen && <ChatContent voteId={voteId} t={t} isDark={isDark} onClose={onClose} onCompose={onCompose} />}
     </DynamicBottomSheet>
   );
 }
@@ -86,9 +88,10 @@ interface ChatContentProps {
   t: Theme;
   isDark: boolean;
   onClose: () => void;
+  onCompose?: () => void;
 }
 
-function ChatContent({ voteId, t, isDark, onClose }: ChatContentProps) {
+function ChatContent({ voteId, t, isDark, onClose, onCompose }: ChatContentProps) {
   const queryClient = useQueryClient();
   // "몰입형만 다크" 규칙에 따라 다크 채팅 = 몰입형 화면으로 간주 (랜딩 분기 기준)
   // 투표 카드 탭으로 랜딩 시 이 채팅 바텀시트(onClose)도 함께 닫는다.
@@ -255,6 +258,7 @@ function ChatContent({ voteId, t, isDark, onClose }: ChatContentProps) {
             isDark={isDark}
             onCancelReply={() => setReplyTarget(null)}
             onReplyTargetClick={scrollToChatMessage}
+            onCompose={onCompose}
             onSubmit={handleSubmitMessage}
           />
         )}
@@ -560,6 +564,7 @@ interface MessageInputProps {
   isDark: boolean;
   onCancelReply: () => void;
   onReplyTargetClick: (messageId: number) => void;
+  onCompose?: () => void;
   onSubmit: (message: string) => void;
 }
 
@@ -572,6 +577,7 @@ function MessageInput({
   isDark,
   onCancelReply,
   onReplyTargetClick,
+  onCompose,
   onSubmit,
 }: MessageInputProps) {
   const [message, setMessage] = useState("");
@@ -593,8 +599,14 @@ function MessageInput({
   const handleSubmit = () => {
     const trimmed = message.trim();
     if (!trimmed || disabled) return;
+    onCompose?.();
     onSubmit(trimmed);
     setMessage("");
+  };
+
+  const handleChange = (next: string) => {
+    if (message.length === 0 && next.length > 0) onCompose?.();
+    setMessage(next);
   };
 
   return (
@@ -614,7 +626,7 @@ function MessageInput({
           value={message}
           disabled={disabled}
           placeholder={t.placeholder}
-          onChange={(e) => setMessage(e.target.value)}
+          onChange={(e) => handleChange(e.target.value)}
           onKeyDown={(e) => {
             if (e.key === "Enter" && !e.shiftKey && !e.nativeEvent.isComposing) {
               e.preventDefault();
