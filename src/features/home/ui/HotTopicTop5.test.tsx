@@ -25,13 +25,15 @@ describe("HotTopicTop5", () => {
     expect(screen.queryByText("6위 투표")).toBeNull();
   });
 
-  it("투표 카드를 누르면 해당 투표 id를 전달한다", () => {
+  it("투표 카드를 누르면 해당 투표 id와 순위를 전달한다", () => {
     const onClickVote = vi.fn();
     render(<HotTopicTop5 hotTopics={[createHotTopic(1), createHotTopic(4)]} onClickVote={onClickVote} />);
 
-    fireEvent.click(screen.getByRole("button", { name: /4위 투표/ }));
+    fireEvent.click(screen.getByRole("button", { name: /1위 투표/ }));
+    expect(onClickVote).toHaveBeenCalledWith(1, 1);
 
-    expect(onClickVote).toHaveBeenCalledWith(4);
+    fireEvent.click(screen.getByRole("button", { name: /4위 투표/ }));
+    expect(onClickVote).toHaveBeenCalledWith(4, 4);
   });
 
   it("핫토픽이 없으면 빈 상태를 노출한다", () => {

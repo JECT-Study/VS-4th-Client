@@ -1,10 +1,17 @@
 import { useEffect, useState } from "react";
 import type { VoteOption } from "../model/types";
 
+export type OptionAccent = "orange" | "purple";
+
+const ACCENT_CLASSES: Record<OptionAccent, { border: string; fill: string; check: string }> = {
+  orange: { border: "border-[#F69B30]", fill: "bg-[#8F6D4B]", check: "text-[#F69B30]" },
+  purple: { border: "border-[#9A9AF6]", fill: "bg-[rgba(119,80,187,0.4)]", check: "text-[#9A9AF6]" },
+};
+
 interface ImmersiveVoteOptionCardProps {
   option: VoteOption;
   isVoted: boolean;
-  isMajority: boolean;
+  accent: OptionAccent;
   isSelected: boolean;
   onClick: () => void;
 }
@@ -12,12 +19,13 @@ interface ImmersiveVoteOptionCardProps {
 export function ImmersiveVoteOptionCard({
   option,
   isVoted,
-  isMajority,
+  accent,
   isSelected,
   onClick,
 }: ImmersiveVoteOptionCardProps) {
   const ratio = option.ratio ?? 0;
   const [animatedRatio, setAnimatedRatio] = useState(0);
+  const accentClasses = ACCENT_CLASSES[accent];
 
   useEffect(() => {
     if (!isVoted) {
@@ -48,15 +56,13 @@ export function ImmersiveVoteOptionCard({
       type="button"
       className={`relative flex h-[100px] min-w-0 flex-1 basis-0 overflow-hidden rounded-lg border-2 text-center shadow-[0px_1px_6px_0px_rgba(0,_0,_0,_0.25)] ${
         isSelected
-          ? `${isMajority ? "border-[#9A9AF6]" : "border-[#F69B30]"} bg-white/30 text-grey-divider`
+          ? `${accentClasses.border} bg-white/30 text-grey-divider`
           : "border-transparent bg-white/25 text-grey-divider"
       }`}
       onClick={onClick}
     >
       <span
-        className={`absolute bottom-0 left-0 right-0 transition-[height] duration-[600ms] ease-out ${
-          isMajority ? "bg-[rgba(119,80,187,0.4)]" : "bg-[#8F6D4B]"
-        }`}
+        className={`absolute bottom-0 left-0 right-0 transition-[height] duration-[600ms] ease-out ${accentClasses.fill}`}
         style={{ height: `${animatedRatio}%` }}
         aria-hidden
       />
@@ -65,12 +71,24 @@ export function ImmersiveVoteOptionCard({
           {option.label}
         </span>
         <span className="mt-0.5 text-label-s text-grey-divider">
-          {isSelected && (
-            <span className={`inline-block w-4 h-4 mr-1 ${isMajority ? "text-[#9A9AF6]" : "text-[#F69B30]"}`}>✓</span>
-          )}
+          {isSelected && <CheckIcon className={`inline-block w-4 h-4 mr-1 align-middle ${accentClasses.check}`} />}
           {ratio}%
         </span>
       </span>
     </button>
+  );
+}
+
+function CheckIcon({ className }: { className?: string }) {
+  return (
+    <svg className={className} width="16" height="16" viewBox="0 0 16 16" fill="none" aria-hidden="true">
+      <path
+        d="M4.30078 7.7998L7.30078 10.7998L12.3008 5.2998"
+        stroke="currentColor"
+        strokeWidth="1.4"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      />
+    </svg>
   );
 }

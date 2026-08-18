@@ -1,4 +1,5 @@
 import { userQueryOptions } from "@features/auth/api/userQuery";
+import { postAllVotesClick, postHotTopicClick } from "@features/home/api/homeClickTracking.ts";
 import { useHomeHotTopicsQuery } from "@features/home/api/homeHotTopicsQuery.ts";
 import { useHomeVotesQuery } from "@features/home/api/homeVotesQuery.ts";
 import { useScrollTopButton } from "@features/home/model/useScrollTopButton.ts";
@@ -28,8 +29,19 @@ export function HomePage() {
   const allVotes = votesData?.pages.flatMap((page) => page.votes) ?? [];
   const hotTopics = hotTopicsData?.hotTopics ?? [];
 
-  const handleClickVote = (voteId: number) => {
+  const goToVote = (voteId: number) => {
     navigate({ to: `/votes/${voteId}` });
+  };
+
+  // 계측 응답을 기다리지 않고 바로 이동한다.
+  const handleClickHotTopic = (voteId: number, rank: number) => {
+    postHotTopicClick(voteId, rank);
+    goToVote(voteId);
+  };
+
+  const handleClickFeedVote = (voteId: number) => {
+    postAllVotesClick(voteId);
+    goToVote(voteId);
   };
 
   const handleClickNotification = () => {
@@ -50,7 +62,7 @@ export function HomePage() {
     >
       <HomeHeader hasUnreadNotification={unreadNotificationCount > 0} onClickNotification={handleClickNotification} />
 
-      <HotTopicTop5 hotTopics={hotTopics} onClickVote={handleClickVote} />
+      <HotTopicTop5 hotTopics={hotTopics} onClickVote={handleClickHotTopic} />
 
       <section className="px-5 pt-14">
         <h2 className="mb-3 text-h-s text-grey-black">모든 투표</h2>
@@ -65,7 +77,7 @@ export function HomePage() {
         <VoteFeedList
           votes={allVotes}
           hasNextPage={hasNextPage}
-          onClickVote={handleClickVote}
+          onClickVote={handleClickFeedVote}
           onLoadMore={fetchNextPage}
         />
       </section>
