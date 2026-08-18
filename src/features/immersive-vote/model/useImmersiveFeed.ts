@@ -220,7 +220,9 @@ export function useImmersiveFeed(startVoteId?: number, startVoteSeq?: number) {
 
     lastNavigationTime.current = now;
     // 아무 인터랙션 없이 넘어간 경우에만 기록된다(이미 다른 행동을 했으면 무시됨).
-    if (currentVoteIdRef.current !== null) trackImmersiveLeave(currentVoteIdRef.current);
+    // 피드가 1개면 무한 캐러셀이 같은 투표를 다시 보여주는 것이라 떠난 게 아니다.
+    // 이때 이탈을 보내면 보고 있는 콘텐츠에 SCROLL_NEXT가 찍히고, 그 노출의 첫 행동이 막힌다.
+    if (feedLength > 1 && currentVoteIdRef.current !== null) trackImmersiveLeave(currentVoteIdRef.current);
     setIsTransitionEnabled(true);
     setTrackIndex((index) => index + 1);
   }, [feedLength]);

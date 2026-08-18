@@ -1,4 +1,4 @@
-import { API_BASE_URL, apiClient } from "@base/api/client";
+import { API_BASE_URL } from "@base/api/client";
 
 /** 한 노출에서 사용자가 가장 먼저 한 행동. */
 export type ImmersiveFirstAction = "VOTE" | "CHAT" | "EMOJI" | "SHARE" | "EXPAND" | "SCROLL_NEXT";
@@ -20,21 +20,22 @@ export interface TrackOptions {
 }
 
 // 계측은 사용자 경험에 영향을 주면 안 되므로 실패를 전부 삼키고 대기하지 않는다.
+//
+// apiClient를 쓰지 않는 이유가 두 가지다.
+// 1. 401 응답이 인터셉터의 토큰 재발급을 태우고, 재발급까지 실패하면 세션 만료 토스트와
+//    /login 리다이렉트가 일어난다. 사용자가 아무것도 누르지 않았는데 화면이 튀면 안 된다.
+// 2. axios(XHR)는 unload 중에 취소돼서 이탈 시점 전송이 통째로 유실된다.
+// 인증이 쿠키 기반이라 credentials만 맞추면 apiClient와 동일하게 나간다.
 const track = (path: string, body: unknown, options?: TrackOptions): void => {
-  // axios(XHR)는 unload 중에 취소되므로 이탈 시점 전송만 keepalive fetch로 우회한다.
-  // 인증이 쿠키 기반이라 credentials만 맞추면 apiClient와 동일하게 나간다.
-  if (options?.keepalive && typeof fetch === "function") {
-    fetch(`${API_BASE_URL}${path}`, {
-      method: "POST",
-      credentials: "include",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(body),
-      keepalive: true,
-    }).catch(() => {});
-    return;
-  }
+  if (typeof fetch !== "function") return;
 
-  apiClient.post(path, body).catch(() => {});
+  fetch(`${API_BASE_URL}${path}`, {
+    method: "POST",
+    credentials: "include",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(body),
+    keepalive: options?.keepalive,
+  }).catch(() => {});
 };
 
 export const postImmersiveImpression = (voteId: number, body: ImmersiveImpressionRequest): void =>

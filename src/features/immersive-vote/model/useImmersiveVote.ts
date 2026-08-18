@@ -12,7 +12,7 @@ import { v4 as uuid } from "uuid";
 import { immersiveReactEmoji } from "../api/immersiveVoteEmoji";
 import { immersiveParticipate } from "../api/immersiveVoteParticipate";
 import { EMOJI_ASSETS } from "../config/emojiAssets";
-import { releaseImmersiveParticipateContext, trackImmersiveFirstAction } from "./immersiveImpression";
+import { trackImmersiveFirstAction } from "./immersiveImpression";
 import type { EmojiReactionItem, EmojiType, FloatingEmoji, FloatingEmojiOrigin, ImmersiveFeedItem } from "./types";
 
 export function useImmersiveVote(
@@ -110,8 +110,6 @@ export function useImmersiveVote(
       if (!isGuest && response.action === "VOTED") onVoteSuccess?.();
     },
     onError: (err, _optionId, snapshot) => {
-      // 실패한 요청에 실렸던 노출 정보를 풀어줘 재시도가 Time to Vote를 다시 실을 수 있게 한다.
-      releaseImmersiveParticipateContext(vote.voteId);
       if (snapshot) {
         updateVote(vote.voteId, (current) => ({
           ...current,
