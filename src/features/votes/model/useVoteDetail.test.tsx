@@ -330,6 +330,36 @@ describe("useVoteDetail — participateMutation 낙관적 업데이트", () => {
     });
   });
 
+  it("participateVote 성공 시 홈 쿼리를 invalidate한다", async () => {
+    mockParticipateVote.mockResolvedValue({
+      voteId: 42,
+      selectedOptionId: 10,
+      options: [
+        { optionId: 10, label: "옵션 A", voteCount: 8, ratio: 73 },
+        { optionId: 11, label: "옵션 B", voteCount: 3, ratio: 27 },
+      ],
+      participantCount: 11,
+      remainingFreeVotes: null,
+    });
+
+    seedVoteDetail(queryClient);
+    seedLoggedInUser(queryClient);
+
+    const invalidateSpy = vi.spyOn(queryClient, "invalidateQueries");
+
+    const { result } = renderUseVoteDetail(queryClient);
+
+    await waitFor(() => expect(result.current.voteUserType).toBe("member-not-voted"));
+
+    act(() => {
+      result.current.handleOptionClick(10);
+    });
+
+    await waitFor(() => {
+      expect(invalidateSpy).toHaveBeenCalledWith(expect.objectContaining({ queryKey: ["home"] }));
+    });
+  });
+
   it("participateVote 실패 시 myVote를 이전 상태로 롤백한다", async () => {
     const deferred = createDeferred<never>();
     mockParticipateVote.mockReturnValue(deferred.promise);
@@ -439,6 +469,7 @@ describe("useVoteDetail — cancelMutation", () => {
     await waitFor(() => {
       expect(mockCancelVote).toHaveBeenCalledWith(VOTE_ID);
       expect(invalidateSpy).toHaveBeenCalledWith(expect.objectContaining({ queryKey: ["votes", VOTE_ID] }));
+      expect(invalidateSpy).toHaveBeenCalledWith(expect.objectContaining({ queryKey: ["home"] }));
     });
   });
 });

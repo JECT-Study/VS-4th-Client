@@ -106,6 +106,7 @@ export function useImmersiveVote(
         );
       }
       queryClient.invalidateQueries({ queryKey: ["me", "participated-votes"] });
+      queryClient.invalidateQueries({ queryKey: ["home"] });
       invalidateChatVoteState();
       if (!isGuest && response.action === "VOTED") onVoteSuccess?.();
     },

@@ -214,6 +214,29 @@ describe("useImmersiveVote", () => {
     expect(result.current.vote.options.map((option) => option.ratio)).toEqual([40, 60]);
   });
 
+  it("투표 성공 시 홈 쿼리를 invalidate한다", async () => {
+    const queryClient = createTestQueryClient();
+    seedMember(queryClient);
+    mockImmersiveParticipate.mockResolvedValue({
+      voteId: 101,
+      action: "VOTED",
+      selectedOptionId: 10,
+      options: [
+        { optionId: 10, label: "옵션 A", voteCount: 4, ratio: 40 },
+        { optionId: 11, label: "옵션 B", voteCount: 6, ratio: 60 },
+      ],
+      remainingFreeVotes: null,
+    });
+    const invalidateSpy = vi.spyOn(queryClient, "invalidateQueries");
+    const { result } = renderUseImmersiveVote(queryClient, makeVote());
+
+    act(() => result.current.handleOptionClick(10));
+
+    await waitFor(() => {
+      expect(invalidateSpy).toHaveBeenCalledWith(expect.objectContaining({ queryKey: ["home"] }));
+    });
+  });
+
   it("이모지 실패 시 optimistic 변경을 롤백하고 실패 토스트를 띄운다", async () => {
     const queryClient = createTestQueryClient();
     seedMember(queryClient);
