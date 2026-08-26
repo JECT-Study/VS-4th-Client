@@ -114,7 +114,7 @@ export function useVoteDetail(voteId: string) {
         );
       }
       queryClient.invalidateQueries({ queryKey: ["me", "participated-votes"] });
-      queryClient.invalidateQueries({ queryKey: ["home"] });
+      queryClient.invalidateQueries({ queryKey: ["home"], refetchType: "all" });
       invalidateChatVoteState();
       if (user) checkAndShowPushPrompt();
     },
@@ -132,7 +132,7 @@ export function useVoteDetail(voteId: string) {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey });
       queryClient.invalidateQueries({ queryKey: ["me", "participated-votes"] });
-      queryClient.invalidateQueries({ queryKey: ["home"] });
+      queryClient.invalidateQueries({ queryKey: ["home"], refetchType: "all" });
       syncChatVoteOption(null);
       invalidateChatVoteState();
     },
